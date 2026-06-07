@@ -1,0 +1,124 @@
+# shop 단독몰 — 메두사 기반 Docker 스택 (guide 표준 구조 정합)
+# 기동: docker compose up -d --build
+# 정지: docker compose down
+# 데이터 초기화: docker compose down -v
+#
+# 구조: backend(Medusa)=backend/services/api(host :7001) · 관리자=apps/admin(별도 :7002) · storefront=apps/web(host :7003)
+# host 포트 규칙(순차): 7001 백엔드 / 7002 관리자 / 7003 손님 · 컨테이너 내부는 9000(백)/8000(스토어) 유지
+
+services:
+  shop-postgres:
+    image: postgres:17-alpine
+    container_name: shop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shop}
+      POSTGRES_USER: ${POSTGRES_USER:-shop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shop_local_2026}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - shop-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shop} -d ${POSTGRES_DB:-shop}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - shop-net
+
+  shop-redis:
+    image: redis:7-alpine
+    container_name: shop-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6381:6379"
+    volumes:
+      - shop-redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - shop-net
+
+  shop-backend:
+    build:
+      context: ./backend/services/api
+      dockerfile: Dockerfile
+    container_name: shop-backend
+    restart: unless-stopped
+    command: ["sh", "/app/scripts/prod-start.sh"]
+    depends_on:
+      shop-postgres:
+        condition: service_healthy
+      shop-redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://shop:shop_local_2026@shop-postgres:5432/shop
+      REDIS_URL: redis://shop-redis:6379
+      STORE_CORS: http://localhost:7003,http://127.0.0.1:7003
+      ADMIN_CORS: http://localhost:7002,http://127.0.0.1:7002,http://localhost:7001,http://127.0.0.1:7001
+      AUTH_CORS: http://localhost:7001,http://localhost:7002,http://localhost:7003,http://127.0.0.1:7001,http://127.0.0.1:7002,http://127.0.0.1:7003
+      JWT_SECRET: shop-local-jwt-2026-do-not-use-in-prod-xxxxxxxxxxxxxxxxxxxx
+      COOKIE_SECRET: shop-local-cookie-2026-do-not-use-in-prod-xxxxxxxxxxxxxx
+      APP_NAME: shop
+      APP_NAME_KO: 쇼핑몰
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "127.0.0.1:7001:9000"
+    volumes:
+      - ./backend/services/api:/app
+      - shop-api-node-modules:/app/node_modules
+    networks:
+      - shop-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:9000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
+
+  shop-storefront:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: shop-storefront
+    restart: unless-stopped
+    depends_on:
+      shop-backend:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://shop-backend:9000
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: pk_25491a52e11d5a5d9b52344d3f0bdaaea3bd7d3d3a9b27edda84b1287147ccb4
+      NEXT_PUBLIC_DEFAULT_REGION: dk
+      NEXT_PUBLIC_BASE_URL: http://localhost:7003
+      NEXT_PUBLIC_APP_NAME: shop
+      NEXT_PUBLIC_APP_NAME_KO: 쇼핑몰
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "127.0.0.1:7003:8000"
+    volumes:
+      - ./apps/web:/app
+      - shop-web-node-modules:/app/node_modules
+    networks:
+      - shop-net
+
+volumes:
+  shop-pgdata:
+    name: shop-pgdata
+  shop-redisdata:
+    name: shop-redisdata
+  shop-api-node-modules:
+    name: shop-api-node-modules
+  shop-web-node-modules:
+    name: shop-web-node-modules
+
+networks:
+  shop-net:
+    name: shop-net
+    driver: bridge

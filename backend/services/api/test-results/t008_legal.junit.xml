@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="45" failures="0" errors="0" time="0.523">
+  <testsuite name="UT-001: 버전 작성/게시 + 동의이력(d5) 연동" errors="0" failures="0" skipped="0" timestamp="2026-06-03T00:37:03" time="0.502" tests="45">
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="정상 본문(1자 이상 문자열)은 유효하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="긴 본문도 유효하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="빈 문자열은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="공백만 있는 문자열은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="null 은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="undefined 는 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="숫자 타입은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="오늘(2026-06-03)은 유효하다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="내일(2026-06-04)은 유효하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="1개월 후는 유효하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="어제(2026-06-02)는 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="1년 전은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="draft 상태는 게시 가능하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="published 상태는 게시할 수 없다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="archived 상태는 게시할 수 없다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="모든 LEGAL_DOC_STATUSES 중 draft 만 isPublishable=true" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="published 상태는 직접 수정이 차단된다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="archived 상태는 직접 수정이 차단된다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="draft 상태는 직접 수정이 허용된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="C2 가드레일: published 차단 → 새 버전 강제 확인" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="draft 수정 시도 → 차단 없이 통과" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="정상 입력으로 ConsentTriggerPayload 가 생성된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="triggered_at 은 현재 시각에 가깝다(1초 이내)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="모든 LEGAL_DOC_TYPES 에 대해 페이로드가 생성된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="requires_consent=true 게시 흐름: 트리거 페이로드가 non-null 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="requires_consent=false 게시 흐름: 트리거 페이로드가 null 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isValidBodyInput 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isValidEffectiveDate 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isPublishable 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isDirectEditBlocked 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 buildConsentTriggerPayload 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 createDraft 메서드가 있고 isValidBodyInput 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 publishDoc 메서드가 있고 isDirectEditBlocked 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 의 publishDoc 이 buildConsentTriggerPayload 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 getActiveDoc 메서드가 존재한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 listByType 메서드가 존재한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 LEGAL_DOC_MODULE 을 import 한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 LegalDocModuleService 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 publishDoc 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 consent_trigger 를 응답에 포함한다 (d5 연동 증적)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 400 에러 응답을 처리한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 LEGAL_DOC_MODULE 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 GET 핸들러에서 listByType 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 POST 핸들러에서 createDraft 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 201 응답을 반환한다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

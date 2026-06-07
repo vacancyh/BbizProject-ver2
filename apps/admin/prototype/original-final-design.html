@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>커머스 운영툴 — 쇼핑몰 관리자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/moonspam/NanumBarunGothic@1.1/nanumbarungothicsubset.css" rel="stylesheet" />
+<link rel="stylesheet" href="admin.css?v=2" />
+<link rel="stylesheet" href="admin-ux.css?v=1" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar"></aside>
+    <div id="main">
+      <header id="topbar"></header>
+      <main id="content"></main>
+    </div>
+  </div>
+
+  <!-- overlays -->
+  <div class="scrim" id="scrim"></div>
+  <div class="detail-wrap" id="detailWrap"><div class="detail" id="detail" role="dialog" aria-modal="true" aria-label="상세"></div></div>
+  <div class="modal-wrap" id="modal"></div>
+  <div class="result-wrap" id="result"></div>
+  <div id="toast-stack"></div>
+  <div id="float-result"></div>
+  <div id="tweaks-root"></div>
+
+  <!-- engine -->
+  <script src="admin-icons.js"></script>
+  <script src="admin-charts.js"></script>
+  <script src="admin-data.js"></script>
+  <script src="admin-components.js"></script>
+  <!-- screens -->
+  <script src="admin-screen-dashboard.js"></script>
+  <script src="admin-screen-ops.js"></script>
+  <script src="admin-screen-misc.js"></script>
+  <!-- shell (boots on DOMContentLoaded) -->
+  <script src="admin-shell.js"></script>
+
+  <!-- React + Babel (Tweaks panel only) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel">
+    const PRIMARIES = {
+      '블루 (기본)': ['#2563EB','#EFF4FF','#1D4ED8'],
+      '인디고':      ['#4F46E5','#EEF0FF','#4338CA'],
+      '슬레이트':    ['#475569','#F1F5F9','#334155'],
+      '틸':          ['#0D9488','#ECFDFA','#0F766E'],
+    };
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "density": "regular",
+      "primary": "블루 (기본)",
+      "sidebar": false
+    }/*EDITMODE-END*/;
+    function applyTweaks(t){
+      const r=document.documentElement;
+      r.dataset.density = t.density;
+      r.dataset.sidebar = t.sidebar ? 'collapsed':'expanded';
+      const p = PRIMARIES[t.primary] || PRIMARIES['블루 (기본)'];
+      r.style.setProperty('--primary', p[0]);
+      r.style.setProperty('--primary-weak', p[1]);
+      r.style.setProperty('--primary-press', p[2]);
+      r.style.setProperty('--c1', p[0]);
+    }
+    function TweakApp(){
+      const [t,setTweak]=useTweaks(TWEAK_DEFAULTS);
+      React.useEffect(()=>{ applyTweaks(t); },[t]);
+      return (
+        <TweaksPanel>
+          <TweakSection label="레이아웃" />
+          <TweakRadio label="밀도" value={t.density} options={['compact','regular']}
+            onChange={(v)=>setTweak('density',v)} />
+          <TweakToggle label="사이드바 접기" value={t.sidebar}
+            onChange={(v)=>setTweak('sidebar',v)} />
+          <TweakSection label="테마" />
+          <TweakSelect label="포인트 색" value={t.primary} options={Object.keys(PRIMARIES)}
+            onChange={(v)=>setTweak('primary',v)} />
+        </TweaksPanel>
+      );
+    }
+    applyTweaks(TWEAK_DEFAULTS);
+    ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<TweakApp />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="19" failures="0" errors="0" time="0.137">
+  <testsuite name="UT-001: validateCancelReason — 정상 enum 값 허용" errors="0" failures="0" skipped="0" timestamp="2026-06-03T13:25:57" time="0.088" tests="19">
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-fraud: reason=%s → valid=true" name="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-fraud: reason=%s → valid=true" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-staff: reason=%s → valid=true" name="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-staff: reason=%s → valid=true" time="0">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-inventory: reason=%s → valid=true" name="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-inventory: reason=%s → valid=true" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-other: reason=%s → valid=true" name="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-other: reason=%s → valid=true" time="0">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-trim: 앞뒤 공백이 있어도 정상 처리" name="UT-001: validateCancelReason — 정상 enum 값 허용 UT-001-trim: 앞뒤 공백이 있어도 정상 처리" time="0">
+    </testcase>
+    <testcase classname="UT-001: buildCancelIdempotencyKey — 정상 경로 UT-001-key: 형식 = {orderId}:cancel:{nonce}" name="UT-001: buildCancelIdempotencyKey — 정상 경로 UT-001-key: 형식 = {orderId}:cancel:{nonce}" time="0">
+    </testcase>
+    <testcase classname="UT-001: buildCancelIdempotencyKey — 정상 경로 UT-001-key-idempotent: 동일 orderId+nonce 는 항상 같은 키" name="UT-001: buildCancelIdempotencyKey — 정상 경로 UT-001-key-idempotent: 동일 orderId+nonce 는 항상 같은 키" time="0">
+    </testcase>
+    <testcase classname="UT-001: buildCancelIdempotencyKey — 정상 경로 UT-001-key-diff: 서로 다른 nonce 는 다른 키" name="UT-001: buildCancelIdempotencyKey — 정상 경로 UT-001-key-diff: 서로 다른 nonce 는 다른 키" time="0">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-orderId-empty: orderId 비어있으면 예외" name="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-orderId-empty: orderId 비어있으면 예외" time="0.003">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-nonce-empty: nonce 비어있으면 예외" name="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-nonce-empty: nonce 비어있으면 예외" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-orderId-whitespace: orderId 공백만이면 예외" name="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-orderId-whitespace: orderId 공백만이면 예외" time="0">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-nonce-whitespace: nonce 공백만이면 예외" name="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외 UT-002-nonce-whitespace: nonce 공백만이면 예외" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-empty: 빈 문자열 → valid=false, 필수 메시지" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-empty: 빈 문자열 → valid=false, 필수 메시지" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-undefined: undefined → valid=false" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-undefined: undefined → valid=false" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-null: null → valid=false" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-null: null → valid=false" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-enum: &apos;관리자 강제취소&apos;(하드코딩값) → valid=false, enum 메시지" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-enum: &apos;관리자 강제취소&apos;(하드코딩값) → valid=false, enum 메시지" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-enum-2: &apos;cancel&apos; → valid=false (enum 목록에 없음)" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-enum-2: &apos;cancel&apos; → valid=false (enum 목록에 없음)" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-enum-3: &apos;400 bad reason&apos; → valid=false" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-enum-3: &apos;400 bad reason&apos; → valid=false" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-type: number 타입 → valid=false" name="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙) UT-003-invalid-type: number 타입 → valid=false" time="0.001">
+    </testcase>
+  </testsuite>
+</testsuites>

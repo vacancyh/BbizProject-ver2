@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="41" failures="0" errors="0" time="0.097">
+  <testsuite name="UT-001-A: 점검모드 scope 전환 검증" errors="0" failures="0" skipped="0" timestamp="2026-06-03T00:34:53" time="0.07" tests="41">
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;all&apos; 은 허용된 점검 범위이다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;storefront&apos; 는 허용된 점검 범위이다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;admin&apos; 은 허용된 점검 범위이다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;ALL&apos; (대문자) 은 허용되지 않는다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;shop&apos; 은 허용되지 않는 범위이다(false)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="빈 문자열 scope 는 허용되지 않는다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="MAINTENANCE_SCOPES 에 정의된 모든 값이 isValidScope=true 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="undefined 메시지는 검증 통과(선택 입력)(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="빈 문자열 메시지는 검증 통과(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="200자 이내 메시지는 검증 통과(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="정확히 200자 메시지는 검증 통과(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="201자 메시지는 검증 실패(false) — 길이 초과" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="500자 메시지는 검증 실패(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="super 등급만 점검모드 전환이 허용된다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="operation 등급은 점검모드 전환이 차단된다(false)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="cs 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="marketer 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="null(미할당) 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="빈 문자열 roleKey 는 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB·Redis 모두 up → overall &apos;up&apos; / httpCode 200" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB down / Redis up → overall &apos;down&apos; / httpCode 503" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB up / Redis down → overall &apos;down&apos; / httpCode 503" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB·Redis 모두 down → overall &apos;down&apos; / httpCode 503" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="반환 객체는 db/redis/overall/httpCode 필드를 모두 포함한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 canToggleMaintenance 를 ops/logic 에서 import 한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 RBAC_MODULE 을 import 하여 getUserRole 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 403 응답을 반환하는 분기를 포함한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 에서 canToggleMaintenance=false 이면 403 반환 로직이 연결된다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 OPS_MODULE 을 import 하여 toggleMaintenance 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="health/route.ts 가 OPS_MODULE 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="health/route.ts 가 checkHealth 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="health/route.ts 가 200/503 httpCode 기반 응답을 반환한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 canToggleMaintenance 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 isValidScope 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 isValidMaintenanceMessage 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 resolveHealthStatus 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 에 toggleMaintenance 메서드가 존재하고 canToggleMaintenance 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 에 checkHealth 메서드가 존재하고 resolveHealthStatus 를 호출한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="super 등급: canToggleMaintenance=true → route 가 200 경로로 진행해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="non-super 등급: canToggleMaintenance=false → route 가 403 반환해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="null 등급: canToggleMaintenance=false → route 가 403 반환해야 한다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="15" failures="0" errors="0" time="0.178">
+  <testsuite name="UT-001: 전액 환불 (calcProratedRefund)" errors="0" failures="0" skipped="0" timestamp="2026-06-03T12:11:50" time="0.137" tests="15">
+    <testcase classname="UT-001: 전액 환불 (calcProratedRefund)" name="UT-001-a: shippingIncluded = true 이고 totalRefund = 27000 (배송비 없음, 쿠폰 3000 차감)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 전액 환불 (calcProratedRefund)" name="UT-001-b: 라인별 환불액이 음수가 아니다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 전액 환불 (calcProratedRefund)" name="UT-001-c: 배송비 0 이어도 전액환불 정상 처리" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-a: 단일 라인 부분환불 — 기대값 8000원, shippingIncluded=false" time="0">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-b: 다중 라인 부분환불 — 라인별 합계 = totalRefund (1원 정합)" time="0.002">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-c: 절사 후 잔액보정 — 라인별 합계 = totalRefund, 음수 없음" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-d: 라인 없음 → 예외 발생" time="0.016">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-a: buildIdempotencyKey — 형식 정합 ({orderId}:refund:{nonce})" time="0">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-b: buildIdempotencyKey — orderId 비어있으면 예외" time="0">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-c: buildIdempotencyKey — nonce 비어있으면 예외" time="0">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-d: 동일 orderId+nonce 로 생성된 두 키는 같다 (재요청 동일 키 보장)" time="0">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-e: 서로 다른 nonce 는 다른 키를 생성한다" time="0.003">
+    </testcase>
+    <testcase classname="calcReshippingFee (F7 — 재청구 배송비)" name="잔여 &lt; 50000 → 재청구 3000원" time="0">
+    </testcase>
+    <testcase classname="calcReshippingFee (F7 — 재청구 배송비)" name="잔여 = 50000 → 재청구 없음" time="0">
+    </testcase>
+    <testcase classname="calcReshippingFee (F7 — 재청구 배송비)" name="잔여 &gt; 50000 → 재청구 없음" time="0.001">
+    </testcase>
+  </testsuite>
+</testsuites>

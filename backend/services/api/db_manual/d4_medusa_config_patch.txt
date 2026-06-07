@@ -1,0 +1,24 @@
+## medusa-config.ts 모듈 등록 안내 (d4 머지 후 main 이 반영)
+
+### 추가할 모듈 (modules 배열에 삽입)
+
+```ts
+{
+  resolve: "./src/modules/category-option-map",
+},
+```
+
+### 위치
+medusa-config.ts > modules 배열 > 기존 product-type 모듈 항목 아래 삽입 권장.
+
+### 이유
+category-option-map 모듈은 MedusaService 기반 신규 커스텀 모듈이므로
+medusa-config.ts 의 modules 배열에 반드시 등록해야 서비스가 IoC 컨테이너에서
+CATEGORY_OPTION_MAP_MODULE 키로 resolve 가능해진다.
+
+### 등록 형식 (기존 product-type 패턴 참조)
+```ts
+{
+  resolve: "./src/modules/category-option-map",
+},
+```

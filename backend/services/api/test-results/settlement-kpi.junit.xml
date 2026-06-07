@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="20" failures="0" errors="0" time="0.14">
+  <testsuite name="UT-001: 정산 KPI 집계 표시" errors="0" failures="0" skipped="0" timestamp="2026-06-03T05:50:40" time="0.1" tests="20">
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="sales = captured + paid 주문 total 합산(300,000원)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="refund = refunded + partially_refunded 주문 total 합산(80,000원)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="pgFee = 0 (settlement_daily 미구현)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="net = sales - refund - pgFee(220,000원)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="held = 0 (settlement_daily 미구현)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="string total 도 숫자로 변환하여 집계된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="빈 배열이면 모든 KPI 가 0이다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="null 이 아닌 빈 배열 — held=0, pgFee=0 도 포함" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="payment_status 가 없는(undefined) 주문은 집계에서 제외된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="total 이 비정상(NaN/undefined)이면 0 으로 처리된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="환불률이 임계(10%)를 초과하면 ALERT_REFUND_RATE code 가 alerts 에 포함된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="ALERT_REFUND_RATE 경보의 severity 는 warn 이다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="ALERT_REFUND_RATE 경보의 message 에 임계값 퍼센트가 포함된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="환불률이 임계(10%) 이하이면 alerts 는 빈 배열이다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="sales=0 이면 환불률 계산을 건너뛰어 경보가 발생하지 않는다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="0건 KPI 에서는 경보가 발생하지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="커스텀 임계(20%) 설정 시 환불률 15% 는 경보를 발생시키지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="커스텀 임계(5%) 설정 시 환불률 10% 는 경보를 발생시킨다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="held=0 이면 ALERT_HELD_AMOUNT 경보가 발생하지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="held 가 heldAmountThreshold 초과 시 ALERT_HELD_AMOUNT 경보 발생(미래 검증)" time="0.008">
+    </testcase>
+  </testsuite>
+</testsuites>

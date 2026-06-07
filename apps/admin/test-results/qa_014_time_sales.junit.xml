@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="0.575453">
+<testsuite name="qa_014_time_sales.spec.ts" timestamp="2026-06-04T01:36:34.541Z" hostname="d3-time-sales" tests="1" failures="0" skipped="0" time="0.222" errors="0">
+<testcase name="QA-014 d3 타임세일 — 생성/조회/종료 실HTTP › 세일 생성(active) + 목록/단건 + 잘못된 할인율 거부 + 강제종료" classname="qa_014_time_sales.spec.ts" time="0.222">
+</testcase>
+</testsuite>
+</testsuites>

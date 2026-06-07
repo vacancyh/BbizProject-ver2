@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="17" failures="0" errors="0" time="0.519">
+  <testsuite name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" errors="0" failures="0" skipped="0" timestamp="2026-06-03T00:10:14" time="0.496" tests="17">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) 미할당(roleKey=null) 관리자는 모든 메뉴 모든 액션이 허용된다 — C1 부트스트랩 정책" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) 미할당(roleKey=null) 관리자는 모든 메뉴 모든 액션이 허용된다 — C1 부트스트랩 정책" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) super 등급은 모든 메뉴 모든 액션이 허용된다" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) super 등급은 모든 메뉴 모든 액션이 허용된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) operation 등급은 orders 메뉴 FULL CRUD가 허용된다" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) operation 등급은 orders 메뉴 FULL CRUD가 허용된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) cs 등급은 orders 메뉴에서 read/update는 허용, create/delete는 차단된다" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) cs 등급은 orders 메뉴에서 read/update는 허용, create/delete는 차단된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) cs 등급은 permissions 메뉴에서 create/update/delete가 차단된다 — C1/C2" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) cs 등급은 permissions 메뉴에서 create/update/delete가 차단된다 — C1/C2" time="0">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) marketer 등급은 coupons/marketing/stats FULL, 그 외(orders 등)는 read-only" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) marketer 등급은 coupons/marketing/stats FULL, 그 외(orders 등)는 read-only" time="0">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) C2: 매핑 없는 메뉴(미시드) 비SUPER 접근은 차단(false)된다" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) C2: 매핑 없는 메뉴(미시드) 비SUPER 접근은 차단(false)된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) cs 등급은 reviews 메뉴에서 FULL CRUD 허용된다" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) cs 등급은 reviews 메뉴에서 FULL CRUD 허용된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) operation 등급은 permissions 메뉴에서 read-only이다" name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단) operation 등급은 permissions 메뉴에서 read-only이다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 역할 변경: 미할당(null) → operation 부여 후 permissions 메뉴 create 가 차단된다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 역할 변경: 미할당(null) → operation 부여 후 permissions 메뉴 create 가 차단된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 역할 재부여(operation→cs) 후 권한이 즉시 cs 기준으로 변경된다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 역할 재부여(operation→cs) 후 권한이 즉시 cs 기준으로 변경된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: 마지막 super(superCount=1) 를 다른 등급으로 변경하면 에러가 던져진다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: 마지막 super(superCount=1) 를 다른 등급으로 변경하면 에러가 던져진다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: super가 2명이면 1명을 다른 등급으로 변경 허용된다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: super가 2명이면 1명을 다른 등급으로 변경 허용된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: 목표 등급이 super 이면 차단하지 않는다(super→super 또는 신규 super 부여)" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: 목표 등급이 super 이면 차단하지 않는다(super→super 또는 신규 super 부여)" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: 현재 등급이 super 가 아니면 superCount 에 무관하게 통과된다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 C3: 현재 등급이 super 가 아니면 superCount 에 무관하게 통과된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 유효하지 않은 등급 키는 isValidRole 에서 false 를 반환한다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 유효하지 않은 등급 키는 isValidRole 에서 false 를 반환한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 유효한 등급 키는 isValidRole 에서 true 를 반환한다" name="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일 유효한 등급 키는 isValidRole 에서 true 를 반환한다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

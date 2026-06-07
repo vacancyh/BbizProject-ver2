@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="35" failures="0" errors="0" time="0.352">
+  <testsuite name="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" errors="0" failures="0" skipped="0" timestamp="2026-06-04T00:15:38" time="0.106" tests="35">
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="정상 정책은 valid=true" time="0.001">
+    </testcase>
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="빈 배열은 valid=false" time="0">
+    </testcase>
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="minAmount 단조증가 위반 시 valid=false" time="0">
+    </testcase>
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="적립률 100 초과 시 valid=false" time="0">
+    </testcase>
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="음수 minAmount 는 valid=false" time="0">
+    </testcase>
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="DEFAULT_TIERS(예시 초기값)는 검증을 통과한다" time="0">
+    </testcase>
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="TIER_NAMES 는 일반/실버/골드/VIP 4단계" time="0">
+    </testcase>
+    <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="유효 배열은 그대로 반환" time="0">
+    </testcase>
+    <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="배열 아님(객체/null/문자열)은 DEFAULT_TIERS 폴백" time="0">
+    </testcase>
+    <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="검증 실패 배열(단조위반)은 DEFAULT_TIERS 폴백" time="0.001">
+    </testcase>
+    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="0원 = 일반" time="0">
+    </testcase>
+    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="경계값(정확히 minAmount) = 해당 등급으로 승급" time="0">
+    </testcase>
+    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="구간 중간값" time="0">
+    </testcase>
+    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="정책 빈 배열이면 에러" time="0.009">
+    </testcase>
+    <testcase classname="tierEarnRate: 등급별 적립률(UT-002)" name="등급별 적립률 반환" time="0.001">
+    </testcase>
+    <testcase classname="nextTierGap: 다음 등급까지 잔여 금액" name="일반(0원) → 실버까지 30만원" time="0">
+    </testcase>
+    <testcase classname="nextTierGap: 다음 등급까지 잔여 금액" name="실버 구간(50만) → 골드까지 50만원" time="0">
+    </testcase>
+    <testcase classname="nextTierGap: 다음 등급까지 잔여 금액" name="최상위(VIP)는 null" time="0">
+    </testcase>
+    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="정상 차감" time="0">
+    </testcase>
+    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="0 미만으로 내려가지 않음" time="0">
+    </testcase>
+    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="음수 환불액은 0으로 보정(누적 불변)" time="0">
+    </testcase>
+    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="차감 후 등급 하향 확인(골드 100만→환불 80만→일반)" time="0">
+    </testcase>
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="배열은 json 으로 통과" time="0.001">
+    </testcase>
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="객체는 json 으로 통과" time="0">
+    </testcase>
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="null 은 json 검증 실패(에러)" time="0">
+    </testcase>
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="문자열은 json 검증 실패(에러)" time="0">
+    </testcase>
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="기존 number/boolean/string 검증은 불변" time="0.001">
+    </testcase>
+    <testcase classname="service.ts 구조 검증: logic 룰 실제 호출" name="service 가 logic 에서 calcMembershipTier 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="service.ts 구조 검증: logic 룰 실제 호출" name="service 가 recalcAccruedOnRefund 를 import/사용한다" time="0">
+    </testcase>
+    <testcase classname="service.ts 구조 검증: logic 룰 실제 호출" name="recordAccrual / applyRefund / getOrDefault 메서드가 존재한다" time="0">
+    </testcase>
+    <testcase classname="service.ts 구조 검증: logic 룰 실제 호출" name="MedusaService 자동 메서드(create/update/list CustomerMemberships)를 사용한다" time="0">
+    </testcase>
+    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="POST 가 validateTierPolicy 로 룰 검증한다" time="0">
+    </testcase>
+    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="confirm!==true 면 409 를 반환한다(이중확인)" time="0">
+    </testcase>
+    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="정책 저장은 policy.set 으로 위임한다(별도 테이블 미신설)" time="0.001">
+    </testcase>
+    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="감사 로그(audit.record)를 기록한다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

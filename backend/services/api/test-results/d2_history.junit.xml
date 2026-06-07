@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="7" failures="0" errors="0" time="0.087">
+  <testsuite name="serializeStateHistory" errors="0" failures="0" skipped="0" timestamp="2026-06-03T07:10:31" time="0.06" tests="7">
+    <testcase classname="serializeStateHistory" name="TC-1: 빈 배열 입력 시 빈 배열을 반환한다" time="0.001">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-2: null 입력 시 빈 배열을 반환한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-3: undefined 입력 시 빈 배열을 반환한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-4: from_state / to_state 를 from / to 로 정규화한다" time="0.001">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-5: created_at 오름차순으로 정렬한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-6: 누락된 필드는 null 로 정규화한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-7: created_at 이 null 인 항목은 정렬 후 맨 뒤에 위치한다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

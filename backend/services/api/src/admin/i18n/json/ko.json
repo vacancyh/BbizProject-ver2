@@ -1,0 +1,33 @@
+{
+  "login": {
+    "title": "쇼핑몰에 오신 것을 환영합니다"
+  },
+  "invite": {
+    "title": "쇼핑몰에 오신 것을 환영합니다",
+    "successHint": "지금 바로 쇼핑몰 관리자를 시작하세요.",
+    "successAction": "쇼핑몰 관리자 시작"
+  },
+  "workflowExecutions": {
+    "subtitle": "쇼핑몰 애플리케이션의 워크플로우 실행을 보고 추적합니다."
+  },
+  "notifications": {
+    "description": "쇼핑몰 활동에 대한 알림이 여기에 나열됩니다."
+  },
+  "payments": {
+    "manage": {
+      "systemPaymentDesc": "결제 중 하나 이상이 시스템 결제입니다. 이러한 결제의 경우 캡처 및 환불은 쇼핑몰에서 처리되지 않습니다."
+    }
+  },
+  "secretApiKeys": {
+    "create": {
+      "createSecretHint": "인증된 관리자 사용자로 쇼핑몰 API에 접근하기 위한 새 비밀 API 키를 생성합니다."
+    }
+  },
+  "translations": {
+    "domain": {
+      "list": {
+        "subtitle": "쇼핑몰 데이터의 번역을 관리합니다"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "shop-playwright-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "shop 메두사 풀테스트 E2E (Playwright)",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "pg": "^8.13.1",
+    "typescript": "^5.7.2"
+  }
+}

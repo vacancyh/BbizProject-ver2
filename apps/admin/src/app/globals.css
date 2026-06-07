@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   디자인 토큰 — apps/admin/prototype/assets/styles/admin.css 이식 (단일 출처)
+   Calm Admin · Clean SaaS · Low Color · Data First
+   ============================================================ */
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #111827;
+  --text-2: #6b7280;
+  --text-3: #9ca3af;
+  --primary: #2563eb;
+  --primary-weak: #eff4ff;
+  --primary-press: #1d4ed8;
+  --success: #16a34a;
+  --success-weak: #ecfdf3;
+  --warning: #d97706;
+  --warning-weak: #fff7ed;
+  --danger: #dc2626;
+  --danger-weak: #fef2f2;
+  --info: #0ea5e9;
+  --info-weak: #eff8fe;
+
+  /* chart palette (<=4 hues) */
+  --c1: #2563eb;
+  --c2: #0ea5e9;
+  --c3: #94a3b8;
+  --c4: #1e293b;
+
+  --sidebar-w: 248px;
+  --topbar-h: 60px;
+  --row-h: 54px;
+  --font-sans: "Nanum Gothic", system-ui, -apple-system, "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text);
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

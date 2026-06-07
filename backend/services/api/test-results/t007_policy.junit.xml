@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="36" failures="0" errors="0" time="0.68">
+  <testsuite name="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" errors="0" failures="0" skipped="0" timestamp="2026-06-03T00:34:52" time="0.648" tests="36">
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=true 이면 requireConfirm 이 에러를 던지지 않는다(이중확인 통과)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=false 이면 requireConfirm 이 에러를 던진다(이중확인 미수행 차단)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=undefined 이면 requireConfirm 이 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=null 이면 requireConfirm 이 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=&apos;true&apos;(문자열) 이면 requireConfirm 이 에러를 던진다(엄격 === 비교)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 숫자(유한값)는 통과한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 문자열은 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 Infinity 는 에러를 던진다(유한값 아님)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 NaN 은 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=boolean 일 때 true/false 는 통과한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=boolean 일 때 숫자(1/0)는 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=string 일 때 문자열은 통과한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=string 일 때 숫자는 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=null(미할당)은 isSuperRole=true 이다(C1 부트스트랩 정책 정합)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;super&apos; 는 isSuperRole=true 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;operation&apos; 은 isSuperRole=false 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;cs&apos; 는 isSuperRole=false 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;marketer&apos; 는 isSuperRole=false 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts 가 requireConfirm 을 policy/logic 에서 import 한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts 가 validatePolicyValue 를 policy/logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts set 메서드가 requireConfirm(confirm) 을 실제 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts set 메서드가 validatePolicyValue(value, valueType) 를 실제 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts set 메서드가 createPolicyHistories 로 이력을 적재한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="operation 등급은 isSuperRole=false → 정책 write 권한 없음" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="cs 등급은 isSuperRole=false → 정책 write 권한 없음" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="marketer 등급은 isSuperRole=false → 정책 write 권한 없음" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="operation 등급은 policies 메뉴 update 가 차단된다(rbac 권한 매트릭스)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="operation 등급은 policies 메뉴 create 가 차단된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="super 등급은 policies 메뉴 update 가 허용된다(write 권한 있음)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="null(미할당) 등급은 policies 메뉴 update 가 허용된다(C1 부트스트랩)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="middlewares.ts 가 /admin/policy 경로를 policies 메뉴로 매핑한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="middlewares.ts 가 rbacGuard 를 적용한다(403 차단 경로 존재)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="middlewares.ts 가 write 메서드(POST/PUT/PATCH/DELETE)에만 rbac 검사를 적용한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="route.ts 가 confirm=true 가 아닐 때 409 를 반환하는 분기가 있다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="route.ts 가 policy.set() 을 호출하여 정책을 변경한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="route.ts 가 감사 로그(audit.record)를 기록한다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

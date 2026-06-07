@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>커머스 운영툴 — 쇼핑몰 관리자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/moonspam/NanumBarunGothic@1.1/nanumbarungothicsubset.css" rel="stylesheet" />
+<link rel="stylesheet" href="./assets/styles/admin.css" />
+<link rel="stylesheet" href="./assets/styles/admin-ux.css" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar"></aside>
+    <div id="main">
+      <header id="topbar"></header>
+      <main id="content"></main>
+    </div>
+  </div>
+
+  <!-- overlays -->
+  <div class="scrim" id="scrim"></div>
+  <div class="detail-wrap" id="detailWrap"><div class="detail" id="detail" role="dialog" aria-modal="true" aria-label="상세"></div></div>
+  <div class="modal-wrap" id="modal"></div>
+  <div class="result-wrap" id="result"></div>
+  <div id="toast-stack"></div>
+  <div id="float-result"></div>
+
+  <!-- framework-aligned prototype engine -->
+  <script src="./assets/scripts/core/admin-icons.js"></script>
+  <script src="./assets/scripts/core/admin-charts.js"></script>
+  <script src="./assets/scripts/data/admin-data.js"></script>
+  <script src="./assets/scripts/core/admin-components.js"></script>
+  <script src="./assets/scripts/domains/dashboard/admin-screen-dashboard.js"></script>
+  <script src="./assets/scripts/domains/commerce/admin-screen-ops.js"></script>
+  <script src="./assets/scripts/domains/operations/admin-screen-misc.js"></script>
+  <script src="./assets/scripts/core/admin-shell.js"></script>
+</body>
+</html>

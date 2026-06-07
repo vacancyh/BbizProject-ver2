@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="15" failures="0" errors="0" time="0.144">
+  <testsuite name="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" errors="0" failures="0" skipped="0" timestamp="2026-06-03T08:43:56" time="0.097" tests="15">
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-1: 회수 금액 = 신규 금액인 경우 차액 0" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-2: 신규 금액 &gt; 회수 금액이면 diff 양수(추가결제)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-3: 회수 금액 &gt; 신규 금액이면 diff 음수(환불)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-4: 수량이 반영되어 합산된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-5: 빈 배열 입력 시 차액 0" time="0">
+    </testcase>
+    <testcase classname="UT-002: 다건 그룹 + 1회 회수 — 차액 합산 검증" name="TC-1: 2개 교환 라인 합산 차액(추가결제)" time="0">
+    </testcase>
+    <testcase classname="UT-002: 다건 그룹 + 1회 회수 — 차액 합산 검증" name="TC-2: lines 배열이 모든 라인을 포함한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 다건 그룹 + 1회 회수 — 차액 합산 검증" name="TC-3: 다건 합산 후 차액이 0인 경우 diff=0" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-1: 정수 단위 차액(추가결제) — 절사 없음" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-2: 정수 단위 차액(환불) — diff 음수" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-3: floor 적용 — 정수 결과는 그대로 반환된다" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-4: lines 합산이 diff 와 항상 일치한다(잔액보정 정합)" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-5: 추가결제 케이스 — price_diff 응답 구조 확인" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-6: 환불 케이스 — diff 음수 + lines 구조" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-7: unit_price 가 undefined 이면 0 으로 처리된다" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>
