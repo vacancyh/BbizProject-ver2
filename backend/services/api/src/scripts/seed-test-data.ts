@@ -8,6 +8,8 @@ import {
   createCustomersWorkflow,
   createOrderWorkflow,
   createProductCategoriesWorkflow,
+  createCustomerGroupsWorkflow,
+  linkCustomersToCustomerGroupWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
@@ -229,6 +231,57 @@ export default async function seedTestData({ container }: ExecArgs) {
     }
   }
   logger.info(`적립금 적립: ${pointsCreated}`)
+
+  // ── 7) 데모: 계정회원 + VIP 그룹 (회원 탭 '정상'/'VIP' 시연용) ──
+  const demoEmails = Array.from({ length: 6 }, (_, i) => `member${String(i + 1).padStart(2, "0")}@kr-demo.local`)
+  const existingDemo = await customerModule.listCustomers({ email: demoEmails }, { take: 100 })
+  let demoMembers: any[] = existingDemo
+  if (demoMembers.length < demoEmails.length) {
+    const { result } = await createCustomersWorkflow(container).run({
+      input: {
+        customersData: demoEmails.map((email, i) => ({
+          email,
+          first_name: KO_FIRST[(i + 5) % KO_FIRST.length],
+          last_name: KO_LAST[(i + 5) % KO_LAST.length],
+          phone: `010-7${String(100 + i).padStart(3, "0")}-${String(2000 + i).padStart(4, "0")}`,
+          has_account: true, // 계정회원(정상 탭 대상)
+        })),
+      },
+    })
+    demoMembers = result
+    logger.info(`데모 계정회원 생성: ${demoMembers.length}`)
+  } else {
+    logger.info(`데모 계정회원 존재(skip): ${demoMembers.length}`)
+  }
+
+  // VIP 그룹
+  const { data: existingVip } = await query.graph({
+    entity: "customer_group",
+    fields: ["id", "name"],
+    filters: { name: "VIP" } as any,
+  })
+  let vipGroup: any = existingVip[0]
+  if (!vipGroup) {
+    const { result } = await createCustomerGroupsWorkflow(container).run({
+      input: { customersData: [{ name: "VIP" }] },
+    })
+    vipGroup = result[0]
+    logger.info(`VIP 그룹 생성: ${vipGroup.id}`)
+  } else {
+    logger.info(`VIP 그룹 존재(skip): ${vipGroup.id}`)
+  }
+
+  // 데모 회원 앞 3명 VIP 지정
+  if (vipGroup && demoMembers.length > 0) {
+    try {
+      await linkCustomersToCustomerGroupWorkflow(container).run({
+        input: { id: vipGroup.id, add: demoMembers.slice(0, 3).map((m) => m.id) },
+      })
+      logger.info(`VIP 그룹에 ${Math.min(3, demoMembers.length)}명 지정`)
+    } catch (e: any) {
+      logger.info(`VIP 지정 skip/실패(무시): ${e?.message}`)
+    }
+  }
 
   logger.info("================ 테스트 데이터 시드 완료 ================")
 }

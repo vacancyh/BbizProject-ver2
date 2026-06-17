@@ -14,7 +14,6 @@ import {
   Download,
   MessageSquare,
   Search,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
@@ -58,6 +57,10 @@ import {
 } from "@/lib/api/customer-groups";
 
 const PAGE_SIZE = 20;
+
+/* 세그탭: 라벨 ↔ 조회 키. 정상=계정회원·최근1년 / 휴면=계정회원·가입1년경과(미접속 데이터 미구현 proxy) / VIP=그룹 */
+const TABS = ["전체", "정상 회원", "휴면 회원", "VIP"] as const;
+const TAB_KEYS = ["all", "active", "dormant", "vip"] as const;
 
 /* ── 유틸 ─────────────────────────────────────────────── */
 
@@ -190,8 +193,38 @@ function MembersScreen() {
         offset: (page - 1) * PAGE_SIZE,
       };
       if (q) params.q = q;
-      if (filterStatus === "active") params.has_account = "true";
-      if (filterStatus === "guest") params.has_account = "false";
+
+      // ── 세그탭 필터 ───────────────────────────────────────────────
+      // 정상=계정회원·최근1년 / 휴면=계정회원·가입1년경과(미접속 데이터 미구현 → 가입경과 proxy)
+      // VIP=VIP 그룹 소속(그룹 없으면 0건). 상태 select 는 '전체' 탭일 때만 적용.
+      const oneYearAgo = new Date(Date.now() - 365 * 86400000).toISOString();
+      const tab = TAB_KEYS[activeTab];
+      if (tab === "active") {
+        params.has_account = "true";
+        params.created_at_from = oneYearAgo;
+      } else if (tab === "dormant") {
+        params.has_account = "true";
+        params.created_at_to = oneYearAgo;
+      } else if (tab === "vip") {
+        const vip = groups.find((g) => /vip/i.test(g.name));
+        params.group_id = vip?.id ?? "__none__"; // VIP 그룹 없으면 빈 결과
+      } else {
+        if (filterStatus === "active") params.has_account = "true";
+        if (filterStatus === "guest") params.has_account = "false";
+      }
+
+      // ── 등급(그룹) select ──
+      if (filterGrade) {
+        const g = groups.find((gr) => gr.name === filterGrade);
+        if (g) params.group_id = g.id;
+      }
+
+      // ── 가입일 ── (탭이 설정한 created_at 범위를 덮어쓰지 않음)
+      const join = joinOffset();
+      if (join.created_at_from && !params.created_at_from) {
+        params.created_at_from = join.created_at_from;
+      }
+
       const res = await listCustomers(params);
       setRows(res.customers);
       setCount(res.count);
@@ -200,7 +233,7 @@ function MembersScreen() {
     } finally {
       setLoading(false);
     }
-  }, [q, filterStatus, page]);
+  }, [q, filterStatus, filterGrade, filterJoin, activeTab, page, groups]);
 
   useEffect(() => {
     void load();
@@ -354,9 +387,6 @@ function MembersScreen() {
   }).length;
   const vipCount = rows.filter((r) => gradeFromGroups(r.groups) === "VIP").length;
 
-  /* ── 탭 ── */
-  const TABS = ["전체", "정상 회원", "휴면 회원", "VIP"];
-
   /* ── 페이지 수 ── */
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
@@ -463,12 +493,18 @@ function MembersScreen() {
           />
         </div>
 
-        {/* 등급 select */}
-        <button className="select" type="button" onClick={() => setFilterGrade("")}>
-          <span className="sl-k">등급</span>
-          {filterGrade || "전체"}
-          <ChevronDown size={15} />
-        </button>
+        {/* 등급(고객 그룹) select */}
+        <select
+          className="select"
+          value={filterGrade}
+          onChange={(e) => { setFilterGrade(e.target.value); setPage(1); }}
+          style={{ appearance: "none" }}
+        >
+          <option value="">등급 전체</option>
+          {groups.map((g) => (
+            <option key={g.id} value={g.name}>{g.name}</option>
+          ))}
+        </select>
 
         {/* 가입일 select */}
         <select
@@ -513,7 +549,7 @@ function MembersScreen() {
               key={t}
               type="button"
               className={`segtab${activeTab === i ? " active" : ""}`}
-              onClick={() => setActiveTab(i)}
+              onClick={() => { setActiveTab(i); setPage(1); }}
             >
               {t}
             </button>
