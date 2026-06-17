@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { Check, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,8 +31,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const dismiss = (id: number) => setItems((prev) => prev.filter((t) => t.id !== id));
 
+  // value 를 메모이즈해야 소비자(useToast)의 참조가 안정적이다.
+  // (미메모 시 토스트 발생→Provider 리렌더→새 value→useEffect 의존성 변동→무한 재요청)
+  const value = useMemo<ToastApi>(() => ({ show }), [show]);
+
   return (
-    <ToastContext.Provider value={{ show }}>
+    <ToastContext.Provider value={value}>
       {children}
       <div className="fixed bottom-5 right-5 z-[70] flex flex-col gap-2">
         {items.map((t) => (
