@@ -93,14 +93,17 @@ async function rbacGuard(
   next: MedusaNextFunction
 ) {
   try {
-    if (!WRITE_METHODS.includes(req.method)) return next()
+    const isWrite = WRITE_METHODS.includes(req.method)
+    const isRead = req.method === "GET"
+    // write = create/update/delete 판정, read = GET 조회 판정(보안 메뉴 등 can_read 제한 적용)
+    if (!isWrite && !isRead) return next()
     const menu = menuFromPath(req.path)
     if (!menu) return next() // 매핑 없는 경로는 통과(코어 보호)
     const userId = actorIdOf(req)
     if (!userId) return next() // 미인증은 Medusa auth 가 처리
 
     const rbac = req.scope.resolve(RBAC_MODULE) as unknown as RbacModuleService
-    const action = actionFromMethod(req.method)
+    const action: RbacAction = isWrite ? actionFromMethod(req.method) : "read"
     const allowed = await rbac.checkPermission(userId, menu, action)
     if (!allowed) {
       res.status(403).json({
@@ -183,8 +186,9 @@ function auditTap(
 export default defineMiddlewares({
   routes: [
     {
+      // GET 포함 — rbacGuard 가 보안메뉴 조회(read) 권한도 검사. auditTap 은 write 만 기록.
       matcher: "/admin/*",
-      method: ["POST", "PUT", "PATCH", "DELETE"],
+      method: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       middlewares: [rbacGuard, auditTap],
     },
   ],

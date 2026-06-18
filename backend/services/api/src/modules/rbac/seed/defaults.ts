@@ -60,6 +60,11 @@ const ROLE_EDIT_MENUS: Record<Exclude<RoleKey, "super">, MenuId[]> = {
   marketer: [],
 }
 
+const NONE: Perm = { can_read: false, can_create: false, can_update: false, can_delete: false }
+
+// super 외 등급은 조회(read)조차 불가한 보안/시스템 메뉴 (읽기 권한 분리 — 옵션 A)
+const SUPER_ONLY_MENUS: MenuId[] = ["permissions", "policies", "audit-logs"]
+
 /** 등급별 메뉴별 기본 권한 행 목록 생성 */
 export function buildDefaultPermissions(): {
   role_key: RoleKey
@@ -75,6 +80,8 @@ export function buildDefaultPermissions(): {
       let perm: Perm
       if (role === "super") {
         perm = FULL // 표시용(실제 판정은 단락)
+      } else if (SUPER_ONLY_MENUS.includes(menu)) {
+        perm = NONE // 보안/시스템 메뉴는 super 외 조회·쓰기 모두 불가
       } else {
         const full = ROLE_FULL_MENUS[role]
         const edit = ROLE_EDIT_MENUS[role]
