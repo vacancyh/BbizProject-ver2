@@ -28,6 +28,7 @@ import { useToast } from "@/components/ui/Toast";
 import { formatCurrency } from "@/lib/utils";
 import {
   listOrders,
+  searchOrders,
   getOrder,
   createShipment,
   type OrderListItem,
@@ -235,17 +236,16 @@ export default function ShippingPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await listOrders({
+      const tabStatuses = TABS.find((t) => t.key === activeTab)?.statuses ?? [];
+      // 결제/배송상태 서버 필터(코어 미지원) → /admin/orders-kr/search(searchOrders)
+      const res = await searchOrders({
         q: q || undefined,
+        fulfillment_status: tabStatuses.length ? tabStatuses.join(",") : undefined,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
       });
-      const tabStatuses = TABS.find((t) => t.key === activeTab)?.statuses ?? [];
-      const filtered = res.orders.filter((o) =>
-        tabStatuses.length ? tabStatuses.includes(o.fulfillment_status) : true
-      );
-      // 택배사 필터 (클라이언트 측)
-      const withRows = filtered.map(toShipRow);
+      // 택배사 필터 (클라이언트 측 — 택배사 버튼 활성화 시)
+      const withRows = res.orders.map(toShipRow);
       const carrierFiltered =
         carrierFilter === "전체"
           ? withRows

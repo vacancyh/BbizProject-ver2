@@ -22,6 +22,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { formatCurrency } from "@/lib/utils";
 import {
   listOrders,
+  searchOrders,
   getOrder,
   getOrderHistory,
   listMemos,
@@ -132,6 +133,16 @@ import { getToken } from "@/lib/api/client";
 import { getUsers, type AdminUserRow } from "@/lib/api/rbac";
 
 const PAGE_SIZE = 10;
+// 세그탭(전체/결제완료/배송준비/배송중/배송완료/취소·환불) → 서버 검색 필터 매핑.
+// 결제/배송상태는 코어 미지원 → /admin/orders-kr/search(searchOrders) 로 처리.
+const TAB_FILTERS: Array<{ status?: string; payment_status?: string; fulfillment_status?: string }> = [
+  {}, // 전체
+  { payment_status: "captured" }, // 결제완료
+  { fulfillment_status: "not_fulfilled" }, // 배송준비
+  { fulfillment_status: "shipped" }, // 배송중
+  { fulfillment_status: "delivered" }, // 배송완료
+  { status: "canceled" }, // 취소/환불
+];
 const CARRIERS = ["CJ대한통운", "우체국택배", "한진택배", "롯데택배", "로젠택배"];
 
 // 청약철회 사유(전자상거래법 §17 ② 분류) — code 는 백엔드 enum 과 1:1
@@ -320,9 +331,13 @@ export default function OrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await listOrders({
+      const tabF = TAB_FILTERS[activeTab] ?? {};
+      const res = await searchOrders({
         q: q || undefined,
-        status: statusFilter || undefined,
+        // 탭이 주문상태(취소)를 지정하면 우선, 아니면 상태 select 값 사용
+        status: tabF.status ?? (statusFilter || undefined),
+        payment_status: tabF.payment_status,
+        fulfillment_status: tabF.fulfillment_status,
         from: fromDate || undefined,
         to: toDate || undefined,
         limit: PAGE_SIZE,
@@ -335,7 +350,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [q, statusFilter, fromDate, toDate, page]);
+  }, [q, statusFilter, fromDate, toDate, page, activeTab]);
 
   useEffect(() => {
     void load();
@@ -1146,7 +1161,7 @@ export default function OrdersPage() {
               key={t.label}
               type="button"
               className={`segtab${activeTab === i ? " active" : ""}`}
-              onClick={() => setActiveTab(i)}
+              onClick={() => { setActiveTab(i); setPage(1); }}
             >
               {t.label}
               {t.cnt !== null ? (

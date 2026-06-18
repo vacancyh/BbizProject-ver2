@@ -144,6 +144,34 @@ export function listOrders(
   return apiFetch(`/admin/orders?${qs.toString()}`);
 }
 
+/** 주문 검색 파라미터 — 결제/배송상태 필터 포함(한국형 보강). */
+export type OrderSearchParams = OrderListParams & {
+  /** 결제상태(captured/not_paid/partially_refunded/refunded/awaiting/canceled …) */
+  payment_status?: string;
+  /** 배송상태(not_fulfilled/fulfilled/shipped/delivered/canceled …) */
+  fulfillment_status?: string;
+};
+
+/**
+ * 주문 검색(한국형 — 결제/배송상태 필터 보강).
+ * 코어 /admin/orders 는 payment_status·fulfillment_status 서버 필터를 지원하지 않으므로
+ * 커스텀 /admin/orders-kr/search 사용(결과/count 정확).
+ */
+export function searchOrders(
+  params: OrderSearchParams = {}
+): Promise<{ orders: OrderListItem[]; count: number }> {
+  const qs = new URLSearchParams();
+  if (params.q) qs.set("q", params.q);
+  if (params.status) qs.set("status", params.status);
+  if (params.payment_status) qs.set("payment_status", params.payment_status);
+  if (params.fulfillment_status) qs.set("fulfillment_status", params.fulfillment_status);
+  if (params.from) qs.set("from", params.from);
+  if (params.to) qs.set("to", params.to);
+  qs.set("limit", String(params.limit ?? 20));
+  qs.set("offset", String(params.offset ?? 0));
+  return apiFetch(`/admin/orders-kr/search?${qs.toString()}`);
+}
+
 /** 주문 상세(Medusa REST). */
 export function getOrder(id: string): Promise<{ order: OrderDetail }> {
   const qs = new URLSearchParams({ fields: DETAIL_FIELDS });
