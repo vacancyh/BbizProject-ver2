@@ -131,6 +131,7 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [categories, setCategories]     = useState<Category[]>([]);
+  const [sort, setSort]                 = useState("-updated_at"); // 정렬(최근수정) 기본
   const [loading, setLoading]           = useState(true);
 
   /* ── 상세/편집 상태 ── */
@@ -180,6 +181,7 @@ export default function ProductsPage() {
         q: q || undefined,
         status: statusFilter || undefined,
         category_id: filterCategory || undefined,
+        order: sort,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
       });
@@ -190,7 +192,16 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [q, statusFilter, filterCategory, page, toast]);
+  }, [q, statusFilter, filterCategory, page, toast, sort]);
+
+  /* ── 정렬 토글/표시 ── */
+  function toggleSort(field: string) {
+    setPage(1);
+    setSort((s) => (s === `-${field}` ? field : `-${field}`));
+  }
+  function sortCaret(field: string): string {
+    return sort === field ? "▲" : sort === `-${field}` ? "▼" : "↕";
+  }
 
   useEffect(() => { void load(); }, [load]);
 
@@ -686,10 +697,10 @@ export default function ProductsPage() {
                       <th className="col-check"><span className="ck" /></th>
                       <th>상품</th>
                       <th>카테고리</th>
-                      <th className="num sortable">판매가 <span className="sortcaret">↕</span></th>
-                      <th className="num sortable">재고 <span className="sortcaret">↕</span></th>
+                      <th className="num">판매가</th>
+                      <th className="num">재고</th>
                       <th>판매상태</th>
-                      <th className="sortable">최근 수정 <span className="sortcaret">↕</span></th>
+                      <th className="sortable" style={{ cursor: "pointer" }} onClick={() => toggleSort("updated_at")}>최근 수정 <span className="sortcaret">{sortCaret("updated_at")}</span></th>
                       <th></th>
                     </tr>
                   </thead>

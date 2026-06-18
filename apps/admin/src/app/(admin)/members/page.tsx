@@ -136,6 +136,7 @@ function MembersScreen() {
   const [filterGrade, setFilterGrade] = useState("");
   const [filterJoin, setFilterJoin] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [sort, setSort] = useState("-created_at"); // 정렬(가입일) 기본 최신순
 
   const [groups, setGroups] = useState<CustomerGroup[]>([]);
 
@@ -225,6 +226,8 @@ function MembersScreen() {
         params.created_at_from = join.created_at_from;
       }
 
+      params.order = sort;
+
       const res = await listCustomers(params);
       setRows(res.customers);
       setCount(res.count);
@@ -233,7 +236,16 @@ function MembersScreen() {
     } finally {
       setLoading(false);
     }
-  }, [q, filterStatus, filterGrade, filterJoin, activeTab, page, groups]);
+  }, [q, filterStatus, filterGrade, filterJoin, activeTab, page, groups, sort]);
+
+  /* ── 정렬 토글/표시 ── */
+  function toggleSort(field: string) {
+    setPage(1);
+    setSort((s) => (s === `-${field}` ? field : `-${field}`));
+  }
+  function sortCaret(field: string): string {
+    return sort === field ? "▲" : sort === `-${field}` ? "▼" : "↕";
+  }
 
   useEffect(() => {
     void load();
@@ -567,13 +579,11 @@ function MembersScreen() {
                 <th>아이디</th>
                 <th>이름</th>
                 <th>등급</th>
-                <th className="sortable">
-                  가입일 <span className="sortcaret">▼</span>
+                <th className="sortable" style={{ cursor: "pointer" }} onClick={() => toggleSort("created_at")}>
+                  가입일 <span className="sortcaret">{sortCaret("created_at")}</span>
                 </th>
-                <th className="num sortable">주문수</th>
-                <th className="num sortable">
-                  누적 구매액 <span className="sortcaret">▼</span>
-                </th>
+                <th className="num">주문수</th>
+                <th className="num">누적 구매액</th>
                 <th>상태</th>
                 <th></th>
               </tr>

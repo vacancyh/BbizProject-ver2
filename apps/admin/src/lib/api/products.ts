@@ -45,7 +45,7 @@ const DETAIL_FIELDS =
   LIST_FIELDS +
   ",subtitle,description,metadata,*options,options.values.value,images.id,images.url";
 
-export type ProductListParams = { q?: string; status?: string; category_id?: string; limit?: number; offset?: number };
+export type ProductListParams = { q?: string; status?: string; category_id?: string; order?: string; limit?: number; offset?: number };
 
 /** 상품 목록(Medusa REST). */
 export function listProducts(
@@ -57,7 +57,7 @@ export function listProducts(
   if (params.category_id) qs.set("category_id[]", params.category_id);
   qs.set("limit", String(params.limit ?? 20));
   qs.set("offset", String(params.offset ?? 0));
-  qs.set("order", "-updated_at");
+  qs.set("order", params.order || "-updated_at");
   return apiFetch(`/admin/products?${qs.toString()}`);
 }
 

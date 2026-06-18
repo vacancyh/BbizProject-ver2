@@ -255,6 +255,7 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState(0);
+  const [sort, setSort] = useState("-display_id"); // 정렬 기본 주문번호 내림차순
   const [exportBusy, setExportBusy] = useState(false);
 
   // ── 현재 사용자(메모 삭제 권한 판단용) ─────────────────────────────────────
@@ -340,6 +341,7 @@ export default function OrdersPage() {
         fulfillment_status: tabF.fulfillment_status,
         from: fromDate || undefined,
         to: toDate || undefined,
+        order: sort,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
       });
@@ -350,7 +352,16 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [q, statusFilter, fromDate, toDate, page, activeTab]);
+  }, [q, statusFilter, fromDate, toDate, page, activeTab, sort]);
+
+  /* ── 정렬 토글/표시 ── */
+  function toggleSort(field: string) {
+    setPage(1);
+    setSort((s) => (s === `-${field}` ? field : `-${field}`));
+  }
+  function sortCaret(field: string): string {
+    return sort === field ? "▲" : sort === `-${field}` ? "▼" : "↕";
+  }
 
   useEffect(() => {
     void load();
@@ -1189,13 +1200,17 @@ export default function OrdersPage() {
                   <th className="col-check">
                     <Ck checked={allSelected} onChange={toggleAll} />
                   </th>
-                  <th className="sortable" style={{ minWidth: 90 }}>
-                    주문번호 <span className="sortcaret">▼</span>
+                  <th className="sortable" style={{ minWidth: 90, cursor: "pointer" }} onClick={() => toggleSort("display_id")}>
+                    주문번호 <span className="sortcaret">{sortCaret("display_id")}</span>
                   </th>
-                  <th className="sortable" style={{ minWidth: 140 }}>주문일시</th>
+                  <th className="sortable" style={{ minWidth: 140, cursor: "pointer" }} onClick={() => toggleSort("created_at")}>
+                    주문일시 <span className="sortcaret">{sortCaret("created_at")}</span>
+                  </th>
                   <th style={{ minWidth: 100 }}>고객명</th>
                   <th className="num" style={{ minWidth: 60 }}>수량</th>
-                  <th className="num sortable" style={{ minWidth: 110 }}>결제금액</th>
+                  <th className="num sortable" style={{ minWidth: 110, cursor: "pointer" }} onClick={() => toggleSort("total")}>
+                    결제금액 <span className="sortcaret">{sortCaret("total")}</span>
+                  </th>
                   <th style={{ minWidth: 90 }}>결제상태</th>
                   <th style={{ minWidth: 90 }}>주문상태</th>
                   <th style={{ minWidth: 90 }}>배송상태</th>

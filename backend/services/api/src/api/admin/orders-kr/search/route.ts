@@ -58,6 +58,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const fulfillmentStatuses = multi(req.query.fulfillment_status)
   const from = str(req.query.from)
   const to = str(req.query.to)
+  const order = str(req.query.order) // 예: "created_at" | "-total" | "display_id"(기본)
   const limit = Math.max(1, Number(req.query.limit ?? 20))
   const offset = Math.max(0, Number(req.query.offset ?? 0))
 
@@ -97,9 +98,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     logger.warn(`[orders-kr/search] 스캔 상한(${MAX_SCAN}) 도달 — 결과가 잘릴 수 있습니다.`)
   }
 
-  // 최신순(display_id DESC)
-  list.sort((a, b) => (b.display_id ?? 0) - (a.display_id ?? 0))
-
   // ── ③ 메모리 필터(계산필드 + 키워드) ─────────────────────────
   if (paymentStatuses.length) list = list.filter((o) => paymentStatuses.includes(o.payment_status))
   if (fulfillmentStatuses.length) list = list.filter((o) => fulfillmentStatuses.includes(o.fulfillment_status))
@@ -114,6 +112,22 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       )
     })
   }
+
+  // ── ④ 정렬(기본 display_id DESC) — display_id/created_at/total 허용 ──────
+  const desc = !order || order.startsWith("-")
+  const field = (order ?? "display_id").replace(/^-/, "")
+  const sortField = ["display_id", "created_at", "total"].includes(field) ? field : "display_id"
+  list.sort((a, b) => {
+    let av: number, bv: number
+    if (sortField === "created_at") {
+      av = new Date(a.created_at).getTime() || 0
+      bv = new Date(b.created_at).getTime() || 0
+    } else {
+      av = Number(a[sortField]) || 0
+      bv = Number(b[sortField]) || 0
+    }
+    return desc ? bv - av : av - bv
+  })
 
   // ── 페이지네이션 ─────────────────────────────────────────────
   const count = list.length

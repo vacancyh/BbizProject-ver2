@@ -150,6 +150,8 @@ export type OrderSearchParams = OrderListParams & {
   payment_status?: string;
   /** 배송상태(not_fulfilled/fulfilled/shipped/delivered/canceled …) */
   fulfillment_status?: string;
+  /** 정렬: display_id|created_at|total (앞에 - = 내림차순). 기본 -display_id */
+  order?: string;
 };
 
 /**
@@ -167,6 +169,7 @@ export function searchOrders(
   if (params.fulfillment_status) qs.set("fulfillment_status", params.fulfillment_status);
   if (params.from) qs.set("from", params.from);
   if (params.to) qs.set("to", params.to);
+  if (params.order) qs.set("order", params.order);
   qs.set("limit", String(params.limit ?? 20));
   qs.set("offset", String(params.offset ?? 0));
   return apiFetch(`/admin/orders-kr/search?${qs.toString()}`);

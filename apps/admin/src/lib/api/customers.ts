@@ -64,6 +64,8 @@ export type CustomerListParams = {
   /** 이름 정확매칭(내부 분리검색용). */
   first_name?: string;
   last_name?: string;
+  /** 정렬(예: created_at | -created_at | email). 기본 -created_at */
+  order?: string;
   limit?: number;
   offset?: number;
 };
@@ -77,7 +79,7 @@ function isHangulFullName(s: string): boolean {
 function fetchCustomers(
   params: CustomerListParams
 ): Promise<{ customers: CustomerListItem[]; count: number }> {
-  const qs = new URLSearchParams({ fields: LIST_FIELDS, order: "-created_at" });
+  const qs = new URLSearchParams({ fields: LIST_FIELDS, order: params.order || "-created_at" });
   if (params.q) qs.set("q", params.q);
   if (params.first_name) qs.set("first_name", params.first_name);
   if (params.last_name) qs.set("last_name", params.last_name);
