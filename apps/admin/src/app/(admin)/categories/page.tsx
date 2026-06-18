@@ -226,7 +226,7 @@ function CategoriesTab() {
 
   async function searchProducts() {
     try {
-      const { products } = await listProducts({ q: pq || undefined, limit: 8 });
+      const { products } = await listProducts({ q: pq || undefined, limit: 50 });
       const linked = new Set((detail?.products ?? []).map((p) => p.id));
       setPresults(products.filter((p) => !linked.has(p.id)));
     } catch (e) {
@@ -566,7 +566,7 @@ function CollectionsTab() {
 
   async function searchProducts() {
     try {
-      const { products } = await listProducts({ q: pq || undefined, limit: 8 });
+      const { products } = await listProducts({ q: pq || undefined, limit: 50 });
       const linked = new Set((detail?.products ?? []).map((p) => p.id));
       setPresults(products.filter((p) => !linked.has(p.id)));
     } catch (e) {

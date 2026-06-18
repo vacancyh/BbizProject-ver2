@@ -20,7 +20,6 @@ import {
   setReviewStatus,
   replyReview,
   type ReviewItem,
-  type ReviewType,
   type ReviewStatus,
 } from "@/lib/api/reviews";
 
@@ -108,32 +107,28 @@ export default function Page() {
     blind: 0,
   });
 
-  /* 카운트 초기 로드 */
+  /* 카운트 초기 로드 — 1:1 문의(product_id 없음) / 상품 Q&A(product_id 있음) 구분 */
   useEffect(() => {
     Promise.allSettled([
-      listReviews({ type: "inquiry", limit: 1 }),
-      listReviews({ type: "inquiry", limit: 1 }), // qna = inquiry 동일 타입
+      listReviews({ type: "inquiry", limit: 200 }),
       listReviews({ type: "review", limit: 1 }),
       Promise.all([
         listReviews({ type: "review", status: "hidden", limit: 1 }),
         listReviews({ type: "inquiry", status: "hidden", limit: 1 }),
       ]),
     ]).then((results) => {
-      const inquiry =
-        results[0].status === "fulfilled" ? results[0].value.count : 0;
+      const inquiries =
+        results[0].status === "fulfilled" ? results[0].value.reviews : [];
+      const inquiry = inquiries.filter((r) => !r.product_id).length;
+      const qna = inquiries.filter((r) => !!r.product_id).length;
       const review =
-        results[2].status === "fulfilled" ? results[2].value.count : 0;
+        results[1].status === "fulfilled" ? results[1].value.count : 0;
       const blindPair =
-        results[3].status === "fulfilled" ? results[3].value : [{ count: 0 }, { count: 0 }];
+        results[2].status === "fulfilled" ? results[2].value : [{ count: 0 }, { count: 0 }];
       const blind =
         (blindPair as [{ count: number }, { count: number }])[0].count +
         (blindPair as [{ count: number }, { count: number }])[1].count;
-      setCounts({
-        inquiry,
-        qna: inquiry, // same endpoint — 구분은 화면 탭용
-        review,
-        blind,
-      });
+      setCounts({ inquiry, qna, review, blind });
     });
   }, []);
 
@@ -151,12 +146,21 @@ export default function Page() {
         // 프로토타입 정합 — 첫 항목 자동 선택 (우측 답변 패널 항상 노출)
         setSelected(merged[0] ?? null);
         setReplyText(merged[0]?.reply ?? "");
-      } else {
-        const apiType: ReviewType = tab === "review" ? "review" : "inquiry";
-        const { reviews } = await listReviews({ type: apiType, limit: 100 });
+      } else if (tab === "review") {
+        const { reviews } = await listReviews({ type: "review", limit: 100 });
         setRows(reviews);
         setSelected(reviews[0] ?? null);
         setReplyText(reviews[0]?.reply ?? "");
+      } else {
+        // inquiry(1:1 문의) / qna(상품 Q&A) 모두 type=inquiry — product_id 유무로 구분
+        const { reviews } = await listReviews({ type: "inquiry", limit: 200 });
+        const filtered =
+          tab === "qna"
+            ? reviews.filter((r) => !!r.product_id) // 상품 Q&A = 상품 연결 문의
+            : reviews.filter((r) => !r.product_id); // 1:1 문의 = 일반 문의
+        setRows(filtered);
+        setSelected(filtered[0] ?? null);
+        setReplyText(filtered[0]?.reply ?? "");
       }
     } finally {
       setLoading(false);
