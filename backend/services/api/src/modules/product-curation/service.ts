@@ -176,10 +176,13 @@ class ProductCurationModuleService extends MedusaService({
 
     const existing = await this.listPopularSearchTerms({ term })
     const now = new Date()
+    // 금칙어 목록 확인 — 이미 금칙어로 등록된 검색어는 기록 시점에 is_banned 처리
+    // (금칙어 등록→이후 검색 순서에서도 인기검색어에서 제외되도록)
+    const banned = await this.checkBannedWord(term, "search")
 
     if (existing.length === 0) {
       const [created] = await this.createPopularSearchTerms([
-        { term, count: 1, last_searched_at: now, is_banned: false },
+        { term, count: 1, last_searched_at: now, is_banned: banned },
       ])
       return created
     }
@@ -190,6 +193,7 @@ class ProductCurationModuleService extends MedusaService({
         id: record.id,
         count: Number(record.count) + 1,
         last_searched_at: now,
+        is_banned: banned,
       },
     ])
     return updated
