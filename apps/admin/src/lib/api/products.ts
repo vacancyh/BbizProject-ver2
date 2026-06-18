@@ -45,7 +45,7 @@ const DETAIL_FIELDS =
   LIST_FIELDS +
   ",subtitle,description,metadata,*options,options.values.value,images.id,images.url";
 
-export type ProductListParams = { q?: string; status?: string; limit?: number; offset?: number };
+export type ProductListParams = { q?: string; status?: string; category_id?: string; limit?: number; offset?: number };
 
 /** 상품 목록(Medusa REST). */
 export function listProducts(
@@ -54,6 +54,7 @@ export function listProducts(
   const qs = new URLSearchParams({ fields: LIST_FIELDS });
   if (params.q) qs.set("q", params.q);
   if (params.status) qs.set("status[]", params.status);
+  if (params.category_id) qs.set("category_id[]", params.category_id);
   qs.set("limit", String(params.limit ?? 20));
   qs.set("offset", String(params.offset ?? 0));
   qs.set("order", "-updated_at");

@@ -42,6 +42,7 @@ import {
   type ProductStatus,
 } from "@/lib/api/products";
 import { getProductTypes, type ProductTypeNode } from "@/lib/api/product-types";
+import { listCategoriesFlat, type Category } from "@/lib/api/categories";
 import { productsToCsv } from "@/lib/products/product-list-logic";
 import {
   parseProductCsv,
@@ -128,6 +129,8 @@ export default function ProductsPage() {
   const [page, setPage]                 = useState(1);
   const [q, setQ]                       = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [categories, setCategories]     = useState<Category[]>([]);
   const [loading, setLoading]           = useState(true);
 
   /* ── 상세/편집 상태 ── */
@@ -176,6 +179,7 @@ export default function ProductsPage() {
       const res = await listProducts({
         q: q || undefined,
         status: statusFilter || undefined,
+        category_id: filterCategory || undefined,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
       });
@@ -186,9 +190,16 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [q, statusFilter, page, toast]);
+  }, [q, statusFilter, filterCategory, page, toast]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // 카테고리 필터용 목록(1회 로드)
+  useEffect(() => {
+    listCategoriesFlat()
+      .then(({ product_categories }) => setCategories(product_categories))
+      .catch(() => undefined);
+  }, []);
 
   /* ── CSV 내보내기/가져오기 (t001 export · t004 import) ── */
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -597,9 +608,18 @@ export default function ProductsPage() {
                 onChange={(e) => { setPage(1); setQ(e.target.value); }}
               />
             </div>
-            <button className="select" type="button">
-              <span className="sl-k">카테고리</span> 전체 <ChevronDown size={15} />
-            </button>
+            <select
+              className="select"
+              value={filterCategory}
+              onChange={(e) => { setPage(1); setFilterCategory(e.target.value); }}
+              style={{ appearance: "none" }}
+              aria-label="카테고리 필터"
+            >
+              <option value="">카테고리: 전체</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
             <button
               className="select"
               type="button"
