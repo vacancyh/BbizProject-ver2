@@ -1,0 +1,55 @@
+# 프롬프트 — 관리자 QA 핸드오프 / 이어가기
+
+> 아래 블록을 AI 어시스턴트(예: Claude Code)에 그대로 붙여넣어 맥락을 인계하고 작업을 이어갈 수 있습니다.
+> 작성일 2026-06-18 기준. 상세 기록은 [관리자QA_작업로그_2026-06-18.md](./관리자QA_작업로그_2026-06-18.md) 참조.
+
+---
+
+```
+당신은 c:\study\BbizProject-ver2 저장소(Medusa v2.15.3 기반 한국형 단독몰)의 개발을 이어받습니다.
+
+[시스템 구성]
+- 백엔드: backend/services/api (Medusa, :9000) — /store(고객) + /admin(관리자) API
+- 관리자 앱: apps/admin (Next.js, :7002) — Medusa 내장 admin UI는 비활성, 자체 앱 사용
+- 스토어프론트: apps/web (Next.js, :8000) — 개발 예정
+- 실행(사내망 TLS 검사 환경): DB/Redis는 Docker, 백엔드·앱은 호스트에서 직접 실행
+  · docker compose -f infra/docker/docker-compose.yml --project-directory . up -d shop-postgres shop-redis
+  · cd backend/services/api && npx medusa develop
+  · cd apps/admin && pnpm dev  /  cd apps/web && pnpm dev
+- 관리자 계정: admin@shop.local / admin1234! (역할 미할당=super 동작)
+- 권한 테스트: ops@shop.local/ops1234!(operation), mkt@shop.local/mkt1234!(marketer)
+- 테스트 데이터 시드: npx medusa exec ./src/scripts/seed-test-data.ts
+
+[현재 상태 — 관리자 기능 점검·수정·검증 완료]
+- 회원 검색(풀네임 분리)·탭·필터·정렬, 상품 카테고리 필터, 큐레이션 500/무한루프, 리뷰 Q&A 분리 수정 완료.
+- 주문/배송 결제·배송상태 탭: Medusa 코어가 payment_status/fulfillment_status 서버필터를 미지원하여
+  커스텀 엔드포인트 GET /admin/orders-kr/search 신설(getOrdersListWorkflow로 계산필드 조회 후 메모리 필터+정렬).
+- 목록 정렬: 주문/회원/상품 평문 컬럼 헤더 클릭 정렬 배선(계산컬럼 제외).
+- RBAC: write는 등급별 강제, read는 보안메뉴(권한·정책·감사로그) super 전용으로 분리.
+- 연계 검증 완료: 주문 생명주기(재고예약→캡처→출고→재고차감→배송→환불→취소→재고복구→감사로그),
+  포인트·등급·제재차단·동의·정책 이중확인·금칙어. 모두 PASS.
+
+[남은 작업 — 백엔드 신규 구현 필요(프런트 단독 불가)]
+1. 배송 화면 택배사·기간 필터 (택배사는 주문 metadata 기반 필터 설계 필요)
+2. 통계 '기간' 필터 / 리포트 내보내기 (통계 API 파라미터·export 보강)
+3. CSV 내보내기 / 목록 일괄작업
+4. 회원 부분 풀네임 검색("김민") — Medusa first_name 부분일치 미지원으로 보류
+5. 계산·집계 컬럼 정렬(판매가/재고/주문수/누적구매액)
+
+[작업 규칙]
+- Medusa 코어 미수정 원칙(링크/metadata/커스텀 모듈로 확장).
+- 변경 후 반드시 라이브 검증(엔드포인트 호출 + 연계 결과 확인) 및 apps/admin은 pnpm typecheck 통과.
+- 커밋은 의도 단위로 작게, 작성자 김성현 책임(kimsh@CNS.LGCNS.COM). main 직접 push 허용(현 단계).
+- .env류·앱별 pnpm-lock/workspace·.vscode 는 커밋 제외.
+
+[다음에 할 일]
+(여기에 지시: 예) "스토어프론트(apps/web) M1 구매여정 개발을 시작하라" 또는
+ "남은 작업 N번을 구현하라" 등 구체적 작업을 적어 주세요.
+```
+
+---
+
+## 사용법
+1. 위 코드블록을 복사해 AI 어시스턴트에 붙여넣습니다.
+2. 맨 아래 `[다음에 할 일]`에 이어서 시킬 작업을 한 줄 추가합니다.
+3. 프런트 개발은 같은 폴더의 [프런트개발_업무분담_회의자료.md](./프런트개발_업무분담_회의자료.md) 분담안을 함께 참고하세요.
