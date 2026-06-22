@@ -78,9 +78,9 @@ test.describe("QA-001 d2_주문관리 목록 → 상세 진입 플로우", () =>
     // ── 1. 목록 API 응답 대기 Promise 미리 등록 (진입 전 등록해야 타이밍 안전) ──
     const ordersListPromise = page.waitForResponse(
       (r: any) =>
-        r.url().includes("/admin/orders") &&
-        !r.url().includes("/admin/orders/") && // 단일 주문 상세 제외
-        !r.url().includes("/admin/orders-kr") && // 메모 등 한국형 wrap 제외
+        // 주문 목록은 커스텀 검색 엔드포인트로 조회(코어 /admin/orders 는 결제/배송상태
+        // 서버필터 미지원 → /admin/orders-kr/search 로 대체).
+        r.url().includes("/admin/orders-kr/search") &&
         r.status() === 200,
       { timeout: 20000 }
     );
