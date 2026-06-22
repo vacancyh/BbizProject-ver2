@@ -41,12 +41,12 @@
 |---|---|---|---|---|---|---|---|
 | 대시보드(위젯) | 대시보드 메인 | TODO | MATCH | WRAP | 대시보드 | — | dashboard/stats 집계 wrap |
 | (보강) 정산 KPI·경보 | 대시보드 KPI 카드 | TODO | GAP_B | MODULE | 대시보드 | ours-only/dashboard-kpi.md | settlement 모듈 연동 |
-| (보강) 통화 표기(currency_code) | 전 화면 공통 | TODO | GAP_B | — | 대시보드 | — | 하드코딩 금지(시드 EUR 혼재) |
+| (보강) 통화 표기(currency_code) | 전 화면 공통 | DONE | GAP_B | — | 대시보드 | — | 하드코딩 금지. 국내 KRW 기본(한국 region·세금10%·배송·전 상품가 — setup-korea.ts), EUR 보존 |
 
 ### 2) products → 우리 메뉴: **상품 관리**
 | Medusa 기능(화면·액션) | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 도메인 | 문서경로 | 비고 |
 |---|---|---|---|---|---|---|---|
-| products.list | 상품 목록 | DONE | MATCH | REST | 상품 | — | /products 목록(통화 ₩/€ 표기·카테고리·변형수) Playwright 검증 |
+| products.list | 상품 목록 | DONE | MATCH | REST | 상품 | — | /products 목록(통화 표기·변형수)·카테고리 필터(category_id)·최근수정 정렬 Playwright 검증 |
 | products.create | 상품 등록 | DONE | MATCH | REST | 상품 | — | 등록 폼(기본옵션/변형+가격, handle 자동) UI end-to-end 검증(DB) |
 | products.import(CSV) | 상품 일괄 등록 | TODO | MATCH | REST | 상품 | — | 후속 |
 | products.export | 상품 내보내기 | TODO | MATCH | REST | 상품 | — | 후속 |
@@ -65,7 +65,7 @@
 | products.sales-channels | 판매채널 연결 | TODO | MATCH | REST | 상품 | — | |
 | (보강) 상품정보고시·KC·원산지 | 고시 템플릿/검증/버저닝 | DONE | GAP_B | MODULE | 상품 | ours-only/product-classification.md | 분류(상품유형)별 고시 템플릿 + 상품 metadata 연결 + 게시 전 고시 필수항목 검증(실 DB 검증) · KC/버저닝 후속 |
 | (보강) 타임세일 | 기간·재고 제한, 종료 시 원가 복원 | TODO | GAP_B | MODULE | 상품 | ours-only/flash-sale.md | flash-sale module |
-| (보강) 상품통계·홈큐레이션 | 조회수/판매량/위시·인기검색어·베스트 | TODO | GAP_B | MODULE | 상품 | ours-only/curation-analytics.md | curation module |
+| (보강) 상품통계·홈큐레이션 | 조회수/판매량/위시·인기검색어·베스트 | DOING | GAP_B | MODULE | 상품 | ours-only/curation-analytics.md | curation module(테이블 마이그레이션 적용·500 해결, recordSearch 금칙어 확인 반영) |
 | (보강) 재고 동시성 | 원자적 차감·음수방지·배치 충돌 | TODO | GAP_B | MODULE | 상품 | ours-only/inventory-concurrency.md | inventory 래핑+락 |
 
 ### 3) product-variants → **상품 관리**(하위)
@@ -98,7 +98,7 @@
 ### 6) orders → 우리 메뉴: **주문 관리**
 | Medusa 기능(화면·액션) | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 도메인 | 문서경로 | 비고 |
 |---|---|---|---|---|---|---|---|
-| orders.list | 주문 목록 | DONE | MATCH | REST | 주문 | — | /orders 목록(REST, 통화 currency_code 표기) Playwright 검증 |
+| orders.list | 주문 목록 | DONE | MATCH | REST | 주문 | — | /orders 목록(통화 currency_code 표기). 결제/배송상태 탭·검색·정렬(번호/일시/금액)은 커스텀 GET /admin/orders-kr/search Playwright 검증 |
 | orders.export | 주문 내보내기 | TODO | MATCH | REST | 주문 | — | 엑셀 다운로드 버튼 placeholder — 후속 |
 | orders.detail | 주문 상세 | DONE | MATCH | REST | 주문 | — | DetailDrawer(상품/결제/배송/PII마스킹) Playwright 검증 |
 | orders.create-fulfillment | 출고 처리 | DONE | MATCH | REST | 주문 | — | /admin/orders/:id/fulfillments 실행검증(#1/#4 fulfilled) |
@@ -146,7 +146,7 @@
 ### 10) customers → 우리 메뉴: **회원 관리**
 | Medusa 기능(화면·액션) | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 도메인 | 문서경로 | 비고 |
 |---|---|---|---|---|---|---|---|
-| customers.list | 회원 목록 | DONE | MATCH | REST | 회원 | — | /members 회원 탭 — 목록(이메일/전화 PII 마스킹)·검색·가입유형 필터·페이지네이션 Playwright 실DB 검증 |
+| customers.list | 회원 목록 | DONE | MATCH | REST | 회원 | — | /members 회원 탭 — 목록(PII 마스킹)·풀네임(성+이름) 분리검색·탭(정상/휴면/VIP)·가입일/등급 필터·가입일 정렬·페이지네이션 Playwright 실DB 검증 |
 | customers.create | 회원 생성 | DONE | MATCH | REST | 회원 | — | 등록 드로어(이메일 필수+성/이름/전화) end-to-end 검증 |
 | customers.detail(주문이력/주소) | 회원 상세 | DONE | MATCH | REST | 회원 | — | 상세 드로어(기본정보+그룹+주소+주문이력), PII "원문 보기" 토글 |
 | customers.edit | 회원 수정 | DONE | MATCH | REST | 회원 | — | 성/이름/전화/회사명 인라인 편집(company_name DB 검증) |
@@ -305,7 +305,7 @@
 
 | 기능 | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 모듈 | 문서경로 | 비고 |
 |---|---|---|---|---|---|---|---|
-| 관리자 권한(RBAC) — SUPER/OPERATION/CS/MARKETER + 메뉴·기능별 CRUD 2계층 | 권한 관리 | DONE | GAP_B | MODULE | rbac | ours-only/rbac.md | rbac 모듈 + middlewares.ts 권한검사(403 검증) + /permissions 화면 |
+| 관리자 권한(RBAC) — SUPER/OPERATION/CS/MARKETER + 메뉴·기능별 CRUD 2계층 | 권한 관리 | DONE | GAP_B | MODULE | rbac | ours-only/rbac.md | rbac 모듈 + middlewares.ts 권한검사(write 403 + 보안메뉴 read super 전용 + 점검모드 super 필요) + /permissions 화면 |
 | 감사 로그 — 모든 write append-only·5년·PII 마스킹 | 감사 로그 조회 | DONE | GAP_B | MODULE | audit | ours-only/audit-log.md | audit 모듈 + middlewares.ts 기록 + PII 마스킹(검증) + /audit-logs 화면 |
 | 정책 저장소 — system_policies 통합·이중확인·변경이력(SUPER) | 정책 관리 | DONE | GAP_B | MODULE | policy | ours-only/policy-store.md | policy 모듈 + 이중확인(409) + 변경이력 + /policies 화면 |
 
@@ -336,7 +336,7 @@
 
 | 기능 | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 모듈 | 문서경로 | 비고 |
 |---|---|---|---|---|---|---|---|
-| 점검모드(scope) | 점검 모드 | TODO | GAP_B | MODULE | system/ops | ours-only/system-ops.md | |
+| 점검모드(scope) | 점검 모드 | DONE | GAP_B | MODULE | system/ops | ours-only/system-ops.md | /admin/ops/maintenance 토글(super 전용) |
 | 헬스(DB/Redis polling) | 헬스 모니터 | TODO | GAP_B | MODULE | system/ops | ours-only/system-ops.md | |
 | 약관관리 | 약관 | TODO | GAP_B | MODULE | policy | ours-only/policy-store.md | |
 | CS 통합이력 | CS 이력 | TODO | GAP_B | MODULE | system/ops | ours-only/system-ops.md | |

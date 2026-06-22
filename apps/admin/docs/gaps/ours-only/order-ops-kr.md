@@ -22,10 +22,10 @@
 
 ## 5. 우리 화면 설계 (구현됨)
 - 주문 상세 드로어: "관리자 메모(고객 비노출)" textarea + 이력 목록(memo/cancel/system 구분), footer "주문 강제취소"(danger, ConfirmModal 이중확인)·"메모 저장".
-- 목록/상세는 Medusa REST `/admin/orders` 직접 호출. 통화는 currency_code 로 표기(EUR 시드 — 하드코딩 금지).
+- 목록은 결제/배송상태 서버필터를 위해 커스텀 **`GET /admin/orders-kr/search`** 사용(코어 `/admin/orders`는 payment_status·fulfillment_status 서버필터 미지원 → 우회). 결제완료/배송준비/배송중/배송완료 탭 + 번호·일시·금액 정렬 지원. 상세는 `/admin/orders/:id`. 통화는 currency_code 로 표기(기본 KRW, 하드코딩 금지).
 
 ## 6. 구현 결과
-- [x] BE: `modules/order-ops-kr`(model + service + migration) + `medusa-config` 등록 + `src/api/admin/orders-kr/[id]/{memos,cancel}` + 미들웨어 메뉴 매핑(orders)
+- [x] BE: `modules/order-ops-kr`(model + service + migration) + `medusa-config` 등록 + `src/api/admin/orders-kr/[id]/{memos,cancel}` + **`src/api/admin/orders-kr/search`(결제·배송상태 필터·정렬)** + 미들웨어 메뉴 매핑(orders)
 - [x] FE: `app/(admin)/orders/page.tsx` + `lib/api/orders.ts` + `lib/orders/status.ts`
 - [x] 검증: typecheck/build + Playwright 실 DB 렌더(주문 6건 + 상세) + **메모 추가**(order_admin_note) + **강제취소**(order #2 status=canceled, 사유 메모) + 이중확인 409 + 감사로그 2건 + PII 마스킹(UI)
 - [x] FEATURE_MATRIX 갱신

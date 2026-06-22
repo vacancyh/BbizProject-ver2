@@ -13,7 +13,7 @@
 ## 1. RBAC (관리자 권한)
 - **요구**: SUPER / OPERATION / CS / MARKETER 등급 + 메뉴별·기능별 **CRUD 2계층** 권한.
 - **모델(설계)**: `Role`, `Permission(menu, action)`, `RolePermission(role_id, permission_id)`. user↔role = `src/links/user-role.ts`.
-- **미들웨어**: `src/api/middlewares.ts`에서 `/admin/*` write 요청 진입 시 `rbac.checkPermission(userId, menu, action)` 호출 → 거부 시 403.
+- **미들웨어**: `src/api/middlewares.ts`에서 `/admin/*` write 요청 진입 시 `rbac.checkPermission(userId, menu, action)` 호출 → 거부 시 403. **GET(read)도 보안 메뉴(권한·정책·감사로그)는 super 전용으로 검사**. 점검모드(`/admin/ops/maintenance`) 등은 명시적 super 역할 필요.
 - **화면**: 설정 하위 "권한 관리" — 등급별 권한 매트릭스 토글.
 - **연동점**: `users`(Medusa) 계정에 role 부여. 메뉴 정의 = `apps/admin/src/lib/nav/navigation.ts`.
 

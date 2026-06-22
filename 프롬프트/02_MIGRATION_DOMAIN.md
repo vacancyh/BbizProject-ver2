@@ -33,7 +33,7 @@
 - 관리자 앱 apps/admin (Next.js 15 + Tailwind + Recharts + lucide) host **http://localhost:7002** (`cd apps/admin && npm run dev -- -p 7002`). 디자인 기준 = `apps/admin/prototype/`. webpack 캐시 깨지면 dev 종료→`.next` 백업이동→재기동(코드문제 아님).
 - 인증: POST `http://localhost:7001/auth/user/emailpass`→{token}, Authorization: Bearer, 토큰 localStorage `admin_token`, 401→/login. 계정 smoke-admin@local.test / SmokeTest1234.
 - DB: shop-postgres(user=shop, db=shop, pass=shop_local_2026, 127.0.0.1:5434). 직접 조회로 사실 검증.
-- ⚠️ 통화: 데이터에서 읽어라(`currency_code`). 하드코딩 금지(시드 EUR 혼재). `dashboard/stats`의 "krw" 가정도 보정 대상.
+- ⚠️ 통화: 데이터에서 읽어라(`currency_code`), 하드코딩 금지. **현재 store 기본통화 KRW·한국 region(KRW/kr)·KR 세금(10%)·전 상품 KRW 가격 적용됨**(EUR/Europe도 보존). 과거 "EUR 시드 혼재" 전제는 더 이상 유효치 않음. 재현: `backend/services/api/src/scripts/setup-korea.ts`.
 
 ## 입력 (먼저 읽기)
 - `apps/admin/FEATURE_MATRIX.md` — 이번 도메인의 행(화면·액션·갭유형) = 작업 목록.

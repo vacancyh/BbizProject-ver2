@@ -9,7 +9,7 @@
 - **FEATURE_MATRIX 행**: §4 "관리자 권한(RBAC)"
 
 ## 2. 기능 설명
-SUPER / OPERATION / CS / MARKETER 4등급 + 메뉴별·기능별 CRUD 2계층 권한. 운영자가 등급별 메뉴 권한 매트릭스를 토글하고, 관리자 계정에 등급을 부여한다. `/admin/*` write 요청은 미들웨어가 등급 권한을 검사해 거부 시 403.
+SUPER / OPERATION / CS / MARKETER 4등급 + 메뉴별·기능별 CRUD 2계층 권한. 운영자가 등급별 메뉴 권한 매트릭스를 토글하고, 관리자 계정에 등급을 부여한다. `/admin/*` write 요청은 미들웨어가 등급 권한을 검사해 거부 시 403. **읽기(GET)도 보안 메뉴(권한·정책·감사로그)는 super 전용으로 제한**된다(미들웨어 read 검사). 점검모드(`/admin/ops/maintenance`) 등 일부 기능은 **명시적 super 역할**이 필요(역할 미할당 계정은 부여 필요).
 
 ## 3. 필요 데이터
 - `rbac_role`(key/name/description/is_system) · `rbac_role_permission`(role_key/menu_id/can_read|create|update|delete) · `rbac_user_role`(user_id/role_key).
