@@ -18,16 +18,16 @@ export default async function Footer() {
           <div>
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base"
             >
-              Medusa Store
+              쇼핑몰
             </LocalizedClientLink>
           </div>
           <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {productCategories && productCategories?.length > 0 && (
               <div className="flex flex-col gap-y-2">
                 <span className="txt-small-plus txt-ui-fg-base">
-                  Categories
+                  카테고리
                 </span>
                 <ul
                   className="grid grid-cols-1 gap-2"
@@ -85,7 +85,7 @@ export default async function Footer() {
             {collections && collections.length > 0 && (
               <div className="flex flex-col gap-y-2">
                 <span className="txt-small-plus txt-ui-fg-base">
-                  Collections
+                  컬렉션
                 </span>
                 <ul
                   className={clx(
@@ -109,47 +109,28 @@ export default async function Footer() {
               </div>
             )}
             <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Medusa</span>
+              <span className="txt-small-plus txt-ui-fg-base">고객센터</span>
               <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <a
-                    href="https://github.com/medusajs"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    GitHub
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://docs.medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/medusajs/dtc-starter"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Source code
-                  </a>
-                </li>
+                <li>전화 1600-0000</li>
+                <li>평일 10:00–18:00 (점심 12:00–13:00)</li>
+                <li>주말·공휴일 휴무 · help@shop.example</li>
               </ul>
             </div>
           </div>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
+        <div className="flex flex-col gap-y-3 w-full mb-16 text-ui-fg-muted">
+          {/* 전자상거래법 필수 표기 — 운영 전 실제 사업자 정보로 교체 */}
+          <Text className="txt-compact-small leading-relaxed">
+            상호: 쇼핑몰 · 대표: 홍길동 · 사업자등록번호: 000-00-00000 · 통신판매업신고: 2026-서울강남-00000
+            <br />
+            주소: 서울특별시 강남구 테헤란로 000 · 개인정보보호책임자: 홍길동(privacy@shop.example)
           </Text>
-          <MedusaCTA />
+          <div className="flex justify-between items-center">
+            <Text className="txt-compact-small">
+              © {new Date().getFullYear()} 쇼핑몰. All rights reserved.
+            </Text>
+            <MedusaCTA />
+          </div>
         </div>
       </div>
     </footer>
