@@ -2,7 +2,7 @@
 
 - 검증일: 2026-06-01
 - 대상: admin 웹 http://localhost:7002 `/members` (2탭: 회원 / 회원 그룹)
-- 검증 방식: 실제 DB(`shop-postgres`) + 실제 화면(Playwright) + 실제 REST(`http://localhost:7001`)
+- 검증 방식: 실제 DB(`shop-postgres`) + 실제 화면(Playwright) + 실제 REST(`http://localhost:9000`)
 - 검증자 토큰: `smoke-admin@local.test`
 - 종합 판정: **PASS** (결함 0건, WARN 2건)
 

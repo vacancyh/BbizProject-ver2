@@ -2,7 +2,8 @@ Shop 프로젝트 — 초보 개발자 상세 온보딩 (버전 2)
 
 요약
 - 목적: 이 문서는 새로 투입되는 초보 개발자가 빠르게 로컬 개발환경을 구성하고 코드 구조와 개발 흐름을 이해해 바로 기여할 수 있도록 실전 중심으로 정리합니다.
-- 위치: C:\study\shop (로컬 복제 경로)
+- 위치: C:\study\BbizProject-ver2 (로컬 복제 경로)
+- 현행: 국내(한국/KRW) 설정 완료(기본 통화 KRW·리전 kr·부가세 10%·국내 배송·국내 물류창고), 스토어프런트 기본 진입 `/kr`. 보조: `scripts/healthcheck.ps1`, 관리자 `pnpm test:sweep`, CI `.github/workflows/ci.yml`(타입체크·린트). 셋업 상세는 `docs/main_plan/user_plan/bizproject/프런트개발_셋업_가이드.md`.
 
 1. 전체 구조(빠른 개요)
 - apps/
@@ -20,25 +21,24 @@ Shop 프로젝트 — 초보 개발자 상세 온보딩 (버전 2)
 - Git
 - Node.js >= 20 (권장 최신 LTS 이상)
 - pnpm (root에 명시된 버전 권장: pnpm@11.x)
-- PostgreSQL (개발용 DB) 또는 SQLite(간단 테스트용)
-- Redis (옵션 — 캐싱/queue 사용시 필요)
+- Docker Desktop — 로컬 인프라(Postgres :5434 · Redis :6381)를 컨테이너로 구동
+  · 하이브리드 구동: DB/Redis만 Docker, 백엔드/관리자/스토어프런트는 호스트에서 네이티브 실행(사내 TLS 환경 대응)
 
 3. 루트(워크스페이스) 의존성 설치
 1) 루트로 이동
-   cd C:\study\shop
+   cd C:\study\BbizProject-ver2
 2) 워크스페이스 의존성 설치
    pnpm install -w
 (윈도우에서 권한 문제가 생기면 PowerShell을 관리자 권한으로 실행)
 
-4. 환경 변수(.env) 설정 — 권장 키 목록
-- 루트 또는 backend/services/api에 .env 파일 생성 후 아래 키들을 채움
-  - DATABASE_URL=postgres://user:pass@localhost:5432/shopdb
-  - REDIS_URL=redis://localhost:6379
+4. 환경 변수(.env) 설정 — 템플릿 복사 후 채우기
+- 앱별: `apps/admin/.env.example` → `.env.local`, `apps/web/.env.example` → `.env.local`
+- 백엔드: `backend/services/api/.env.template` 참고하여 `backend/services/api/.env` 작성
+  - DATABASE_URL=postgres://shop:<pw>@127.0.0.1:5434/shop
+  - REDIS_URL=redis://127.0.0.1:6381
   - NODE_ENV=development
-  - ADMIN_JWT_SECRET=replace_with_random_string
-  - COOKIE_SECRET=replace_with_random_string
-  - NEXT_PUBLIC_API_URL=http://localhost:9000 (백엔드 주소)
-  - PORT(각 앱별 기본 포트는 package.json 참조)
+  - JWT_SECRET / COOKIE_SECRET=<랜덤 문자열>
+- 스토어프런트(web)는 퍼블리셔블 키(`NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_...`)와 기본 리전(`NEXT_PUBLIC_DEFAULT_REGION=kr`) 필수
 
 주의: 시크릿 값은 절대 커밋 금지(.gitignore 확인).
 
@@ -54,7 +54,7 @@ Shop 프로젝트 — 초보 개발자 상세 온보딩 (버전 2)
 1) 백엔드
    cd backend\services\api
    pnpm dev
-   - 이 스크립트는 medusa develop을 실행합니다. (백엔드: 기본 포트 확인)
+   - 이 스크립트는 medusa develop을 실행합니다. (백엔드: http://localhost:9000)
 2) 스토어프런트 (web)
    cd apps\web
    pnpm dev

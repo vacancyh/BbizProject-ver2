@@ -2,7 +2,7 @@
 
 - 검증일: 2026-06-01
 - 대상: admin 웹 `http://localhost:7002/orders` (페이지 타이틀 "커머스 운영툴 — 쇼핑몰 관리자")
-- backend REST: `http://localhost:7001` / DB: `shop-postgres`(shop)
+- backend REST: `http://localhost:9000` / DB: `shop-postgres`(shop)
 - 검증 방식: 실제 토큰 발급 → localStorage 주입 → Playwright 실화면 + 실 DB(psql) + REST 직접 확인
 - 검증자 계정: smoke-admin@local.test
 

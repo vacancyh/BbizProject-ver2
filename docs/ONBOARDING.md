@@ -1,7 +1,7 @@
 # Shop 프로젝트 — 초보 개발자 온보딩 가이드
 
 목적
-- 본 문서는 C:\study\shop 저장소의 전체 구조, 핵심 기능, 화면(대략), AI 활용 방식, 로컬 개발 환경 설정 및 주요 워크플로우를 초보 개발자 관점에서 정리합니다.
+- 본 문서는 C:\study\BbizProject-ver2 저장소의 전체 구조, 핵심 기능, 화면(대략), AI 활용 방식, 로컬 개발 환경 설정 및 주요 워크플로우를 초보 개발자 관점에서 정리합니다.
 
 대상
 - 이 저장소에 처음 참여하는 개발자(프론트/백엔드/풀스택 초심자)
@@ -10,18 +10,24 @@
 - apps/               : 배포 가능한 앱들
   - web              : Next.js 스토어프런트 (포트 8000)
   - admin            : 관리자 앱(Next.js, 포트 7002)
-- backend/            : Medusa 기반 백엔드 서비스 (backend/services/api)
+- backend/            : Medusa 기반 백엔드 서비스 (backend/services/api, 포트 9000)
 - modules/            : 도메인별 모듈(상품, 주문, 결제 등)
 - packages/           : 재사용 가능한 패키지 (UI 컴포넌트 등)
 - infra/              : 배포/인프라 관련 코드 (CD/DB 스크립트 등)
 - ai/                 : AI 관련 프롬프트, 정책, 평가 스크립트
 - docs/               : 프로젝트 문서(여기에 온보딩 파일 포함)
 
+현행 로컬 환경(중요)
+- 하이브리드 구동: Docker(Postgres :5434 · Redis :6381) + 호스트 네이티브 실행(백엔드 :9000 · 관리자 :7002 · 스토어프런트 :8000).
+- 국내(한국/KRW) 설정 완료: 기본 통화 KRW, 리전 한국(kr), 부가세 10%, 국내 배송옵션, 국내 물류창고. 스토어프런트 기본 진입 `/kr`.
+- 보조 도구: `scripts/healthcheck.ps1`(전 서비스/포트 상태 점검), 관리자 `pnpm test:sweep`(전 화면 헬스 스윕). CI: `.github/workflows/ci.yml`(타입체크·린트 게이트).
+- 셋업 상세: `docs/main_plan/user_plan/bizproject/프런트개발_셋업_가이드.md` 참고.
+
 핵심 기술 스택
 - 백엔드: Medusa (Node/TypeScript)
 - 프론트: Next.js (React) — apps/web (스토어프런트), apps/admin (관리자)
 - 패키지 매니저: pnpm (packageManager: pnpm@11.3.0 표기)
-- DB: Postgres 권장(또는 Medusa Quickstart에서 지원하는 DB)
+- DB/캐시: Postgres(:5434) · Redis(:6381) — 로컬은 Docker 컨테이너로 구동
 - 테스트: jest, vitest, Playwright 등 일부 패키지에서 사용
 - 기타: TailwindCSS, Vite(개발용 일부 패키지)
 
@@ -29,34 +35,36 @@
 1) 필수 설치
    - Node.js >= 20
    - pnpm (권장 버전: 11.x)
-   - PostgreSQL (또는 로컬에서 지원되는 DB)
+   - Docker Desktop (Postgres :5434 · Redis :6381 컨테이너 구동용)
    - Git
 
 2) 코드 가져오기 (이미 복제됨)
-   cd C:\study\shop
+   cd C:\study\BbizProject-ver2
 
 3) 의존성 설치 (워크스페이스 설치)
    pnpm install -w
 
 4) 환경 설정
-   - 루트에 있는 `.env.example`을 복사하여 `.env`로 생성
-     copy .env.example .env
-   - DB 접속 정보, Redis(사용 시), JWT 시크릿 등 변수 채우기
+   - 앱별 템플릿을 복사하여 사용:
+     copy apps\admin\.env.example apps\admin\.env.local
+     copy apps\web\.env.example apps\web\.env.local
+     (백엔드는 backend\services\api\.env.template 참고하여 .env 작성)
+   - DB 접속 정보, Redis, JWT 시크릿, 퍼블리셔블 키(pk_...) 등 변수 채우기
    - 백엔드(메두사) 문서(backend/services/api/README.md)를 참고하여 DB 마이그레이션/시드 수행
 
 5) 서비스 실행(개별적으로)
    - 백엔드 (개발)
-     cd C:\study\shop\backend\services\api
+     cd C:\study\BbizProject-ver2\backend\services\api
      pnpm dev
      (또는 `medusa develop` 스크립트가 실행됨)
 
    - 스토어프런트
-     cd C:\study\shop\apps\web
+     cd C:\study\BbizProject-ver2\apps\web
      pnpm dev
      (기본 포트: 8000)
 
    - 관리자 앱
-     cd C:\study\shop\apps\admin
+     cd C:\study\BbizProject-ver2\apps\admin
      pnpm dev
      (기본 포트: 7002)
 

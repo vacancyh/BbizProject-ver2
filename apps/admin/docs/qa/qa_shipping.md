@@ -1,6 +1,6 @@
 # QA — 배송 관리 도메인 (`/shipping`)
 
-> 검증: 2026-06-01 · 실제 admin(:7002) + 실제 backend(:7001) + 실 DB(shop-postgres). 날조 없음.
+> 검증: 2026-06-01 · 실제 admin(:7002) + 실제 backend(:9000) + 실 DB(shop-postgres). 날조 없음.
 > 검증자: main(직접) · Playwright MCP + REST + psql 교차.
 > 갭유형: GAP_A(출고지·서비스구역·배송옵션 = Medusa REST 래핑) + GAP_B(국내 택배사 = store.metadata, 택배사 API mock).
 

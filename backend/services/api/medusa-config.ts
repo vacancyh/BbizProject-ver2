@@ -23,7 +23,7 @@ module.exports = defineConfig({
       httpOnly: true,
     },
   },
-  // Medusa 기본 관리자 화면(/app) 비활성화 — 자체 관리자 앱(apps/admin, :7001)으로 대체.
+  // Medusa 기본 관리자 화면(/app) 비활성화 — 자체 관리자 앱(apps/admin, :7002)으로 대체.
   // 화면(UI)만 끄고 /admin REST API 는 그대로 살아있어 새 앱이 데이터를 받습니다.
   // (납품 시에도 고객은 자체 관리자만 사용)
   admin: {

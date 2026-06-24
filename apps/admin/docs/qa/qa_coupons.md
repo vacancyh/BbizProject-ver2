@@ -1,7 +1,7 @@
 # QA 리포트 — 쿠폰·프로모션 도메인 (/coupons)
 
 - 검증 일시: 2026-06-01
-- 검증 방식: 실제 admin 웹(http://localhost:7002) + 실제 backend REST(http://localhost:7001) + 실제 DB(shop-postgres) 라이브 검증
+- 검증 방식: 실제 admin 웹(http://localhost:7002) + 실제 backend REST(http://localhost:9000) + 실제 DB(shop-postgres) 라이브 검증
 - 검증자 계정: smoke-admin@local.test
 - 종합 판정: **PASS** (결함 0건, WARN 2건 — 환경 데이터/툴링 이슈)
 

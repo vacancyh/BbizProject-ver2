@@ -1,7 +1,7 @@
 # 상품 관리 도메인 QA 리포트
 
 - 대상: shop 어드민 리플랫폼 — 상품 관리(`/products`) + 상품 분류 체계(`/product-types`, GAP_B)
-- 환경: admin `http://localhost:7002` · backend REST `http://localhost:7001` · DB `shop-postgres`
+- 환경: admin `http://localhost:7002` · backend REST `http://localhost:9000` · DB `shop-postgres`
 - 검증일: 2026-06-01
 - 검증 방식: 실제 화면(Playwright) 렌더 확인 + 실제 REST 엔드포인트(UI 호출과 동일) write + 실 DB(`product`/`price`/`image`/`product_type_template`) + `audit_log` 검증. 날조 없음.
 - 인증: smoke-admin@local.test 토큰 발급 후 localStorage `admin_token` 주입(actor_id=`user_01KSY583G55V3SJYNEVNZ648EZ`)

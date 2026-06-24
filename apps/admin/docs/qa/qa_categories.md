@@ -2,7 +2,7 @@
 
 - 검증 일시: 2026-06-01
 - 검증 범위: `/categories` (3탭: 진열 카테고리 / 컬렉션·기획전 / 상품 태그) + `/product-types` (상품 분류 체계)
-- 검증 방식: 실제 화면(Playwright) + 실제 백엔드 REST(`http://localhost:7001`) + 실제 DB(`shop-postgres`) 교차 검증
+- 검증 방식: 실제 화면(Playwright) + 실제 백엔드 REST(`http://localhost:9000`) + 실제 DB(`shop-postgres`) 교차 검증
 - 종합 판정: **PASS (조건부)** — 핵심 조회/상세/쓰기 경로 정상. 결함 0건, 관찰사항(WARN) 2건.
 
 ---
