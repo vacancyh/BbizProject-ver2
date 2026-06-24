@@ -83,6 +83,13 @@ for (const r of ROUTES) {
       .catch(() => 0)
     const bodyText = ((await page.locator("body").innerText().catch(() => "")) || "").trim()
 
+    // 데이터 비어있음 신호 (위와 같은 '데이터 없음' 화면 탐지용)
+    const tableRows = await page.locator("tbody tr").count().catch(() => 0)
+    const emptyState = await page
+      .getByText(/없습니다|데이터가 없|등록된[^\n]{0,12}없|결과가 없|항목이 없/)
+      .count()
+      .catch(() => 0)
+
     await page.screenshot({
       path: path.join(SHOT_DIR, `${r.path.replace(/\//g, "_").replace(/^_/, "")}.png`),
       fullPage: true,
@@ -96,7 +103,8 @@ for (const r of ROUTES) {
     console.log(
       [
         `\n▶ ${r.label} ${r.path} → HTTP ${status} | final ${finalUrl.replace("http://localhost:7002", "")}`,
-        `   bodyLen=${bodyText.length} overlay=${overlay} pageErr=${pageErrors.length} consoleErr=${consoleErrors.length} bad=${badResponses.length}`,
+        `   bodyLen=${bodyText.length} rows=${tableRows} emptyState=${emptyState} overlay=${overlay} pageErr=${pageErrors.length} consoleErr=${consoleErrors.length} bad=${badResponses.length}`,
+        tableRows === 0 && emptyState > 0 ? `   📭 데이터 없음(빈 화면) — 시드 검토 필요` : "",
         pageErrors.length ? `   ⛔ pageError: ${pageErrors.slice(0, 3).join(" | ")}` : "",
         server5xx.length ? `   ⛔ 5xx: ${server5xx.slice(0, 5).join(" ; ")}` : "",
         forbidden.length ? `   ⚠ 403: ${forbidden.slice(0, 5).join(" ; ")}` : "",
