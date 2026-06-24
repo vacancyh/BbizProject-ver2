@@ -104,10 +104,11 @@ function gradeBadgeClass(grade: string): string {
   return "badge neutral";
 }
 
-function statusBadge(active: boolean) {
-  return active
-    ? { label: "정상", cls: "badge success" }
-    : { label: "비활성", cls: "badge neutral" };
+/** has_account: true=가입 회원 / false=비회원(게스트 주문). '비활성'이 아니라 '비회원'이 정확. */
+function statusBadge(hasAccount: boolean) {
+  return hasAccount
+    ? { label: "정상회원", cls: "badge success" }
+    : { label: "비회원", cls: "badge neutral" };
 }
 
 /** d5 조작 실패 토스트 메시지(401 분기). */
@@ -924,7 +925,7 @@ function MemberDrawerBody({
               </span>
             </div>
             <div className="muted" style={{ fontSize: "13px" }}>
-              {maskEmail(detail.email)} · {statusBadge(detail.has_account).label} 회원
+              {maskEmail(detail.email)} · {statusBadge(detail.has_account).label}
             </div>
           </div>
         </div>
