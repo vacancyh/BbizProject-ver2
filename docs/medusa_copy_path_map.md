@@ -46,8 +46,10 @@ medusa_backup/apps/backend/            ← pnpm 워크스페이스 루트 (name:
 → **A**가 "한두 군데만 수정" 가설에 부합. B는 워크스페이스 해체라 실제 작업량 큼.
 
 ## 5. 3단계 수정 체크리스트 (옵션 A 기준)
+
+> (갱신 2026-06-24) 아래 docker compose 경로는 **사내 TLS 검사로 컨테이너 빌드가 막혀 현재 미사용**입니다. 현행 로컬은 하이브리드: DB/Redis만 Docker(5434/6381), 백엔드(:9000)·관리자(:7002)·스토어프론트(:8000)는 호스트 네이티브 실행. 아래 내용은 향후 컨테이너 배포 시 참고용으로 보존합니다.
 1. 새 compose 위치 결정(예: shop 루트 `docker-compose.yml`).
 2. `shop-backend`: `context: ./backend/services/api`, `volume: ./backend/services/api:/app` 로 변경.
 3. `shop-storefront`: 동일하게 `./backend/services/api`로 변경.
 4. (dockerfile/command/scripts 경로는 무수정).
-5. `docker compose -p shop up -d` → `/health` 200 + 로그인 + 실DB + 디자인 :7001 재확인(4단계).
+5. `docker compose -p shop up -d` → `/health` 200 + 로그인 + 실DB + 디자인 재확인(4단계). (컨테이너 배포 시 host 포트는 환경에 맞게; 현행 네이티브는 백엔드 :9000)

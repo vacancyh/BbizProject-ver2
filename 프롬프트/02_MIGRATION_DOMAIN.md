@@ -7,7 +7,8 @@
 ## ⚠️ 구조 변경 (2026-06-01 반영 — 작업 전 반드시 인지)
 - **모노레포(pnpm+turbo) → standalone 복사 이식 완료.** Medusa 백엔드는 더 이상 외부/별도 서비스가 아니라 **우리 레포 안의 백엔드**다(소유·수정 가능, 단 커머스 로직은 호출/래핑만).
 - **경로**: Medusa 앱 루트 = `backend/services/api/`(medusa-config.ts·src/api·src/modules) · 손님 storefront = `apps/web/` · **우리 관리자(구현 대상) = `apps/admin/`** · 디자인 사양(읽기전용) = `apps/admin/prototype/`.
-- **host 포트(순차)**: **7001 백엔드** / **7002 관리자(apps/admin)** / **7003 손님(apps/web)**. 컨테이너 내부 포트는 9000(백)/8000(스토어) 유지 — 컨테이너 간 통신은 `shop-backend:9000` 그대로.
+- **host 포트**: **9000 백엔드** / **7002 관리자(apps/admin)** / **8000 손님(apps/web)**.
+  · (갱신 2026-06-24) 과거 Docker 호스트 매핑(7001/7003→컨테이너 9000/8000) 전제였으나, **사내 TLS 검사로 컨테이너 빌드 불가** → 하이브리드 전환(DB/Redis만 Docker:5434/6381, 앱은 호스트 네이티브). 백엔드 host **:9000** 직접 호출.
 - 백엔드 = 화면 없는 순수 API 서버(Node/Express 기반 Medusa) + DB 직접 연동. Medusa 기본 admin(Vite/React)은 `admin.disable:true`로 **비활성 유지**.
 
 ## 역할
@@ -27,11 +28,11 @@
 - 같은 에러 2회 시 중단·분석 보고.
 
 ## 런타임 (사실)
-- 백엔드 Medusa v2.15.3 헤드리스 — host **http://localhost:7001** (컨테이너 shop-backend, 내부 포트 9000, NODE_ENV=production). Medusa 앱 루트 = `backend/services/api/`(medusa-config.ts·src/api·src/modules).
-  · 로컬 빌드: `cd backend/services/api && npx medusa build`.
-  · 컨테이너 반영: `docker exec shop-backend sh -c "cd /app/backend/services/api && npx medusa build" && docker restart shop-backend` → `http://localhost:7001/health` 200 확인.
+- 백엔드 Medusa v2.15.3 헤드리스 — host **http://localhost:9000** (호스트 네이티브 실행). Medusa 앱 루트 = `backend/services/api/`(medusa-config.ts·src/api·src/modules).
+  · (갱신 2026-06-24) 과거엔 Docker 컨테이너(shop-backend, host 7001→내부 9000)였으나 **사내 TLS로 컨테이너 빌드 불가** → 네이티브 전환. 인프라(Postgres:5434/Redis:6381)만 Docker로 기동.
+  · 로컬 실행: `cd backend/services/api && npx medusa develop` → `http://localhost:9000/health` 200 확인.
 - 관리자 앱 apps/admin (Next.js 15 + Tailwind + Recharts + lucide) host **http://localhost:7002** (`cd apps/admin && npm run dev -- -p 7002`). 디자인 기준 = `apps/admin/prototype/`. webpack 캐시 깨지면 dev 종료→`.next` 백업이동→재기동(코드문제 아님).
-- 인증: POST `http://localhost:7001/auth/user/emailpass`→{token}, Authorization: Bearer, 토큰 localStorage `admin_token`, 401→/login. 계정 smoke-admin@local.test / SmokeTest1234.
+- 인증: POST `http://localhost:9000/auth/user/emailpass`→{token}, Authorization: Bearer, 토큰 localStorage `admin_token`, 401→/login. 계정 smoke-admin@local.test / SmokeTest1234.
 - DB: shop-postgres(user=shop, db=shop, pass=shop_local_2026, 127.0.0.1:5434). 직접 조회로 사실 검증.
 - ⚠️ 통화: 데이터에서 읽어라(`currency_code`), 하드코딩 금지. **현재 store 기본통화 KRW·한국 region(KRW/kr)·KR 세금(10%)·전 상품 KRW 가격 적용됨**(EUR/Europe도 보존). 과거 "EUR 시드 혼재" 전제는 더 이상 유효치 않음. 재현: `backend/services/api/src/scripts/setup-korea.ts`.
 

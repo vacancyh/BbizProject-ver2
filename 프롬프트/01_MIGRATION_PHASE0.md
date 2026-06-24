@@ -6,7 +6,8 @@
 ## ⚠️ 구조 변경 (2026-06-01 반영 — 작업 전 반드시 인지)
 - **모노레포(pnpm+turbo) → standalone 복사 이식 완료.** Medusa 백엔드는 외부/별도 서비스가 아니라 **우리 레포 안의 백엔드**다(소유·수정 가능, 단 커머스 로직은 호출/래핑만, 복사·포크 금지).
 - **경로**: Medusa 앱 루트 = `backend/services/api/`(medusa-config.ts·src/api·src/modules) · 손님 storefront = `apps/web/` · **우리 관리자(구현 대상) = `apps/admin/`** · 디자인 사양(읽기전용) = `apps/admin/prototype/`.
-- **host 포트(순차)**: **7001 백엔드** / **7002 관리자(apps/admin)** / **7003 손님(apps/web)**. 컨테이너 내부 포트는 9000(백)/8000(스토어) 유지.
+- **host 포트**: **9000 백엔드** / **7002 관리자(apps/admin)** / **8000 손님(apps/web)**.
+  · (갱신 2026-06-24) 과거 Docker 호스트 매핑(7001→컨테이너 9000, 7003→8000) 전제였으나, **사내 TLS 검사로 컨테이너 빌드가 막혀** 하이브리드로 전환했습니다: DB/Redis만 Docker(5434/6381), 앱 3종은 호스트에서 네이티브 실행. 따라서 백엔드는 host에서 직접 **:9000**, 스토어프론트 **:8000**.
 - 백엔드 = 화면 없는 순수 API 서버(Node/Express 기반 Medusa) + DB 직접 연동. Medusa 기본 admin(Vite/React)은 `admin.disable:true` **비활성 유지**.
 
 ## 역할
