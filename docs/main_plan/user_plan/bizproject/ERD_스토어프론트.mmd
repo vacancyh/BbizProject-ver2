@@ -1,0 +1,221 @@
+%% 스토어프론트 데이터 모형도 (Mermaid ERD) — 전 엔티티 컬럼 포함 (컬럼ID 옆 한글명 병기)
+%% 렌더: GitHub/VS Code 자동 · 이미지: npx @mermaid-js/mermaid-cli -i ERD_스토어프론트.mmd -o ERD_스토어프론트.svg -c mmdc.config.json
+%% 🟢 표준 Medusa(/store 직접연동) · 🔴 커스텀 KR 모듈(프런트 mock). 링크는 FK 아닌 text id 느슨연결.
+erDiagram
+  PRODUCT ||--o{ PRODUCT_VARIANT : has
+  PRODUCT ||--o{ PRODUCT_IMAGE : has
+  PRODUCT ||--o{ PRODUCT_OPTION : has
+  PRODUCT }o--o{ PRODUCT_CATEGORY : in
+  PRODUCT }o--o{ PRODUCT_TAG : tag
+  PRODUCT_COLLECTION ||--o{ PRODUCT : groups
+  PRODUCT_TYPE ||--o{ PRODUCT : types
+  PRODUCT_OPTION ||--o{ PRODUCT_OPTION_VALUE : has
+  PRODUCT_VARIANT ||--o{ PRICE : priced
+  PRODUCT_VARIANT ||--|| INVENTORY_ITEM : tracks
+  INVENTORY_ITEM ||--o{ INVENTORY_LEVEL : stocked
+  STOCK_LOCATION ||--o{ INVENTORY_LEVEL : at
+  REGION ||--o{ PRICE : currency
+  SALES_CHANNEL }o--o{ PRODUCT : sells
+  CART ||--o{ LINE_ITEM : contains
+  CART }o--|| REGION : in
+  CART ||--o{ SHIPPING_METHOD : ships
+  CART ||--o| PAYMENT_COLLECTION : pays
+  LINE_ITEM }o--|| PRODUCT_VARIANT : of
+  SHIPPING_OPTION ||--o{ SHIPPING_METHOD : chosen
+  CUSTOMER ||--o{ CUSTOMER_ADDRESS : has
+  CUSTOMER }o--o{ CUSTOMER_GROUP : member
+  CUSTOMER ||--o{ ORDER : places
+  ORDER ||--o{ ORDER_LINE_ITEM : contains
+  CUSTOMER ||--o{ REVIEW : writes
+  PRODUCT ||--o{ REVIEW : about
+  CUSTOMER ||--o{ POINT_LEDGER : earns
+  CUSTOMER ||--|| MEMBERSHIP : tier
+  CUSTOMER ||--o{ CONSENT_LOG : agrees
+  CUSTOMER ||--o{ WISHLIST : saves
+
+  PRODUCT {
+    string id PK "상품ID"
+    string title "상품명"
+    string handle "URL슬러그"
+    string thumbnail "대표이미지"
+    string status "상태(노출/초안)"
+    string collection_id FK "컬렉션ID"
+    string type_id FK "상품유형ID"
+  }
+  PRODUCT_VARIANT {
+    string id PK "변형ID"
+    string product_id FK "상품ID"
+    string title "변형명(옵션조합)"
+    string sku "재고관리코드SKU"
+    bool manage_inventory "재고관리여부"
+    object calculated_price "계산된가격"
+    number inventory_quantity "가용재고수량"
+  }
+  PRODUCT_OPTION {
+    string id PK "옵션ID"
+    string product_id FK "상품ID"
+    string title "옵션명(색상/사이즈)"
+  }
+  PRODUCT_OPTION_VALUE {
+    string id PK "옵션값ID"
+    string option_id FK "옵션ID"
+    string value "옵션값(빨강/L)"
+  }
+  PRICE {
+    string id PK "가격ID"
+    number amount "금액(KRW=원단위)"
+    string currency_code "통화코드"
+  }
+  PRODUCT_IMAGE {
+    string id PK "이미지ID"
+    string product_id FK "상품ID"
+    string url "이미지주소"
+    number rank "정렬순서"
+  }
+  PRODUCT_CATEGORY {
+    string id PK "카테고리ID"
+    string name "카테고리명"
+    string handle "URL슬러그"
+    string parent_category_id FK "상위카테고리ID"
+  }
+  PRODUCT_COLLECTION {
+    string id PK "컬렉션ID"
+    string title "컬렉션명"
+    string handle "URL슬러그"
+  }
+  PRODUCT_TYPE {
+    string id PK "상품유형ID"
+    string value "유형명"
+  }
+  PRODUCT_TAG {
+    string id PK "태그ID"
+    string value "태그명"
+  }
+  INVENTORY_ITEM {
+    string id PK "재고품목ID"
+    string sku "재고관리코드SKU"
+  }
+  INVENTORY_LEVEL {
+    string id PK "재고수준ID"
+    string inventory_item_id FK "재고품목ID"
+    string location_id FK "창고ID"
+    number stocked_quantity "보유수량"
+    number reserved_quantity "예약수량"
+  }
+  STOCK_LOCATION {
+    string id PK "창고ID"
+    string name "창고명"
+    object address "창고주소"
+  }
+  REGION {
+    string id PK "지역ID"
+    string name "지역명"
+    string currency_code "통화코드"
+  }
+  SALES_CHANNEL {
+    string id PK "판매채널ID"
+    string name "채널명"
+  }
+  CART {
+    string id PK "장바구니ID"
+    string region_id FK "지역ID"
+    string customer_id FK "고객ID"
+    string email "이메일"
+    string currency_code "통화코드"
+    number total "합계금액"
+  }
+  LINE_ITEM {
+    string id PK "품목ID"
+    string cart_id FK "장바구니ID"
+    string variant_id FK "변형ID"
+    string title "상품명"
+    number quantity "수량"
+    number unit_price "단가"
+  }
+  SHIPPING_OPTION {
+    string id PK "배송옵션ID"
+    string name "배송방법명"
+    string price_type "요금유형(고정/계산)"
+    number amount "배송비"
+  }
+  SHIPPING_METHOD {
+    string id PK "배송수단ID"
+    string cart_id FK "장바구니ID"
+    string shipping_option_id FK "배송옵션ID"
+    number amount "배송비"
+  }
+  PAYMENT_COLLECTION {
+    string id PK "결제집합ID"
+    string cart_id FK "장바구니ID"
+    string status "결제상태"
+    number amount "결제금액"
+  }
+  ORDER {
+    string id PK "주문ID"
+    number display_id "주문번호"
+    string customer_id FK "고객ID"
+    string status "주문상태"
+    string payment_status "결제상태"
+    string fulfillment_status "배송상태"
+    number total "주문합계"
+  }
+  ORDER_LINE_ITEM {
+    string id PK "주문품목ID"
+    string order_id FK "주문ID"
+    string variant_id FK "변형ID"
+    number quantity "수량"
+    number unit_price "단가"
+  }
+  CUSTOMER {
+    string id PK "고객ID"
+    string email "이메일"
+    string first_name "이름"
+    string last_name "성"
+    string phone "전화번호"
+    bool has_account "회원여부"
+  }
+  CUSTOMER_ADDRESS {
+    string id PK "주소ID"
+    string customer_id FK "고객ID"
+    string address_1 "기본주소"
+    string city "도시"
+    string postal_code "우편번호"
+  }
+  CUSTOMER_GROUP {
+    string id PK "고객그룹ID"
+    string name "그룹명"
+  }
+  REVIEW {
+    string id PK "리뷰ID"
+    string type "유형(review/inquiry)"
+    string product_id FK "상품ID(null=1:1문의)"
+    string customer_id FK "고객ID"
+    number rating "별점"
+    string content "내용"
+    string status "상태"
+  }
+  POINT_LEDGER {
+    string id PK "포인트내역ID"
+    string customer_id FK "고객ID"
+    string entry_type "구분(적립/사용/소멸)"
+    number amount "포인트"
+    string expires_at "만료일"
+  }
+  MEMBERSHIP {
+    string id PK "멤버십ID"
+    string customer_id FK "고객ID"
+    number accrued_amount "누적구매액"
+    string current_tier "현재등급(일반/실버/골드/VIP)"
+  }
+  CONSENT_LOG {
+    string id PK "동의이력ID"
+    string customer_id FK "고객ID"
+    string channel "채널(마케팅/SMS/이메일)"
+    bool agreed "동의여부"
+    string recorded_at "기록일시"
+  }
+  WISHLIST {
+    string id PK "위시리스트ID"
+    string customer_id FK "고객ID"
+    string product_id FK "상품ID"
+  }
