@@ -11,7 +11,7 @@
  */
 import { test, expect } from "@playwright/test"
 
-const API = "http://127.0.0.1:7001"
+const API = process.env.MEDUSA_API ?? "http://127.0.0.1:9000"
 
 // 표준 등급 정책(테스트 기준값 — DEFAULT_TIERS 와 동일하게 매 실행 세팅하여 재실행 안전)
 const STD_TIERS = [

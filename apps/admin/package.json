@@ -10,7 +10,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:junit": "vitest run --reporter=junit --outputFile=test-results/t001_store.junit.xml"
+    "test:junit": "vitest run --reporter=junit --outputFile=test-results/t001_store.junit.xml",
+    "test:sweep": "playwright test --config playwright.sweep.config.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "clsx": "^2.1.1",

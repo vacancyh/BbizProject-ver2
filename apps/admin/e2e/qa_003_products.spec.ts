@@ -18,7 +18,7 @@
  */
 import { test, expect } from "@playwright/test";
 
-const API = "http://127.0.0.1:7001";
+const API = process.env.MEDUSA_API ?? "http://127.0.0.1:9000";
 
 /** Bearer 토큰 획득 헬퍼 */
 async function getAdminToken(request: any): Promise<string> {

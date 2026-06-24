@@ -1,0 +1,37 @@
+name: CI
+
+# PR/푸시 시 정적 검증 게이트 (타입체크·린트).
+# E2E(브라우저)·백엔드 통합은 실행 인프라가 필요하므로 별도(로컬 npm run test:sweep 등)로 운영.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (admin)
+        run: pnpm --filter @shop/admin typecheck
+
+      - name: Lint (admin)
+        run: pnpm --filter @shop/admin lint
+
+      - name: Typecheck (storefront)
+        working-directory: apps/web
+        run: npx tsc --noEmit

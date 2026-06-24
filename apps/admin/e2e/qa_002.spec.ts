@@ -45,7 +45,7 @@ async function waitForLoad(page: any, ms = 8000) {
 
 /** Bearer 토큰 획득 헬퍼 */
 async function getAdminToken(request: any): Promise<string> {
-  const res = await request.post("http://127.0.0.1:7001/auth/user/emailpass", {
+  const res = await request.post("http://127.0.0.1:9000/auth/user/emailpass", {
     data: { email: "admin@local.test", password: "djemalsdlqslek12!@" },
   });
   expect(res.status()).toBe(200); // 토큰 획득 실패 시 전체 중단
@@ -236,7 +236,7 @@ test.describe("QA-002 d2_주문관리 배송처리 → 배송중 전이", () => 
 
     // ── 1. 현재 주문 상태 + fulfillment 목록 사전 조회 ─────────────────────────
     const detailRes = await request.get(
-      `http://127.0.0.1:7001/admin/orders/${orderId}?fields=id,fulfillment_status,fulfillments.id,fulfillments.shipped_at,fulfillments.delivered_at`,
+      `http://127.0.0.1:9000/admin/orders/${orderId}?fields=id,fulfillment_status,fulfillments.id,fulfillments.shipped_at,fulfillments.delivered_at`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     expect(detailRes.status()).toBe(200); // ★ 상세 조회 200 단언
@@ -253,7 +253,7 @@ test.describe("QA-002 d2_주문관리 배송처리 → 배송중 전이", () => 
     // ── 2. fulfillment 생성 시도 ──────────────────────────────────────────────
     // 이미 shipped/active order change 등이면 400 — 실왕복 단언 충족
     const fulRes = await request.post(
-      `http://127.0.0.1:7001/admin/orders/${orderId}/fulfillments`,
+      `http://127.0.0.1:9000/admin/orders/${orderId}/fulfillments`,
       {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         data: { items: [{ id: itemId, quantity: 1 }] },
@@ -280,7 +280,7 @@ test.describe("QA-002 d2_주문관리 배송처리 → 배송중 전이", () => 
       // 응답에 fulfillments 없으면 재조회
       if (!fulfillmentId) {
         const recheckFul = await request.get(
-          `http://127.0.0.1:7001/admin/orders/${orderId}?fields=id,fulfillments.id`,
+          `http://127.0.0.1:9000/admin/orders/${orderId}?fields=id,fulfillments.id`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         expect(recheckFul.status()).toBe(200);
@@ -298,7 +298,7 @@ test.describe("QA-002 d2_주문관리 배송처리 → 배송중 전이", () => 
 
     // ── 4. shipment 생성 (송장 등록) ─────────────────────────────────────────
     const shipRes = await request.post(
-      `http://127.0.0.1:7001/admin/orders/${orderId}/fulfillments/${fulfillmentId}/shipments`,
+      `http://127.0.0.1:9000/admin/orders/${orderId}/fulfillments/${fulfillmentId}/shipments`,
       {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         data: {
@@ -315,7 +315,7 @@ test.describe("QA-002 d2_주문관리 배송처리 → 배송중 전이", () => 
 
     // ── 5. fulfillment_status 재조회 단언 ─────────────────────────────────────
     const recheckRes = await request.get(
-      `http://127.0.0.1:7001/admin/orders/${orderId}?fields=id,fulfillment_status,fulfillments.id,fulfillments.shipped_at`,
+      `http://127.0.0.1:9000/admin/orders/${orderId}?fields=id,fulfillment_status,fulfillments.id,fulfillments.shipped_at`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     expect(recheckRes.status()).toBe(200); // ★ 재조회 200 단언
@@ -351,7 +351,7 @@ test.describe("QA-003 d2_주문관리 반품 → 검수 → 환불 플로우", (
     const orderItemId = "ordli_01KSJAR1GAFQFT6QMCRKBHXKAE";
 
     // ── 1. POST /admin/returns (반품 생성) ────────────────────────────────────
-    const createRes = await request.post("http://127.0.0.1:7001/admin/returns", {
+    const createRes = await request.post("http://127.0.0.1:9000/admin/returns", {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: { order_id: orderId },
     });
@@ -380,7 +380,7 @@ test.describe("QA-003 d2_주문관리 반품 → 검수 → 환불 플로우", (
 
     // ── 2. POST /admin/returns/:id/request-items ─────────────────────────────
     const itemsRes = await request.post(
-      `http://127.0.0.1:7001/admin/returns/${returnId}/request-items`,
+      `http://127.0.0.1:9000/admin/returns/${returnId}/request-items`,
       {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         data: { items: [{ id: orderItemId, quantity: 1 }] },
@@ -394,7 +394,7 @@ test.describe("QA-003 d2_주문관리 반품 → 검수 → 환불 플로우", (
 
     // ── 3. POST /admin/returns/:id/request ───────────────────────────────────
     const requestRes = await request.post(
-      `http://127.0.0.1:7001/admin/returns/${returnId}/request`,
+      `http://127.0.0.1:9000/admin/returns/${returnId}/request`,
       {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         data: {},
@@ -442,7 +442,7 @@ test.describe("QA-004 d2_주문관리 교환 → 회수 → 발송", () => {
     const orderId = "order_01KSJB8BRF9VEPA9PQAZH4YTYH";
 
     // ── POST /admin/exchanges (Medusa 코어) ──────────────────────────────────
-    const exchRes = await request.post("http://127.0.0.1:7001/admin/exchanges", {
+    const exchRes = await request.post("http://127.0.0.1:9000/admin/exchanges", {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: { order_id: orderId },
     });
@@ -495,7 +495,7 @@ test.describe("QA-005 d2_주문관리 클레임 → 보상 → 환불", () => {
     const orderId = "order_01KSJAR1GAB18F836601PSM53M";
 
     // ── POST /admin/claims (Medusa 코어) ─────────────────────────────────────
-    const claimRes = await request.post("http://127.0.0.1:7001/admin/claims", {
+    const claimRes = await request.post("http://127.0.0.1:9000/admin/claims", {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {
         order_id: orderId,
@@ -561,7 +561,7 @@ test.describe("QA-006 d2_주문관리 부분취소 비례배분 + 멱등 409 실
 
     // ── 1회 호출 ─────────────────────────────────────────────────────────────
     const res1 = await request.post(
-      `http://127.0.0.1:7001/admin/orders/${orderId}/refund`,
+      `http://127.0.0.1:9000/admin/orders/${orderId}/refund`,
       {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         data: { amount: 1, refund_method: "pg", nonce: NONCE }, // amount=1 (잔여 5 이내)
@@ -576,7 +576,7 @@ test.describe("QA-006 d2_주문관리 부분취소 비례배분 + 멱등 409 실
 
     // ── 2회 호출 (동일 nonce) ─────────────────────────────────────────────────
     const res2 = await request.post(
-      `http://127.0.0.1:7001/admin/orders/${orderId}/refund`,
+      `http://127.0.0.1:9000/admin/orders/${orderId}/refund`,
       {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         data: { amount: 1, refund_method: "pg", nonce: NONCE }, // amount=1 동일
