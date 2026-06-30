@@ -59,13 +59,16 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          "Pretendard Variable",
+          "Pretendard",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
+          "Apple SD Gothic Neo",
           "Segoe UI",
           "Roboto",
           "Helvetica Neue",
-          "Ubuntu",
+          "Malgun Gothic",
           "sans-serif",
         ],
       },

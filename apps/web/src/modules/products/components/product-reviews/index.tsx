@@ -1,4 +1,5 @@
 import { listProductReviews, type ProductReview } from "@lib/data/reviews"
+import ReviewForm from "@modules/products/components/review-form"
 
 // 별점 표시 (★ 채움 / ☆ 빈칸)
 const Stars = ({ rating }: { rating: number }) => {
@@ -90,7 +91,7 @@ const ProductReviews = async ({ productId }: { productId: string }) => {
         </div>
       )}
 
-      {/* TODO(backend): store 리뷰 API 연동 시 작성 폼/페이지네이션 추가 */}
+      <ReviewForm productId={productId} />
     </div>
   )
 }

@@ -6,51 +6,77 @@ type OrderDetailsProps = {
   showStatus?: boolean
 }
 
-const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const formatStatus = (str: string) => {
-    const formatted = str.split("_").join(" ")
+// 관리자(백엔드)에서 변경되는 주문 상태를 한국어로 표기
+const FULFILLMENT_STATUS_KO: Record<string, string> = {
+  not_fulfilled: "배송 준비 중",
+  partially_fulfilled: "부분 처리",
+  fulfilled: "출고 준비 완료",
+  partially_shipped: "부분 출고",
+  shipped: "배송 중",
+  partially_delivered: "부분 배송 완료",
+  delivered: "배송 완료",
+  canceled: "취소됨",
+}
 
-    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
-  }
+const PAYMENT_STATUS_KO: Record<string, string> = {
+  not_paid: "미결제",
+  awaiting: "입금 대기",
+  authorized: "승인됨",
+  partially_authorized: "부분 승인",
+  captured: "결제 완료",
+  partially_captured: "부분 결제",
+  partially_refunded: "부분 환불",
+  refunded: "환불 완료",
+  canceled: "취소됨",
+  requires_action: "확인 필요",
+}
+
+const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
+  const formatDate = (iso: string | Date) =>
+    new Intl.DateTimeFormat("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(new Date(iso))
 
   return (
     <div>
       <Text>
-        We have sent the order confirmation details to{" "}
+        주문 확인 내역을{" "}
         <span
           className="text-ui-fg-medium-plus font-semibold"
           data-testid="order-email"
         >
           {order.email}
-        </span>
-        .
+        </span>{" "}
+        (으)로 보내드렸습니다.
       </Text>
       <Text className="mt-2">
-        Order date:{" "}
-        <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
-        </span>
+        주문일:{" "}
+        <span data-testid="order-date">{formatDate(order.created_at)}</span>
       </Text>
       <Text className="mt-2 text-ui-fg-interactive">
-        Order number: <span data-testid="order-id">{order.display_id}</span>
+        주문번호: <span data-testid="order-id">{order.display_id}</span>
       </Text>
 
       <div className="flex items-center text-compact-small gap-x-4 mt-4">
         {showStatus && (
           <>
             <Text>
-              Order status:{" "}
+              배송 상태:{" "}
               <span className="text-ui-fg-subtle " data-testid="order-status">
-                {formatStatus(order.fulfillment_status)}
+                {FULFILLMENT_STATUS_KO[order.fulfillment_status] ??
+                  order.fulfillment_status}
               </span>
             </Text>
             <Text>
-              Payment status:{" "}
+              결제 상태:{" "}
               <span
                 className="text-ui-fg-subtle "
-                sata-testid="order-payment-status"
+                data-testid="order-payment-status"
               >
-                {formatStatus(order.payment_status)}
+                {PAYMENT_STATUS_KO[order.payment_status] ??
+                  order.payment_status}
               </span>
             </Text>
           </>

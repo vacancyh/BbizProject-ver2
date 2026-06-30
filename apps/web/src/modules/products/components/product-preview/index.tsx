@@ -2,6 +2,8 @@ import { Text } from "@modules/common/components/ui"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { isInWishlist } from "@lib/data/wishlist"
+import WishlistButton from "@modules/wishlist/components/wishlist-button"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 
@@ -27,17 +29,27 @@ export default async function ProductPreview({
     product,
   })
 
+  const wished = await isInWishlist(product.id)
+
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
-      <div data-testid="product-wrapper">
-        <Thumbnail
-          thumbnail={product.thumbnail}
-          images={product.images}
-          size="full"
-          isFeatured={isFeatured}
-        />
-        <div className="flex txt-compact-medium mt-4 justify-between">
-          <Text className="text-ui-fg-subtle" data-testid="product-title">
+      <div data-testid="product-wrapper" className="relative">
+        <WishlistButton productId={product.id} initialActive={wished} />
+        <div className="overflow-hidden">
+          <div className="transition-transform duration-300 ease-out group-hover:scale-[1.03]">
+            <Thumbnail
+              thumbnail={product.thumbnail}
+              images={product.images}
+              size="full"
+              isFeatured={isFeatured}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-y-1 mt-3">
+          <Text
+            className="text-ui-fg-base text-sm line-clamp-1"
+            data-testid="product-title"
+          >
             {product.title}
           </Text>
           <div className="flex items-center gap-x-2">

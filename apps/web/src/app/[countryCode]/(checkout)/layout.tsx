@@ -21,7 +21,7 @@ export default function CheckoutLayout({
               Back to shopping cart
             </span>
             <span className="mt-px block small:hidden txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base">
-              Back
+              뒤로
             </span>
           </LocalizedClientLink>
           <LocalizedClientLink
@@ -29,7 +29,7 @@ export default function CheckoutLayout({
             className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
             data-testid="store-link"
           >
-            Medusa Store
+            쇼핑몰
           </LocalizedClientLink>
           <div className="flex-1 basis-0" />
         </nav>

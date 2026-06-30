@@ -114,6 +114,38 @@ export default async function Footer() {
                 <li>전화 1600-0000</li>
                 <li>평일 10:00–18:00 (점심 12:00–13:00)</li>
                 <li>주말·공휴일 휴무 · help@shop.example</li>
+                <li className="pt-1">
+                  <LocalizedClientLink
+                    className="hover:text-ui-fg-base"
+                    href="/customer-service"
+                  >
+                    공지·FAQ·1:1 문의
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="hover:text-ui-fg-base"
+                    href="/order/lookup"
+                  >
+                    비회원 주문조회
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="hover:text-ui-fg-base"
+                    href="/content/terms-of-use"
+                  >
+                    이용약관
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="hover:text-ui-fg-base"
+                    href="/content/privacy-policy"
+                  >
+                    개인정보처리방침
+                  </LocalizedClientLink>
+                </li>
               </ul>
             </div>
           </div>

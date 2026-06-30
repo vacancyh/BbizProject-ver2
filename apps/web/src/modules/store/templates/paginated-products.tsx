@@ -12,6 +12,7 @@ type PaginatedProductsParams = {
   category_id?: string[]
   id?: string[]
   order?: string
+  q?: string
 }
 
 export default async function PaginatedProducts({
@@ -20,6 +21,7 @@ export default async function PaginatedProducts({
   collectionId,
   categoryId,
   productsIds,
+  searchQuery,
   countryCode,
 }: {
   sortBy?: SortOptions
@@ -27,6 +29,7 @@ export default async function PaginatedProducts({
   collectionId?: string
   categoryId?: string
   productsIds?: string[]
+  searchQuery?: string
   countryCode: string
 }) {
   const queryParams: PaginatedProductsParams = {
@@ -43,6 +46,11 @@ export default async function PaginatedProducts({
 
   if (productsIds) {
     queryParams["id"] = productsIds
+  }
+
+  // 실제 백엔드 전문검색(q) — /store/products?q= 로 전달
+  if (searchQuery) {
+    queryParams["q"] = searchQuery
   }
 
   if (sortBy === "created_at") {
@@ -65,6 +73,19 @@ export default async function PaginatedProducts({
   })
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
+
+  if (count === 0) {
+    return (
+      <div
+        className="py-24 text-center text-ui-fg-muted"
+        data-testid="no-products-message"
+      >
+        {searchQuery
+          ? `'${searchQuery}'에 대한 검색 결과가 없습니다.`
+          : "표시할 상품이 없습니다."}
+      </div>
+    )
+  }
 
   return (
     <>

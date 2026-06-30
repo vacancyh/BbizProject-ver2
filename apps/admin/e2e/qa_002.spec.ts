@@ -14,12 +14,12 @@
  *  - mock·skip·conditional-skip·try-catch 단언 우회 금지
  *  - 검증 불가 부분은 FAIL 사유 명시
  *
- * 실 DB 픽스처 (진단 완료):
- *  - QA-002 대상: order_01KSJB8BRF9VEPA9PQAZH4YTYH (display_id=6, pending, authorized, not_fulfilled)
- *  - QA-003 대상: order_01KSJAR1GAB18F836601PSM53M (display_id=5, shipped)
- *  - QA-004 대상: order_01KSJB8BRF9VEPA9PQAZH4YTYH (동일 주문 교환)
- *  - QA-005 대상: order_01KSJAR1GAB18F836601PSM53M (display_id=5)
- *  - QA-006 대상: order_01KSJ6KW2CH4SPCRD0RHH2RMG1 (display_id=3, captured, amount=20)
+ * 픽스처 (데이터-독립, 2026-06-30 개정):
+ *  - 과거 하드코딩 order id 는 재시드 후 404 → 현재 DB 에서 동적 해석으로 전환.
+ *  - getFixture(): not_fulfilled + 재고매핑 가능한 주문 + line item + inventory_item/location.
+ *    QA-002 는 ensureReservation 으로 예약 선행 후 fulfillment 성공 단언.
+ *    QA-003~005 는 동일 주문 사용(2xx/4xx 실왕복 단언).
+ *  - getCapturedOrderId(): QA-006 환불 멱등 검증용 captured 주문(고정 nonce 로 재실행 안전).
  */
 import { test, expect } from "@playwright/test";
 
@@ -43,16 +43,102 @@ async function waitForLoad(page: any, ms = 8000) {
 // 공통 상수 (실 DB 픽스처)
 // ─────────────────────────────────────────────────────────────────────────────
 
+const API = "http://127.0.0.1:9000";
+
 /** Bearer 토큰 획득 헬퍼 */
 async function getAdminToken(request: any): Promise<string> {
-  const res = await request.post("http://127.0.0.1:9000/auth/user/emailpass", {
-    data: { email: "admin@local.test", password: "djemalsdlqslek12!@" },
+  const res = await request.post(`${API}/auth/user/emailpass`, {
+    data: { email: "admin@shop.local", password: "admin1234!" },
   });
   expect(res.status()).toBe(200); // 토큰 획득 실패 시 전체 중단
   const body = await res.json();
   const token = body.token as string;
   expect(typeof token).toBe("string");
   return token;
+}
+
+/**
+ * 데이터-독립 픽스처 — 현재 DB 에서 워크플로우 검증용 주문을 동적으로 해석한다.
+ * (과거: 하드코딩 order id 사용 → 재시드 후 404. 이제 실시간 조회로 해소)
+ * 모듈 스코프 캐시(workers:1 직렬 실행). not_fulfilled + 재고매핑 가능한 첫 주문 선택.
+ */
+let _fixture:
+  | {
+      token: string;
+      orderId: string;
+      itemId: string;
+      inventoryItemId: string;
+      locationId: string;
+    }
+  | null = null;
+
+async function getFixture(request: any) {
+  if (_fixture) return _fixture;
+  const token = await getAdminToken(request);
+  const res = await request.get(
+    `${API}/admin/orders?limit=30&order=-display_id&fields=id,fulfillment_status,items.id,items.quantity,items.variant.inventory_items.inventory_item_id,items.variant.inventory_items.inventory.location_levels.location_id`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  expect(res.status()).toBe(200);
+  const orders = (await res.json()).orders ?? [];
+  for (const o of orders) {
+    if (o.fulfillment_status !== "not_fulfilled") continue;
+    const it = (o.items ?? [])[0];
+    const inv = it?.variant?.inventory_items?.[0];
+    const invId = inv?.inventory_item_id;
+    const locId = inv?.inventory?.location_levels?.[0]?.location_id;
+    if (it && invId && locId) {
+      _fixture = {
+        token,
+        orderId: o.id,
+        itemId: it.id,
+        inventoryItemId: invId,
+        locationId: locId,
+      };
+      return _fixture;
+    }
+  }
+  throw new Error(
+    "[qa-002] 워크플로우 검증용 주문(not_fulfilled + 재고매핑)을 찾지 못했습니다."
+  );
+}
+
+/** 환불 멱등 검증용 — captured(또는 partially_refunded) 주문 id 동적 해석(캐시). */
+let _capturedOrderId: string | null = null;
+async function getCapturedOrderId(request: any, token: string): Promise<string> {
+  if (_capturedOrderId) return _capturedOrderId;
+  const res = await request.get(
+    `${API}/admin/orders?limit=100&fields=id,payment_status`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  expect(res.status()).toBe(200);
+  const orders = (await res.json()).orders ?? [];
+  const cap =
+    orders.find((o: any) => o.payment_status === "captured") ??
+    orders.find((o: any) => o.payment_status === "partially_refunded");
+  if (!cap) {
+    throw new Error("[qa-002] 환불 검증용 captured 주문을 찾지 못했습니다.");
+  }
+  _capturedOrderId = cap.id;
+  return _capturedOrderId;
+}
+
+/** 배송처리 전 재고 예약 보장(이미 예약/소진 시 4xx 무시). */
+async function ensureReservation(request: any, f: NonNullable<typeof _fixture>) {
+  await request
+    .post(`${API}/admin/reservations`, {
+      headers: {
+        Authorization: `Bearer ${f.token}`,
+        "Content-Type": "application/json",
+      },
+      data: {
+        line_item_id: f.itemId,
+        inventory_item_id: f.inventoryItemId,
+        location_id: f.locationId,
+        quantity: 1,
+      },
+    })
+    .catch(() => {});
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -230,9 +316,12 @@ test.describe("QA-002 d2_주문관리 배송처리 → 배송중 전이", () => 
    *  - fulfillment id 는 상세 조회에서 사전 획득 (응답 빈 경우 대비)
    */
   test("QA-002 fulfillment + shipment 실왕복 단언", async ({ request }) => {
-    const token = await getAdminToken(request);
-    const orderId = "order_01KSJAR1GAB18F836601PSM53M";
-    const itemId = "ordli_01KSJAR1GAFQFT6QMCRKBHXKAE";
+    const f = await getFixture(request);
+    const token = f.token;
+    const orderId = f.orderId;
+    const itemId = f.itemId;
+    // 배송처리 성공 단언을 위해 재고 예약 선행(데이터-독립)
+    await ensureReservation(request, f);
 
     // ── 1. 현재 주문 상태 + fulfillment 목록 사전 조회 ─────────────────────────
     const detailRes = await request.get(
@@ -346,9 +435,10 @@ test.describe("QA-003 d2_주문관리 반품 → 검수 → 환불 플로우", (
    *    → 도달 가능한 깊이(반품 접수 확정까지) 만 실증. 한계는 거짓 PASS 방지를 위해 명시.
    */
   test("QA-003 반품 생성 → 항목추가 → 접수확정 3단계 실왕복 단언", async ({ request }) => {
-    const token = await getAdminToken(request);
-    const orderId = "order_01KSJAR1GAB18F836601PSM53M";
-    const orderItemId = "ordli_01KSJAR1GAFQFT6QMCRKBHXKAE";
+    const f = await getFixture(request);
+    const token = f.token;
+    const orderId = f.orderId;
+    const orderItemId = f.itemId;
 
     // ── 1. POST /admin/returns (반품 생성) ────────────────────────────────────
     const createRes = await request.post("http://127.0.0.1:9000/admin/returns", {
@@ -438,8 +528,9 @@ test.describe("QA-004 d2_주문관리 교환 → 회수 → 발송", () => {
    *  - /admin/exchanges POST 는 Medusa 코어 직접 호출 (커스텀 route 없음)
    */
   test("QA-004 교환 생성 실왕복 단언", async ({ request }) => {
-    const token = await getAdminToken(request);
-    const orderId = "order_01KSJB8BRF9VEPA9PQAZH4YTYH";
+    const f = await getFixture(request);
+    const token = f.token;
+    const orderId = f.orderId;
 
     // ── POST /admin/exchanges (Medusa 코어) ──────────────────────────────────
     const exchRes = await request.post("http://127.0.0.1:9000/admin/exchanges", {
@@ -491,8 +582,9 @@ test.describe("QA-005 d2_주문관리 클레임 → 보상 → 환불", () => {
    *  - items 추가는 POST /admin/claims/:id/claim-items 별도 호출 (Medusa v2 패턴)
    */
   test("QA-005 클레임 생성 실왕복 단언", async ({ request }) => {
-    const token = await getAdminToken(request);
-    const orderId = "order_01KSJAR1GAB18F836601PSM53M";
+    const f = await getFixture(request);
+    const token = f.token;
+    const orderId = f.orderId;
 
     // ── POST /admin/claims (Medusa 코어) ─────────────────────────────────────
     const claimRes = await request.post("http://127.0.0.1:9000/admin/claims", {
@@ -555,8 +647,10 @@ test.describe("QA-006 d2_주문관리 부분취소 비례배분 + 멱등 409 실
    *  - 2회: 반드시 409 + body.cached === true
    */
   test("QA-006 멱등 환불 불변식 — 동일 nonce 2회 호출 시 2번째 409 cached 단언", async ({ request }) => {
-    const token = await getAdminToken(request);
-    const orderId = "order_01KSJ6KW2CH4SPCRD0RHH2RMG1";
+    const f = await getFixture(request);
+    const token = f.token;
+    // 환불 멱등은 captured 결제가 있어야 검증 가능 → captured 주문 동적 해석
+    const orderId = await getCapturedOrderId(request, token);
     const NONCE = "qa006-fixed-nonce-v2"; // 고정 nonce v2 — 재실행 안전 (v1 사용 이력 있어 v2 사용)
 
     // ── 1회 호출 ─────────────────────────────────────────────────────────────

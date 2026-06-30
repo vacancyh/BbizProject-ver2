@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
+import RestockNotify from "@modules/products/components/restock-notify"
 import { isEqual } from "lodash"
 import { useParams, usePathname, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -172,16 +173,25 @@ export default function ProductActions({
             !isValidVariant
           }
           variant="primary"
-          className="w-full h-10"
+          className="w-full h-12 rounded-none text-base"
           isLoading={isAdding}
           data-testid="add-product-button"
         >
           {!selectedVariant && !options
-            ? "Select variant"
+            ? "옵션을 선택하세요"
             : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
+            ? "품절"
+            : "장바구니 담기"}
         </Button>
+
+        {/* 품절 변형 선택 시 재입고 알림 신청 */}
+        {selectedVariant && !inStock && isValidVariant && (
+          <RestockNotify
+            variantId={selectedVariant.id}
+            productId={product.id}
+          />
+        )}
+
         <MobileActions
           product={product}
           variant={selectedVariant}

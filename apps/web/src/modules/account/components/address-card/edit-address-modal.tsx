@@ -2,8 +2,10 @@
 
 import {
   deleteCustomerAddress,
+  setDefaultShippingAddress,
   updateCustomerAddress,
 } from "@lib/data/customer"
+import { useRouter } from "next/navigation"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { PencilSquare as Edit, Trash } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
@@ -11,9 +13,12 @@ import CountrySelect from "@modules/checkout/components/country-select"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import Modal from "@modules/common/components/modal"
+import PostcodeSearch, {
+  setFormInputValue,
+} from "@modules/common/components/postcode-search"
 import { Button, Heading, Text, clx } from "@modules/common/components/ui"
 import Spinner from "@modules/common/icons/spinner"
-import React, { useActionState, useEffect, useState } from "react"
+import React, { useActionState, useEffect, useRef, useState } from "react"
 
 type EditAddressProps = {
   region: HttpTypes.StoreRegion
@@ -26,9 +31,14 @@ const EditAddress: React.FC<EditAddressProps> = ({
   address,
   isActive = false,
 }) => {
+  const router = useRouter()
   const [removing, setRemoving] = useState(false)
+  const [settingDefault, setSettingDefault] = useState(false)
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  const isDefaultShipping = Boolean(address.is_default_shipping)
 
   const [formState, formAction] = useActionState(updateCustomerAddress, {
     success: false,
@@ -59,6 +69,16 @@ const EditAddress: React.FC<EditAddressProps> = ({
     setRemoving(false)
   }
 
+  const handleSetDefault = async () => {
+    if (isDefaultShipping || settingDefault) {
+      return
+    }
+    setSettingDefault(true)
+    await setDefaultShippingAddress(address.id)
+    setSettingDefault(false)
+    router.refresh()
+  }
+
   return (
     <>
       <div
@@ -71,6 +91,14 @@ const EditAddress: React.FC<EditAddressProps> = ({
         data-testid="address-container"
       >
         <div className="flex flex-col">
+          {isDefaultShipping && (
+            <span
+              className="mb-2 inline-flex w-fit items-center rounded-rounded bg-gray-900 px-2 py-0.5 text-xs font-medium text-white"
+              data-testid="default-shipping-badge"
+            >
+              기본 배송지
+            </span>
+          )}
           <Heading
             className="text-left text-base-semi"
             data-testid="address-name"
@@ -106,7 +134,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
             data-testid="address-edit-button"
           >
             <Edit />
-            Edit
+            수정
           </button>
           <button
             className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
@@ -114,22 +142,33 @@ const EditAddress: React.FC<EditAddressProps> = ({
             data-testid="address-delete-button"
           >
             {removing ? <Spinner /> : <Trash />}
-            Remove
+            삭제
           </button>
+          {!isDefaultShipping && (
+            <button
+              className="text-small-regular text-ui-fg-base flex items-center gap-x-2 ml-auto disabled:opacity-50"
+              onClick={handleSetDefault}
+              disabled={settingDefault}
+              data-testid="address-set-default-button"
+            >
+              {settingDefault && <Spinner />}
+              기본 배송지로 설정
+            </button>
+          )}
         </div>
       </div>
 
       <Modal isOpen={state} close={close} data-testid="edit-address-modal">
         <Modal.Title>
-          <Heading className="mb-2">Edit address</Heading>
+          <Heading className="mb-2">배송지 수정</Heading>
         </Modal.Title>
-        <form action={formAction}>
+        <form action={formAction} ref={formRef}>
           <input type="hidden" name="addressId" value={address.id} />
           <Modal.Body>
             <div className="grid grid-cols-1 gap-y-2">
               <div className="grid grid-cols-2 gap-x-2">
                 <Input
-                  label="First name"
+                  label="이름"
                   name="first_name"
                   required
                   autoComplete="given-name"
@@ -137,7 +176,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                   data-testid="first-name-input"
                 />
                 <Input
-                  label="Last name"
+                  label="성"
                   name="last_name"
                   required
                   autoComplete="family-name"
@@ -146,14 +185,22 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 />
               </div>
               <Input
-                label="Company"
+                label="회사 (선택)"
                 name="company"
                 autoComplete="organization"
                 defaultValue={address.company || undefined}
                 data-testid="company-input"
               />
+              <PostcodeSearch
+                onComplete={(r) => {
+                  setFormInputValue(formRef.current, "postal_code", r.zonecode)
+                  setFormInputValue(formRef.current, "address_1", r.address)
+                  setFormInputValue(formRef.current, "city", r.sigungu || r.sido)
+                  setFormInputValue(formRef.current, "province", r.sido)
+                }}
+              />
               <Input
-                label="Address"
+                label="주소"
                 name="address_1"
                 required
                 autoComplete="address-line1"
@@ -161,7 +208,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 data-testid="address-1-input"
               />
               <Input
-                label="Apartment, suite, etc."
+                label="상세주소"
                 name="address_2"
                 autoComplete="address-line2"
                 defaultValue={address.address_2 || undefined}
@@ -169,7 +216,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
               />
               <div className="grid grid-cols-[144px_1fr] gap-x-2">
                 <Input
-                  label="Postal code"
+                  label="우편번호"
                   name="postal_code"
                   required
                   autoComplete="postal-code"
@@ -177,7 +224,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                   data-testid="postal-code-input"
                 />
                 <Input
-                  label="City"
+                  label="도시"
                   name="city"
                   required
                   autoComplete="locality"
@@ -186,7 +233,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 />
               </div>
               <Input
-                label="Province / State"
+                label="도/광역시"
                 name="province"
                 autoComplete="address-level1"
                 defaultValue={address.province || undefined}
@@ -201,7 +248,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 data-testid="country-select"
               />
               <Input
-                label="Phone"
+                label="휴대폰"
                 name="phone"
                 autoComplete="phone"
                 defaultValue={address.phone || undefined}
@@ -223,9 +270,9 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 className="h-10"
                 data-testid="cancel-button"
               >
-                Cancel
+                취소
               </Button>
-              <SubmitButton data-testid="save-button">Save</SubmitButton>
+              <SubmitButton data-testid="save-button">저장</SubmitButton>
             </div>
           </Modal.Footer>
         </form>

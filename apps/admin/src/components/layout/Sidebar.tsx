@@ -31,6 +31,8 @@ import {
   MapPin,
   Zap,
   Sparkles,
+  Headphones,
+  Image,
   type LucideIcon,
 } from "lucide-react";
 import { NAVIGATION, type IconName } from "@/lib/nav/navigation";
@@ -64,6 +66,8 @@ const ICONS: Record<IconName, LucideIcon> = {
   MapPin,
   Zap,
   Sparkles,
+  Headphones,
+  Image,
 };
 
 /** Sidebar — prototype 사이드바 이식. 3그룹 네비 + 활성 표시 + 갭B 배지 + 배지/예정.

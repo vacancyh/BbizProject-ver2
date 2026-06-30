@@ -1,5 +1,6 @@
 import ItemsTemplate from "./items"
 import Summary from "./summary"
+import PointsApply from "../components/points-apply"
 import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
@@ -30,7 +31,8 @@ const CartTemplate = ({
               <div className="flex flex-col gap-y-8 sticky top-12">
                 {cart && cart.region && (
                   <>
-                    <div className="bg-white py-6">
+                    <div className="bg-white py-6 flex flex-col gap-y-4">
+                      <PointsApply cart={cart} customer={customer} />
                       <Summary cart={cart} />
                     </div>
                   </>

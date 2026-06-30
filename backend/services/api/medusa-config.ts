@@ -118,5 +118,13 @@ module.exports = defineConfig({
       // 상품정보고시(d3, GAP_B) — 전자상거래법 고시 버전 이력 관리(draft→published→archived).
       resolve: "./src/modules/product-disclosure",
     },
+    {
+      // 재입고 알림(GAP) — 품절 상품 재입고 시 고객 알림 구독.
+      resolve: "./src/modules/restock-notification",
+    },
+    {
+      // 고객센터 콘텐츠(GAP) — 공지/FAQ 관리(admin) + 노출(store).
+      resolve: "./src/modules/cms",
+    },
   ],
 })

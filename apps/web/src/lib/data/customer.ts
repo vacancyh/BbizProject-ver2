@@ -127,6 +127,53 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
+/**
+ * 소셜 로그인 (MOCK) — 실제 운영 시 카카오/네이버 OAuth 로 교체.
+ * 현재는 provider별 데모 계정으로 로그인(없으면 가입)해 흐름을 시연한다.
+ * TODO(prod): NEXT_PUBLIC OAuth 앱키 + /auth/customer/{provider} 콜백 연동.
+ */
+export async function socialLoginMock(
+  countryCode: string,
+  provider: "kakao" | "naver"
+) {
+  const email = `${provider}-demo@kr-demo.local`
+  const password = `${provider}demo1234!`
+  const label = provider === "kakao" ? "카카오" : "네이버"
+
+  try {
+    const token = await sdk.auth.login("customer", "emailpass", {
+      email,
+      password,
+    })
+    await setAuthToken(token as string)
+  } catch {
+    // 데모 계정이 없으면 가입 후 로그인
+    try {
+      const regToken = await sdk.auth.register("customer", "emailpass", {
+        email,
+        password,
+      })
+      await setAuthToken(regToken as string)
+      await sdk.store.customer.create(
+        { email, first_name: label, last_name: "회원" },
+        {},
+        { ...(await getAuthHeaders()) }
+      )
+      const loginToken = await sdk.auth.login("customer", "emailpass", {
+        email,
+        password,
+      })
+      await setAuthToken(loginToken as string)
+    } catch (e) {
+      return String(e)
+    }
+  }
+
+  const tag = await getCacheTag("customers")
+  revalidateTag(tag)
+  redirect(`/${countryCode}/account`)
+}
+
 export async function signout(countryCode: string) {
   await sdk.auth.logout()
 
@@ -141,6 +188,32 @@ export async function signout(countryCode: string) {
   revalidateTag(cartCacheTag)
 
   redirect(`/${countryCode}/account`)
+}
+
+/** 회원 탈퇴 — 본인 계정 소프트 삭제 후 로그아웃. */
+export async function withdrawAccount(countryCode: string) {
+  const headers = { ...(await getAuthHeaders()) }
+  try {
+    await sdk.client.fetch(`/store/customers/me/withdraw`, {
+      method: "POST",
+      headers,
+      body: {},
+    })
+  } catch (e) {
+    return String(e)
+  }
+
+  try {
+    await sdk.auth.logout()
+  } catch {
+    // 로그아웃 실패해도 토큰 제거 진행
+  }
+  await removeAuthToken()
+  const tag = await getCacheTag("customers")
+  revalidateTag(tag)
+  await removeCartId()
+
+  redirect(`/${countryCode}`)
 }
 
 export async function transferCart() {
@@ -194,6 +267,26 @@ export const addCustomerAddress = async (
     .catch((err) => {
       return { success: false, error: err.toString() }
     })
+}
+
+/** 기본 배송지로 설정. */
+export const setDefaultShippingAddress = async (
+  addressId: string
+): Promise<{ success: boolean }> => {
+  const headers = { ...(await getAuthHeaders()) }
+  try {
+    await sdk.store.customer.updateAddress(
+      addressId,
+      { is_default_shipping: true } as HttpTypes.StoreUpdateCustomerAddress,
+      {},
+      headers
+    )
+    const tag = await getCacheTag("customers")
+    revalidateTag(tag)
+    return { success: true }
+  } catch {
+    return { success: false }
+  }
 }
 
 export const deleteCustomerAddress = async (

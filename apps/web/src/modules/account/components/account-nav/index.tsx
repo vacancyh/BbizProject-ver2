@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRightOnRectangle } from "@medusajs/icons"
+import { ArrowRightOnRectangle, CurrencyDollar, Heart, ShieldCheck, Star, Tag } from "@medusajs/icons"
 import { clx } from "@modules/common/components/ui"
 import { useParams, usePathname } from "next/navigation"
 
@@ -35,13 +35,13 @@ const AccountNav = ({
           >
             <>
               <ChevronDown className="transform rotate-90" />
-              <span>Account</span>
+              <span>내 계정</span>
             </>
           </LocalizedClientLink>
         ) : (
           <>
             <div className="text-xl-semi mb-4 px-8">
-              Hello {customer?.first_name}
+              {customer?.first_name}님 안녕하세요
             </div>
             <div className="text-base-regular">
               <ul>
@@ -54,7 +54,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <User size={20} />
-                        <span>Profile</span>
+                        <span>프로필</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -69,7 +69,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <MapPin size={20} />
-                        <span>Addresses</span>
+                        <span>배송지</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -83,9 +83,84 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <Package size={20} />
-                      <span>Orders</span>
+                      <span>주문 내역</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/account/points"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="points-link"
+                  >
+                    <>
+                      <div className="flex items-center gap-x-2">
+                        <CurrencyDollar />
+                        <span>적립금</span>
+                      </div>
+                      <ChevronDown className="transform -rotate-90" />
+                    </>
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/account/membership"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="membership-link"
+                  >
+                    <>
+                      <div className="flex items-center gap-x-2">
+                        <Star />
+                        <span>등급</span>
+                      </div>
+                      <ChevronDown className="transform -rotate-90" />
+                    </>
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/wishlist"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="wishlist-link"
+                  >
+                    <>
+                      <div className="flex items-center gap-x-2">
+                        <Heart />
+                        <span>위시리스트</span>
+                      </div>
+                      <ChevronDown className="transform -rotate-90" />
+                    </>
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/account/coupons"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="coupons-link"
+                  >
+                    <>
+                      <div className="flex items-center gap-x-2">
+                        <Tag />
+                        <span>쿠폰함</span>
+                      </div>
+                      <ChevronDown className="transform -rotate-90" />
+                    </>
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/account/consents"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="consents-link"
+                  >
+                    <>
+                      <div className="flex items-center gap-x-2">
+                        <ShieldCheck />
+                        <span>동의 관리</span>
+                      </div>
+                      <ChevronDown className="transform -rotate-90" />
+                    </>
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -97,7 +172,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <ArrowRightOnRectangle />
-                      <span>Log out</span>
+                      <span>로그아웃</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </button>
@@ -110,7 +185,7 @@ const AccountNav = ({
       <div className="hidden small:block" data-testid="account-nav">
         <div>
           <div className="pb-4">
-            <h3 className="text-base-semi">Account</h3>
+            <h3 className="text-base-semi">내 계정</h3>
           </div>
           <div className="text-base-regular">
             <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
@@ -120,7 +195,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="overview-link"
                 >
-                  Overview
+                  개요
                 </AccountNavLink>
               </li>
               <li>
@@ -129,7 +204,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="profile-link"
                 >
-                  Profile
+                  프로필
                 </AccountNavLink>
               </li>
               <li>
@@ -138,7 +213,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="addresses-link"
                 >
-                  Addresses
+                  배송지
                 </AccountNavLink>
               </li>
               <li>
@@ -147,7 +222,52 @@ const AccountNav = ({
                   route={route!}
                   data-testid="orders-link"
                 >
-                  Orders
+                  주문 내역
+                </AccountNavLink>
+              </li>
+              <li>
+                <AccountNavLink
+                  href="/account/points"
+                  route={route!}
+                  data-testid="points-link"
+                >
+                  적립금
+                </AccountNavLink>
+              </li>
+              <li>
+                <AccountNavLink
+                  href="/account/membership"
+                  route={route!}
+                  data-testid="membership-link"
+                >
+                  등급
+                </AccountNavLink>
+              </li>
+              <li>
+                <AccountNavLink
+                  href="/wishlist"
+                  route={route!}
+                  data-testid="wishlist-link"
+                >
+                  위시리스트
+                </AccountNavLink>
+              </li>
+              <li>
+                <AccountNavLink
+                  href="/account/coupons"
+                  route={route!}
+                  data-testid="coupons-link"
+                >
+                  쿠폰함
+                </AccountNavLink>
+              </li>
+              <li>
+                <AccountNavLink
+                  href="/account/consents"
+                  route={route!}
+                  data-testid="consents-link"
+                >
+                  동의 관리
                 </AccountNavLink>
               </li>
               <li className="text-grey-700">
@@ -156,7 +276,7 @@ const AccountNav = ({
                   onClick={handleLogout}
                   data-testid="logout-button"
                 >
-                  Log out
+                  로그아웃
                 </button>
               </li>
             </ul>

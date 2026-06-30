@@ -2,6 +2,7 @@ import { HttpTypes } from "@medusajs/types"
 import { Container } from "@modules/common/components/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
+import PostcodeSearch from "@modules/common/components/postcode-search"
 import { mapKeys } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
@@ -99,7 +100,7 @@ const ShippingAddress = ({
       {customer && (addressesInRegion?.length || 0) > 0 && (
         <Container className="mb-6 flex flex-col gap-y-4 p-5">
           <p className="text-small-regular">
-            {`Hi ${customer.first_name}, do you want to use one of your saved addresses?`}
+            {`${customer.first_name}님, 저장된 배송지를 사용하시겠어요?`}
           </p>
           <AddressSelect
             addresses={customer.addresses}
@@ -114,7 +115,7 @@ const ShippingAddress = ({
       )}
       <div className="grid grid-cols-2 gap-4">
         <Input
-          label="First name"
+          label="이름"
           name="shipping_address.first_name"
           autoComplete="given-name"
           value={formData["shipping_address.first_name"]}
@@ -123,7 +124,7 @@ const ShippingAddress = ({
           data-testid="shipping-first-name-input"
         />
         <Input
-          label="Last name"
+          label="성"
           name="shipping_address.last_name"
           autoComplete="family-name"
           value={formData["shipping_address.last_name"]}
@@ -131,8 +132,23 @@ const ShippingAddress = ({
           required
           data-testid="shipping-last-name-input"
         />
+        <div className="col-span-2">
+          <PostcodeSearch
+            onComplete={(r) =>
+              setFormData((prev: Record<string, string>) => ({
+                ...prev,
+                "shipping_address.postal_code": r.zonecode,
+                "shipping_address.address_1": r.address,
+                "shipping_address.city": r.sigungu || r.sido,
+                "shipping_address.province": r.sido,
+                "shipping_address.country_code":
+                  prev["shipping_address.country_code"] || "kr",
+              }))
+            }
+          />
+        </div>
         <Input
-          label="Address"
+          label="주소"
           name="shipping_address.address_1"
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"]}
@@ -141,7 +157,7 @@ const ShippingAddress = ({
           data-testid="shipping-address-input"
         />
         <Input
-          label="Company"
+          label="회사 (선택)"
           name="shipping_address.company"
           value={formData["shipping_address.company"]}
           onChange={handleChange}
@@ -149,7 +165,7 @@ const ShippingAddress = ({
           data-testid="shipping-company-input"
         />
         <Input
-          label="Postal code"
+          label="우편번호"
           name="shipping_address.postal_code"
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"]}
@@ -158,7 +174,7 @@ const ShippingAddress = ({
           data-testid="shipping-postal-code-input"
         />
         <Input
-          label="City"
+          label="도시"
           name="shipping_address.city"
           autoComplete="address-level2"
           value={formData["shipping_address.city"]}
@@ -176,7 +192,7 @@ const ShippingAddress = ({
           data-testid="shipping-country-select"
         />
         <Input
-          label="State / Province"
+          label="도/광역시"
           name="shipping_address.province"
           autoComplete="address-level1"
           value={formData["shipping_address.province"]}
@@ -186,7 +202,7 @@ const ShippingAddress = ({
       </div>
       <div className="my-8">
         <Checkbox
-          label="Billing address same as shipping address"
+          label="청구지가 배송지와 동일합니다"
           name="same_as_billing"
           checked={checked}
           onChange={onChange}
@@ -195,10 +211,10 @@ const ShippingAddress = ({
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input
-          label="Email"
+          label="이메일"
           name="email"
           type="email"
-          title="Enter a valid email address."
+          title="올바른 이메일 주소를 입력하세요."
           autoComplete="email"
           value={formData.email}
           onChange={handleChange}
@@ -206,7 +222,7 @@ const ShippingAddress = ({
           data-testid="shipping-email-input"
         />
         <Input
-          label="Phone"
+          label="휴대폰"
           name="shipping_address.phone"
           autoComplete="tel"
           value={formData["shipping_address.phone"]}

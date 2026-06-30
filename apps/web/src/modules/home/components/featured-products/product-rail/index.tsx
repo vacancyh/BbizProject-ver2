@@ -27,14 +27,16 @@ export default async function ProductRail({
   }
 
   return (
-    <div className="content-container py-12 small:py-24">
-      <div className="flex justify-between mb-8">
-        <Text className="txt-xlarge">{collection.title}</Text>
+    <div className="content-container py-12 small:py-20">
+      <div className="flex justify-between items-end mb-8">
+        <Text className="text-2xl small:text-3xl font-semibold tracking-tight text-ui-fg-base">
+          {collection.title}
+        </Text>
         <InteractiveLink href={`/collections/${collection.handle}`}>
-          View all
+          전체 보기
         </InteractiveLink>
       </div>
-      <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
+      <ul className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-10 small:gap-y-12">
         {pricedProducts &&
           pricedProducts.map((product) => (
             <li key={product.id}>

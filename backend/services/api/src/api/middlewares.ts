@@ -65,6 +65,10 @@ const PATH_MENU_MAP: { prefix: string; menu: string }[] = [
   { prefix: "/admin/refund-reasons", menu: "settings" }, // 환불 사유 코드(설정>반품·환불 사유 탭)
   { prefix: "/admin/sales-channels", menu: "settings" },
   { prefix: "/admin/api-keys", menu: "settings" },
+  { prefix: "/admin/notices", menu: "settings" }, // 고객센터 공지(설정>고객센터 콘텐츠)
+  { prefix: "/admin/faqs", menu: "settings" }, // 고객센터 FAQ(설정>고객센터 콘텐츠)
+  { prefix: "/admin/banners", menu: "settings" }, // 메인 배너/팝업(설정>배너·팝업)
+  { prefix: "/admin/home-curations", menu: "products" }, // 홈 큐레이션(MD추천) — 상품 메뉴 권한
 ]
 
 function menuFromPath(path: string): string | null {

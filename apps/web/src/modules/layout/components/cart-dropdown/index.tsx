@@ -103,7 +103,7 @@ const CartDropdown = ({
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
-              <h3 className="text-large-semi">Cart</h3>
+              <h3 className="text-large-semi">장바구니</h3>
             </div>
             {cartState && cartState.items?.length ? (
               <>
@@ -168,7 +168,7 @@ const CartDropdown = ({
                             className="mt-1"
                             data-testid="cart-item-remove-button"
                           >
-                            Remove
+                            삭제
                           </DeleteButton>
                         </div>
                       </div>
@@ -177,8 +177,8 @@ const CartDropdown = ({
                 <div className="p-4 flex flex-col gap-y-4 text-small-regular">
                   <div className="flex items-center justify-between">
                     <span className="text-ui-fg-base font-semibold">
-                      Subtotal{" "}
-                      <span className="font-normal">(excl. taxes)</span>
+                      상품 합계{" "}
+                      <span className="font-normal">(세금 제외)</span>
                     </span>
                     <span
                       className="text-large-semi"
@@ -197,7 +197,7 @@ const CartDropdown = ({
                       size="large"
                       data-testid="go-to-cart-button"
                     >
-                      Go to cart
+                      장바구니로 이동
                     </Button>
                   </LocalizedClientLink>
                 </div>
@@ -208,12 +208,12 @@ const CartDropdown = ({
                   <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
                     <span>0</span>
                   </div>
-                  <span>Your shopping bag is empty.</span>
+                  <span>장바구니가 비어 있습니다.</span>
                   <div>
                     <LocalizedClientLink href="/store">
                       <>
-                        <span className="sr-only">Go to all products page</span>
-                        <Button onClick={close}>Explore products</Button>
+                        <span className="sr-only">전체 상품 보기</span>
+                        <Button onClick={close}>상품 둘러보기</Button>
                       </>
                     </LocalizedClientLink>
                   </div>

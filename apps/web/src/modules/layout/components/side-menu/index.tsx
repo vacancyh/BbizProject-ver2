@@ -12,20 +12,26 @@ import LanguageSelect from "../language-select"
 import { Locale } from "@lib/data/locales"
 
 
-const SideMenuItems = {
-  Home: "/",
-  Store: "/store",
-  Account: "/account",
-  Cart: "/cart",
-}
+const SideMenuItems: { label: string; href: string; testid: string }[] = [
+  { label: "홈", href: "/", testid: "home-link" },
+  { label: "스토어", href: "/store", testid: "store-link" },
+  { label: "내 계정", href: "/account", testid: "account-link" },
+  { label: "장바구니", href: "/cart", testid: "cart-link" },
+]
 
 type SideMenuProps = {
   regions: HttpTypes.StoreRegion[] | null
   locales: Locale[] | null
   currentLocale: string | null
+  categories?: HttpTypes.StoreProductCategory[]
 }
 
-const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
+const SideMenu = ({
+  regions,
+  locales,
+  currentLocale,
+  categories = [],
+}: SideMenuProps) => {
   const countryToggleState = useToggleState()
   const languageToggleState = useToggleState()
 
@@ -40,7 +46,7 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                   data-testid="nav-menu-button"
                   className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
                 >
-                  Menu
+                  메뉴
                 </Popover.Button>
               </div>
 
@@ -73,21 +79,43 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                       </button>
                     </div>
                     <ul className="flex flex-col gap-6 items-start justify-start">
-                      {Object.entries(SideMenuItems).map(([name, href]) => {
+                      {SideMenuItems.map((item) => {
                         return (
-                          <li key={name}>
+                          <li key={item.href}>
                             <LocalizedClientLink
-                              href={href}
+                              href={item.href}
                               className="text-3xl leading-10 hover:text-ui-fg-disabled"
                               onClick={close}
-                              data-testid={`${name.toLowerCase()}-link`}
+                              data-testid={item.testid}
                             >
-                              {name}
+                              {item.label}
                             </LocalizedClientLink>
                           </li>
                         )
                       })}
                     </ul>
+                    {categories.length > 0 && (
+                      <div className="flex flex-col gap-y-3">
+                        <span className="text-sm uppercase tracking-wide text-ui-fg-on-color/60">
+                          카테고리
+                        </span>
+                        <ul className="flex flex-col gap-y-2">
+                          {categories.map((c) => (
+                            <li key={c.id}>
+                              <LocalizedClientLink
+                                href={`/categories/${c.handle}`}
+                                className="text-lg leading-7 hover:text-ui-fg-disabled"
+                                onClick={close}
+                                data-testid="category-link"
+                              >
+                                {/* 표시명만 시드 테스트 표식 정리 (handle/데이터는 admin 소관) */}
+                                {c.name.replace(/\s*\(kr-test\)\s*$/i, "")}
+                              </LocalizedClientLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <div className="flex flex-col gap-y-6">
                       {!!locales?.length && (
                         <div
@@ -127,8 +155,7 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                         />
                       </div>
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} Medusa Store. All rights
-                        reserved.
+                        © {new Date().getFullYear()} 쇼핑몰. All rights reserved.
                       </Text>
                     </div>
                   </div>

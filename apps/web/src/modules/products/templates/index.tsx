@@ -4,9 +4,13 @@ import ImageGallery from "@modules/products/components/image-gallery"
 import ProductActions from "@modules/products/components/product-actions"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductTabs from "@modules/products/components/product-tabs"
+import ProductDisclosureSection from "@modules/products/components/product-disclosure"
 import ProductReviews from "@modules/products/components/product-reviews"
+import ProductInquiries from "@modules/products/components/product-inquiries"
 import RelatedProducts from "@modules/products/components/related-products"
+import RecentlyViewed from "@modules/products/components/recently-viewed"
 import ProductInfo from "@modules/products/templates/product-info"
+import ProductWishlist from "@modules/wishlist/components/product-wishlist"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
@@ -56,11 +60,24 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           >
             <ProductActionsWrapper id={product.id} region={region} />
           </Suspense>
+          <Suspense fallback={null}>
+            <ProductWishlist productId={product.id} />
+          </Suspense>
         </div>
       </div>
       <div className="content-container my-16 small:my-32">
         <Suspense fallback={null}>
+          <ProductDisclosureSection productId={product.id} />
+        </Suspense>
+      </div>
+      <div className="content-container my-16 small:my-32">
+        <Suspense fallback={null}>
           <ProductReviews productId={product.id} />
+        </Suspense>
+      </div>
+      <div className="content-container my-16 small:my-32">
+        <Suspense fallback={null}>
+          <ProductInquiries productId={product.id} />
         </Suspense>
       </div>
       <div
@@ -71,6 +88,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
       </div>
+      <RecentlyViewed
+        current={{
+          id: product.id!,
+          handle: product.handle!,
+          title: product.title!,
+          thumbnail: product.thumbnail ?? null,
+        }}
+      />
     </>
   )
 }

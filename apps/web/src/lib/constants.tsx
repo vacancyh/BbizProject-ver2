@@ -4,6 +4,9 @@ import Ideal from "@modules/common/icons/ideal"
 import PayPal from "@modules/common/icons/paypal"
 import React from "react"
 
+/** 무료배송 기준 금액(원). 상품 소계가 이 금액 이상이면 무료배송 안내. */
+export const FREE_SHIPPING_THRESHOLD = 50000
+
 /* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
 export const paymentInfoMap: Record<
   string,
@@ -30,7 +33,7 @@ export const paymentInfoMap: Record<
     icon: <PayPal />,
   },
   pp_system_default: {
-    title: "Manual Payment",
+    title: "무통장입금",
     icon: <CreditCard />,
   },
   // Add more payment providers here

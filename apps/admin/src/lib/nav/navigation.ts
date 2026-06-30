@@ -39,7 +39,9 @@ export type IconName =
   | "Warehouse"
   | "MapPin"
   | "Zap"
-  | "Sparkles";
+  | "Sparkles"
+  | "Headphones"
+  | "Image";
 
 export type NavItem = {
   id: string;
@@ -97,7 +99,10 @@ export const NAVIGATION: NavGroup[] = [
       { id: "workflow-logs", label: "워크플로우 로그", href: "/settings/workflow-logs", icon: "GitBranch", gap: null, order: 15 },
       { id: "reasons", label: "반품·환불 사유", href: "/settings/reasons", icon: "RotateCcw", gap: null, order: 16 },
       { id: "legal-docs", label: "약관 관리", href: "/settings/legal-docs", icon: "FileText", gap: null, order: 17 },
-      { id: "maintenance", label: "점검 모드", href: "/settings/maintenance", icon: "Wrench", gap: null, order: 18 },
+      { id: "customer-service", label: "고객센터 콘텐츠", href: "/settings/customer-service", icon: "Headphones", gap: null, order: 18 },
+      { id: "banners", label: "배너·팝업", href: "/settings/banners", icon: "Image", gap: null, order: 19 },
+      { id: "home-curation", label: "홈 큐레이션", href: "/settings/home-curation", icon: "Sparkles", gap: null, order: 20 },
+      { id: "maintenance", label: "점검 모드", href: "/settings/maintenance", icon: "Wrench", gap: null, order: 21 },
     ],
   },
   {
