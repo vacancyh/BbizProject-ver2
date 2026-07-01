@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: 20 }
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: 20 }
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: 20 }
       - run: pnpm install --frozen-lockfile
       - name: Typecheck (정보성 — 실패해도 게이트는 통과)
