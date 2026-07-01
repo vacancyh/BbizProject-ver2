@@ -2,6 +2,7 @@ import { Suspense } from "react"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
+import SearchSuggestions from "@modules/store/components/search-suggestions"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 import PaginatedProducts from "./paginated-products"
@@ -41,6 +42,7 @@ const StoreTemplate = ({
             )}
           </h1>
         </div>
+        <SearchSuggestions currentQuery={q} />
         <Suspense fallback={<SkeletonProductGrid />}>
           <PaginatedProducts
             sortBy={sort}
