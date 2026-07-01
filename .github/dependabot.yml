@@ -1,0 +1,22 @@
+# 의존성 취약점 자동 스캔·업데이트 (주 1회 PR 생성)
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule: { interval: "weekly" }
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+  - package-ecosystem: "npm"
+    directory: "/apps/admin"
+    schedule: { interval: "weekly" }
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+  - package-ecosystem: "npm"
+    directory: "/backend/services/api"
+    schedule: { interval: "weekly" }
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule: { interval: "weekly" }
+    labels: ["ci"]

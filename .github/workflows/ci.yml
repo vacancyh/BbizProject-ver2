@@ -1,7 +1,8 @@
 name: CI
 
-# PR/푸시 시 정적 검증 게이트 (타입체크·린트).
-# E2E(브라우저)·백엔드 통합은 실행 인프라가 필요하므로 별도(로컬 npm run test:sweep 등)로 운영.
+# PR/푸시 시 게이트: 앱별 독립 설치 + 타입체크/린트/빌드.
+# (루트 워크스페이스 없음 — 각 앱이 자체 lockfile 로 설치)
+# E2E(브라우저)·백엔드 통합·프로덕션 데이터 시드는 실행 인프라 필요 → 별도(로컬/야간) 운영.
 on:
   push:
     branches: [main]
@@ -9,29 +10,61 @@ on:
     branches: [main]
 
 jobs:
-  static-checks:
+  storefront:
+    name: 스토어프론트 (typecheck·lint)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11.3.0
-
+        with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Typecheck (admin)
-        run: pnpm --filter @shop/admin typecheck
-
-      - name: Lint (admin)
-        run: pnpm --filter @shop/admin lint
-
-      - name: Typecheck (storefront)
-        working-directory: apps/web
+        with: { node-version: 20 }
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
         run: npx tsc --noEmit
+      - name: Lint
+        run: pnpm lint
+      # next build 는 SSG 중 백엔드 호출 → CI 무백엔드에선 별도(야간 통합) 실행.
+
+  admin:
+    name: 관리자 (typecheck·lint·build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.3.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Build (프로덕션 빌드 회귀 감지 — 클라이언트 렌더라 백엔드 불필요)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_BACKEND_URL: http://localhost:9000
+
+  backend:
+    name: 백엔드 (typecheck)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.3.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck (정보성 — 실패해도 게이트는 통과)
+        run: npx tsc --noEmit
+        continue-on-error: true
+      # medusa build 는 medusa-config env 로딩 필요 → 별도(배포 파이프라인) 실행.

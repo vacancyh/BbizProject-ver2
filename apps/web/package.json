@@ -52,5 +52,10 @@
     "tailwindcss": "^3.0.23",
     "typescript": "^5.3.2"
   },
-  "packageManager": "pnpm@11.3.0"
+  "packageManager": "pnpm@11.3.0",
+  "pnpm": {
+    "overrides": {
+      "postcss": ">=8.4.31"
+    }
+  }
 }

@@ -222,8 +222,57 @@ async function storeOrderOwnershipGuard(
   }
 }
 
+/**
+ * 인증 rate limit — 로그인 무차별 대입(brute-force) 방어.
+ * 실패(401/400)만 카운트 → 정상 로그인/테스트는 영향 없음, 실패 폭주만 차단.
+ * 인메모리(단일 인스턴스 기준). 다중 인스턴스 운영은 Redis 백엔드로 교체 권장(문서화).
+ */
+const FAIL_WINDOW_MS = 5 * 60_000 // 5분 창
+const FAIL_MAX = 10 // 창 내 실패 10회 초과 시 차단
+const failStore = new Map<string, { fails: number; resetAt: number }>()
+function clientIp(req: MedusaRequest): string {
+  const xf = (req.headers["x-forwarded-for"] as string) || ""
+  return (xf.split(",")[0].trim() || req.ip || "unknown").toString()
+}
+function authRateLimit(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  if (req.method !== "POST") return next()
+  const ip = clientIp(req)
+  const now = Date.now()
+  const e = failStore.get(ip)
+  if (e && e.resetAt > now && e.fails >= FAIL_MAX) {
+    res.setHeader("Retry-After", String(Math.ceil((e.resetAt - now) / 1000)))
+    res.status(429).json({
+      message: "인증 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+      code: "RATE_LIMITED",
+    })
+    return
+  }
+  res.on("finish", () => {
+    const sc = res.statusCode
+    if (sc === 401 || sc === 400) {
+      const cur = failStore.get(ip)
+      if (!cur || cur.resetAt < now)
+        failStore.set(ip, { fails: 1, resetAt: now + FAIL_WINDOW_MS })
+      else cur.fails++
+    } else if (sc >= 200 && sc < 300) {
+      failStore.delete(ip) // 성공 시 초기화
+    }
+  })
+  return next()
+}
+
 export default defineMiddlewares({
   routes: [
+    {
+      // 인증 무차별 대입 방어(실패 기반).
+      matcher: "/auth/*",
+      method: ["POST"],
+      middlewares: [authRateLimit],
+    },
     {
       // GET 포함 — rbacGuard 가 보안메뉴 조회(read) 권한도 검사. auditTap 은 write 만 기록.
       matcher: "/admin/*",
