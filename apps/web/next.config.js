@@ -8,10 +8,37 @@ checkEnvVariables()
 const S3_HOSTNAME = process.env.MEDUSA_CLOUD_S3_HOSTNAME
 const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
 
+// 보안 헤더 (전 경로 적용). CSP 는 다음 우편번호·데모 이미지·백엔드 API 를 허용.
+// ⚠️ 운영: connect-src/img-src 를 실제 도메인으로 좁히고 'unsafe-eval' 제거(nonce 도입) 권장.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.daumcdn.net https://t1.daumcdn.net",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data: https://cdn.jsdelivr.net",
+  "connect-src 'self' http://localhost:9000 https: ws: wss:",
+  "frame-src 'self' https://*.daum.net https://postcode.map.daum.net",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+].join("; ")
+
+const securityHeaders = [
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+  { key: "Content-Security-Policy", value: CSP },
+]
+
 /**
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }]
+  },
   reactStrictMode: true,
   logging: {
     fetches: {

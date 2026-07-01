@@ -265,13 +265,46 @@ function authRateLimit(
   return next()
 }
 
+/**
+ * 비밀번호 정책 — 약한 비밀번호 가입/설정 차단.
+ * 최소 8자 + 영문 + 숫자. register/reset 계열 요청의 body.password 검증.
+ */
+function isStrongPassword(pw: unknown): boolean {
+  return (
+    typeof pw === "string" &&
+    pw.length >= 8 &&
+    /[A-Za-z]/.test(pw) &&
+    /[0-9]/.test(pw)
+  )
+}
+function passwordPolicyGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  // 신규 비밀번호 설정 계열만 검증(가입/재설정). 로그인(자격증명 검증)은 제외
+  // → 기존 짧은 비밀번호 계정의 로그인은 그대로 허용.
+  const p = req.path || ""
+  const isPasswordSet = p.endsWith("/register") || p.includes("/reset-password") || p.includes("/update")
+  if (!isPasswordSet) return next()
+  const pw = (req.body as any)?.password
+  if (pw !== undefined && pw !== null && !isStrongPassword(pw)) {
+    res.status(400).json({
+      message: "비밀번호는 8자 이상이며 영문과 숫자를 포함해야 합니다.",
+      code: "WEAK_PASSWORD",
+    })
+    return
+  }
+  return next()
+}
+
 export default defineMiddlewares({
   routes: [
     {
-      // 인증 무차별 대입 방어(실패 기반).
+      // 인증 무차별 대입 방어(실패 기반) + 비밀번호 정책.
       matcher: "/auth/*",
       method: ["POST"],
-      middlewares: [authRateLimit],
+      middlewares: [authRateLimit, passwordPolicyGuard],
     },
     {
       // GET 포함 — rbacGuard 가 보안메뉴 조회(read) 권한도 검사. auditTap 은 write 만 기록.

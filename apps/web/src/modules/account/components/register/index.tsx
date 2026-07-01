@@ -62,8 +62,14 @@ const Register = ({ setCurrentView }: Props) => {
             required
             type="password"
             autoComplete="new-password"
+            minLength={8}
+            pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
+            title="8자 이상, 영문과 숫자를 포함해 주세요."
             data-testid="password-input"
           />
+          <p className="text-xsmall-regular text-ui-fg-muted -mt-2">
+            비밀번호는 8자 이상이며 영문과 숫자를 포함해야 합니다.
+          </p>
           <div className="mt-2">
             <PhoneVerify />
           </div>

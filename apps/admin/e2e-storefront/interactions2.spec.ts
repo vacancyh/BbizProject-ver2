@@ -106,7 +106,7 @@ test("회원 탈퇴", async ({ page }) => {
   await page.getByTestId("last-name-input").fill("테")
   await page.getByTestId("email-input").fill(email)
   await page.getByTestId("phone-input").fill("010-9999-0000")
-  await page.getByTestId("password-input").fill("wd1234!")
+  await page.getByTestId("password-input").fill("wd123456!")
   await page.getByRole("button", { name: "가입하기" }).click()
   await expect(page.getByTestId("welcome-message")).toBeVisible({ timeout: 20000 })
   // 프로필 → 탈퇴
