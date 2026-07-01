@@ -1,31 +1,37 @@
 "use server"
 
-// 위시리스트 데이터 계층 (쿠키 영속 + 실제 상품 fetch 하이브리드)
+// 위시리스트 데이터 계층 (하이브리드)
 // ─────────────────────────────────────────────────────────────
-// 백엔드 product-curation(wishlist) 모듈은 관리자측에만 있고 고객용 /store API가 없음.
-// 그래서 "찜 목록(상품 id)"은 쿠키에 영속화하고, 상품 데이터는 실제 store API로 조회한다.
-// → mock이지만 실제로 추가/삭제가 동작하는 사용 가능한 형태.
-// 백엔드 store 위시 API 준비 시: 쿠키 대신 `/store/customers/me/wishlist` 로 교체.
+// - 로그인 고객: 백엔드 서버 위시리스트(`/store/customers/me/wishlist`, product-curation 모듈) → 기기간 동기화.
+// - 비회원: 쿠키(`_wishlist`)로 영속(게스트도 사용 가능).
+// - 로그인 시: 쿠키 위시 → 서버로 머지(mergeGuestWishlistToServer) 후 쿠키 정리.
+// 상품 데이터는 실제 store products API 로 조회(찜한 순서 유지).
 
 import { cookies as nextCookies } from "next/headers"
 import { HttpTypes } from "@medusajs/types"
+import { sdk } from "@lib/config"
+import { getAuthHeaders } from "./cookies"
 import { listProducts } from "./products"
 
 const COOKIE = "_wishlist"
 
-export async function getWishlistIds(): Promise<string[]> {
+async function isLoggedIn(): Promise<boolean> {
+  const h = await getAuthHeaders()
+  return "authorization" in h
+}
+
+// ─── 쿠키(게스트) ───
+async function getCookieIds(): Promise<string[]> {
   try {
     const cookies = await nextCookies()
     const raw = cookies.get(COOKIE)?.value
-    if (!raw) return []
-    const arr = JSON.parse(raw)
+    const arr = raw ? JSON.parse(raw) : []
     return Array.isArray(arr) ? arr.filter((x) => typeof x === "string") : []
   } catch {
     return []
   }
 }
-
-async function setWishlistIds(ids: string[]) {
+async function setCookieIds(ids: string[]) {
   const cookies = await nextCookies()
   cookies.set(COOKIE, JSON.stringify(ids), {
     maxAge: 60 * 60 * 24 * 30,
@@ -34,24 +40,93 @@ async function setWishlistIds(ids: string[]) {
   })
 }
 
+// ─── 서버(로그인) ───
+async function getServerIds(): Promise<string[]> {
+  try {
+    const headers = { ...(await getAuthHeaders()) }
+    const res = await sdk.client.fetch<{ product_ids: string[] }>(
+      "/store/customers/me/wishlist",
+      { method: "GET", headers, cache: "no-store" }
+    )
+    return res?.product_ids ?? []
+  } catch {
+    return []
+  }
+}
+
+// ─── 공개 API (하이브리드) ───
+export async function getWishlistIds(): Promise<string[]> {
+  return (await isLoggedIn()) ? getServerIds() : getCookieIds()
+}
+
 export async function isInWishlist(productId: string): Promise<boolean> {
   return (await getWishlistIds()).includes(productId)
 }
 
-/** 토글: 찜되어 있으면 해제, 없으면 추가. 추가 여부를 반환. */
+/** 토글: 찜되어 있으면 해제, 없으면 추가. 추가 여부 반환. */
 export async function toggleWishlist(productId: string): Promise<boolean> {
-  const ids = await getWishlistIds()
+  if (await isLoggedIn()) {
+    const headers = { ...(await getAuthHeaders()) }
+    const has = (await getServerIds()).includes(productId)
+    if (has) {
+      await sdk.client
+        .fetch(`/store/customers/me/wishlist/${productId}`, {
+          method: "DELETE",
+          headers,
+        })
+        .catch(() => {})
+      return false
+    }
+    await sdk.client
+      .fetch("/store/customers/me/wishlist", {
+        method: "POST",
+        headers,
+        body: { product_id: productId },
+      })
+      .catch(() => {})
+    return true
+  }
+  // 게스트: 쿠키
+  const ids = await getCookieIds()
   if (ids.includes(productId)) {
-    await setWishlistIds(ids.filter((id) => id !== productId))
+    await setCookieIds(ids.filter((id) => id !== productId))
     return false
   }
-  await setWishlistIds([productId, ...ids])
+  await setCookieIds([productId, ...ids])
   return true
 }
 
 export async function removeFromWishlist(productId: string): Promise<void> {
-  const ids = await getWishlistIds()
-  await setWishlistIds(ids.filter((id) => id !== productId))
+  if (await isLoggedIn()) {
+    const headers = { ...(await getAuthHeaders()) }
+    await sdk.client
+      .fetch(`/store/customers/me/wishlist/${productId}`, {
+        method: "DELETE",
+        headers,
+      })
+      .catch(() => {})
+    return
+  }
+  const ids = await getCookieIds()
+  await setCookieIds(ids.filter((id) => id !== productId))
+}
+
+/** 로그인 직후 호출: 게스트(쿠키) 위시를 서버로 머지하고 쿠키 정리. */
+export async function mergeGuestWishlistToServer(): Promise<void> {
+  try {
+    const cookieIds = await getCookieIds()
+    if (!cookieIds.length) return
+    const headers = { ...(await getAuthHeaders()) }
+    if (!("authorization" in headers)) return
+    await sdk.client.fetch("/store/customers/me/wishlist", {
+      method: "POST",
+      headers,
+      body: { product_ids: cookieIds },
+    })
+    await setCookieIds([]) // 머지 후 쿠키 비움
+  } catch {
+    // 실패해도 치명적 아님
+  }
 }
 
 /** 찜한 상품들을 실제 store API로 조회 (찜한 순서 유지). */

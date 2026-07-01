@@ -125,6 +125,14 @@ export async function login(_currentState: unknown, formData: FormData) {
   } catch (error) {
     return String(error)
   }
+
+  // 게스트(쿠키) 위시리스트를 서버로 머지(로그인 전 찜한 상품 보존)
+  try {
+    const { mergeGuestWishlistToServer } = await import("./wishlist")
+    await mergeGuestWishlistToServer()
+  } catch {
+    // 비치명적
+  }
 }
 
 /**
