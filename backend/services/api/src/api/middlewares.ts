@@ -187,6 +187,41 @@ function auditTap(
   return next()
 }
 
+/**
+ * 스토어 주문 단건 조회(GET /store/orders/:id) 소유권 가드 — IDOR 방지.
+ * 코어 라우트는 소유권을 검사하지 않아 로그인 고객이 남의 주문 id 로 조회 가능했음.
+ * - 인증된 고객: 본인(customer_id === actor_id) 주문만 허용, 그 외 404(존재 노출 방지).
+ * - 미인증(게스트 주문완료 페이지): 기존 동작 유지(주문 id 기반 조회). 운영 시 서명 토큰 권장.
+ */
+async function storeOrderOwnershipGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    if (req.method !== "GET") return next()
+    const id = req.params.id
+    if (!id || id === "lookup") return next() // 목록/조회 라우트 제외
+    const actorId = actorIdOf(req)
+    if (!actorId) return next() // 미인증 게스트 — 기존 동작
+
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+    const { data } = await query.graph({
+      entity: "order",
+      fields: ["id", "customer_id"],
+      filters: { id } as Record<string, unknown>,
+    })
+    const order = data?.[0]
+    if (!order || order.customer_id !== actorId) {
+      res.status(404).json({ message: "주문을 찾을 수 없습니다." })
+      return
+    }
+    return next()
+  } catch {
+    return next() // 오류 시 코어 라우트로 위임(잠금 방지)
+  }
+}
+
 export default defineMiddlewares({
   routes: [
     {
@@ -194,6 +229,12 @@ export default defineMiddlewares({
       matcher: "/admin/*",
       method: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       middlewares: [rbacGuard, auditTap],
+    },
+    {
+      // 스토어 주문 단건 조회 IDOR 방지(인증 고객은 본인 주문만).
+      matcher: "/store/orders/:id",
+      method: ["GET"],
+      middlewares: [storeOrderOwnershipGuard],
     },
   ],
 })
