@@ -4,9 +4,9 @@ import type { NextConfig } from "next";
 const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
-  "font-src 'self' data: https://cdn.jsdelivr.net",
+  "font-src 'self' data: https://cdn.jsdelivr.net https://fonts.gstatic.com",
   "connect-src 'self' http://localhost:9000 https: ws: wss:",
   "frame-ancestors 'none'",
   "object-src 'none'",
