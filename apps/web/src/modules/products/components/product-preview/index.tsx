@@ -35,8 +35,8 @@ export default async function ProductPreview({
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
       <div data-testid="product-wrapper" className="relative">
         <WishlistButton productId={product.id} initialActive={wished} />
-        <div className="overflow-hidden">
-          <div className="transition-transform duration-300 ease-out group-hover:scale-[1.03]">
+        <div className="overflow-hidden rounded-xl bg-ui-bg-subtle ring-1 ring-black/5 transition-shadow duration-300 group-hover:shadow-lg">
+          <div className="transition-transform duration-500 ease-out group-hover:scale-[1.05]">
             <Thumbnail
               thumbnail={product.thumbnail}
               images={product.images}
@@ -45,14 +45,14 @@ export default async function ProductPreview({
             />
           </div>
         </div>
-        <div className="flex flex-col gap-y-1 mt-3">
+        <div className="flex flex-col gap-y-1 mt-3 px-0.5">
           <Text
-            className="text-ui-fg-base text-sm line-clamp-1"
+            className="text-ui-fg-base text-sm line-clamp-1 group-hover:text-ui-fg-interactive transition-colors"
             data-testid="product-title"
           >
             {product.title}
           </Text>
-          <div className="flex items-center gap-x-2">
+          <div className="flex items-center gap-x-2 font-medium text-ui-fg-base">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>
         </div>

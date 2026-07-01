@@ -39,6 +39,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.s3.amazonaws.com",
       },
+      // 데모용 플레이스홀더 이미지 (운영 전환 시 실제 상품 이미지/CDN 으로 교체)
+      { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "fastly.picsum.photos" },
+      { protocol: "https", hostname: "images.unsplash.com" },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {
