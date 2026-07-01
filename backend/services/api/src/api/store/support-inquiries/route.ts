@@ -8,6 +8,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { REVIEW_MODULE } from "../../../modules/review"
 import type ReviewModuleService from "../../../modules/review/service"
+import { checkText } from "../../_utils/text"
 
 const CATEGORIES = ["주문/결제", "배송", "교환/반품", "회원/적립금", "기타"]
 
@@ -21,8 +22,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     content?: string
   }
 
-  if (!b.content || b.content.trim().length < 5) {
-    res.status(400).json({ message: "문의 내용을 5자 이상 입력해 주세요." })
+  // 길이 검증(최소 + 최대 상한 — 과대 payload 방지)
+  const lenErr =
+    checkText(b.content, { field: "문의 내용", min: 5, max: 5000, required: true }) ||
+    checkText(b.subject, { field: "제목", max: 200 }) ||
+    checkText(b.author_name, { field: "이름", max: 50 }) ||
+    checkText(b.author_email, { field: "이메일", max: 254 })
+  if (lenErr) {
+    res.status(400).json({ message: lenErr })
     return
   }
   if (!b.author_email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.author_email)) {

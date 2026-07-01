@@ -8,6 +8,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { REVIEW_MODULE } from "../../../../../modules/review"
 import type ReviewModuleService from "../../../../../modules/review/service"
+import { checkText } from "../../../../_utils/text"
 
 type ReviewRatingKey = 1 | 2 | 3 | 4 | 5
 
@@ -89,6 +90,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   if (!body.content || typeof body.rating !== "number") {
     res.status(400).json({ message: "rating(1~5)과 content는 필수입니다." })
+    return
+  }
+  const lenErr =
+    checkText(body.content, { field: "리뷰 내용", max: 5000, required: true }) ||
+    checkText(body.title, { field: "제목", max: 200 }) ||
+    checkText(body.author_name, { field: "작성자명", max: 50 })
+  if (lenErr) {
+    res.status(400).json({ message: lenErr })
     return
   }
 

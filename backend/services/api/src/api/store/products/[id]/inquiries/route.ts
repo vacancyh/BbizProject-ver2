@@ -9,6 +9,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { REVIEW_MODULE } from "../../../../../modules/review"
 import type ReviewModuleService from "../../../../../modules/review/service"
+import { checkText } from "../../../../_utils/text"
 
 function toStoreInquiry(r: any) {
   return {
@@ -67,8 +68,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     content?: string
   }
 
-  if (!body.content || body.content.trim().length < 5) {
-    res.status(400).json({ message: "문의 내용을 5자 이상 입력해 주세요." })
+  const lenErr =
+    checkText(body.content, { field: "문의 내용", min: 5, max: 5000, required: true }) ||
+    checkText(body.author_name, { field: "작성자명", max: 50 })
+  if (lenErr) {
+    res.status(400).json({ message: lenErr })
     return
   }
 
