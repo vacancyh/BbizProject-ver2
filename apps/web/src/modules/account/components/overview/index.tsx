@@ -90,7 +90,11 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                               <span className="font-semibold">주문번호</span>
                               <span className="font-semibold">결제금액</span>
                               <span data-testid="order-created-date">
-                                {new Date(order.created_at).toDateString()}
+                                {new Date(order.created_at).toLocaleDateString("ko-KR", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
                               </span>
                               <span
                                 data-testid="order-id"

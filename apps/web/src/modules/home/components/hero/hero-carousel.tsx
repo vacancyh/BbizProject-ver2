@@ -27,7 +27,9 @@ const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
         alt={b.title}
         className="h-full w-full object-cover"
       />
-      <div className="absolute inset-0 bg-black/25" />
+      {/* 배너 이미지가 밝아도 흰 텍스트 가독성 확보: 어두운 오버레이 + 하단 그라데이션 */}
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
       <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center gap-6 p-8">
         <Heading
           level="h1"

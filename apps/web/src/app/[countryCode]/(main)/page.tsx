@@ -36,6 +36,12 @@ export default async function Home(props: {
 
   const popupBanners = await listBanners("popup")
 
+  // 홈 전용 섹션(베스트/신상품)과 중복되는 컬렉션은 하단 레일에서 제외해 중복 노출 방지.
+  const DUP_HANDLES = new Set(["best", "new"])
+  const railCollections = collections.filter(
+    (c) => !DUP_HANDLES.has((c.handle ?? "").toLowerCase())
+  )
+
   return (
     <>
       <HomePopup banners={popupBanners} />
@@ -44,11 +50,13 @@ export default async function Home(props: {
       <BestProducts region={region} />
       <TimeSaleSection countryCode={countryCode} region={region} />
       <NewArrivals region={region} />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div>
+      {railCollections.length > 0 && (
+        <div className="py-12">
+          <ul className="flex flex-col gap-x-6">
+            <FeaturedProducts collections={railCollections} region={region} />
+          </ul>
+        </div>
+      )}
     </>
   )
 }

@@ -7,10 +7,12 @@ type ImageGalleryProps = {
 }
 
 const ImageGallery = ({ images }: ImageGalleryProps) => {
+  // URL 없는 이미지 레코드는 빈 회색 박스로 렌더되어 큰 공백을 만드므로 제외.
+  const validImages = images.filter((img) => !!img.url)
   return (
     <div className="flex items-start relative">
       <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
-        {images.map((image, index) => {
+        {validImages.map((image, index) => {
           return (
             <Container
               key={image.id}
