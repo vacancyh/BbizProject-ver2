@@ -9,6 +9,7 @@ import ProductReviews from "@modules/products/components/product-reviews"
 import ProductInquiries from "@modules/products/components/product-inquiries"
 import RelatedProducts from "@modules/products/components/related-products"
 import RecentlyViewed from "@modules/products/components/recently-viewed"
+import ProductViewTracker from "@modules/products/components/view-tracker"
 import ProductInfo from "@modules/products/templates/product-info"
 import ProductWishlist from "@modules/wishlist/components/product-wishlist"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
@@ -88,6 +89,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
       </div>
+      <ProductViewTracker productId={product.id!} />
       <RecentlyViewed
         current={{
           id: product.id!,

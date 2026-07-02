@@ -20,6 +20,9 @@ import type RbacModuleService from "../modules/rbac/service"
 import type { RbacAction } from "../modules/rbac/service"
 import { AUDIT_MODULE } from "../modules/audit"
 import type AuditModuleService from "../modules/audit/service"
+import { ADMIN_2FA_MODULE } from "../modules/admin-2fa"
+import type Admin2faModuleService from "../modules/admin-2fa/service"
+import { rlGet, rlIncr, rlReset } from "./_utils/rate-limit"
 
 const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
 
@@ -120,6 +123,46 @@ async function rbacGuard(
   } catch (e) {
     // 내부 오류 시 fail-open(잠금 방지). 운영 모니터링은 후속.
     console.warn("[rbac] 권한검사 오류, 통과 처리:", (e as Error)?.message)
+    return next()
+  }
+}
+
+/**
+ * 관리자 2FA 세션 게이팅 — 클라이언트 우회 방지(서버측 강제).
+ * 2FA 활성 관리자는 로그인 토큰이 /admin/2fa/verify 를 통과(markTokenVerified)하기 전까지
+ * 모든 /admin/* 접근이 403(2FA_REQUIRED)로 차단된다.
+ *  - /admin/2fa/* 는 예외(상태조회·검증 자체는 허용해야 통과 가능).
+ *  - 2FA 미활성 관리자/미인증 요청은 그대로 통과(기존 동작·E2E 무영향).
+ *  - 내부 오류 시 fail-open(잠금 방지). 운영 모니터링은 후속.
+ */
+async function twoFactorGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    // 2FA 관련 엔드포인트는 게이팅 예외(검증 진입 경로 확보)
+    if (req.path.startsWith("/admin/2fa")) return next()
+    const userId = actorIdOf(req)
+    if (!userId) return next() // 미인증은 Medusa auth 가 처리
+
+    const svc = req.scope.resolve(
+      ADMIN_2FA_MODULE
+    ) as unknown as Admin2faModuleService
+    const row = await svc.getByUser(userId)
+    if (!row || !row.enabled) return next() // 2FA 미활성 → 통과
+
+    const h = req.headers.authorization ?? ""
+    const tok = h.startsWith("Bearer ") ? h.slice(7) : null
+    if (tok && (await svc.isTokenVerified(userId, tok))) return next()
+
+    res.status(403).json({
+      message: "2단계 인증이 필요합니다. 다시 로그인해 인증 코드를 입력해 주세요.",
+      code: "2FA_REQUIRED",
+    })
+    return
+  } catch (e) {
+    console.warn("[2fa] 게이팅 오류, 통과 처리:", (e as Error)?.message)
     return next()
   }
 }
@@ -225,42 +268,38 @@ async function storeOrderOwnershipGuard(
 /**
  * 인증 rate limit — 로그인 무차별 대입(brute-force) 방어.
  * 실패(401/400)만 카운트 → 정상 로그인/테스트는 영향 없음, 실패 폭주만 차단.
- * 인메모리(단일 인스턴스 기준). 다중 인스턴스 운영은 Redis 백엔드로 교체 권장(문서화).
+ * 저장소: 캐시 서비스(운영 Redis 구성 시 다중 인스턴스 공유) → 미가용 시 인메모리 폴백.
+ *   (운영에선 WAF/API 게이트웨이 rate limit 을 1차 방어로 병행 권장.)
  */
 const FAIL_WINDOW_MS = 5 * 60_000 // 5분 창
 const FAIL_MAX = 10 // 창 내 실패 10회 초과 시 차단
-const failStore = new Map<string, { fails: number; resetAt: number }>()
 function clientIp(req: MedusaRequest): string {
   const xf = (req.headers["x-forwarded-for"] as string) || ""
   return (xf.split(",")[0].trim() || req.ip || "unknown").toString()
 }
-function authRateLimit(
+async function authRateLimit(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ) {
   if (req.method !== "POST") return next()
-  const ip = clientIp(req)
-  const now = Date.now()
-  const e = failStore.get(ip)
-  if (e && e.resetAt > now && e.fails >= FAIL_MAX) {
-    res.setHeader("Retry-After", String(Math.ceil((e.resetAt - now) / 1000)))
-    res.status(429).json({
-      message: "인증 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
-      code: "RATE_LIMITED",
-    })
-    return
+  const key = `authfail:${clientIp(req)}`
+  try {
+    if ((await rlGet(req.scope, key)) >= FAIL_MAX) {
+      res.setHeader("Retry-After", String(Math.ceil(FAIL_WINDOW_MS / 1000)))
+      res.status(429).json({
+        message: "인증 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+        code: "RATE_LIMITED",
+      })
+      return
+    }
+  } catch {
+    // 저장소 오류 → fail-open(가용성 우선)
   }
   res.on("finish", () => {
     const sc = res.statusCode
-    if (sc === 401 || sc === 400) {
-      const cur = failStore.get(ip)
-      if (!cur || cur.resetAt < now)
-        failStore.set(ip, { fails: 1, resetAt: now + FAIL_WINDOW_MS })
-      else cur.fails++
-    } else if (sc >= 200 && sc < 300) {
-      failStore.delete(ip) // 성공 시 초기화
-    }
+    if (sc === 401 || sc === 400) void rlIncr(req.scope, key, FAIL_WINDOW_MS)
+    else if (sc >= 200 && sc < 300) void rlReset(req.scope, key)
   })
   return next()
 }
@@ -310,7 +349,7 @@ export default defineMiddlewares({
       // GET 포함 — rbacGuard 가 보안메뉴 조회(read) 권한도 검사. auditTap 은 write 만 기록.
       matcher: "/admin/*",
       method: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      middlewares: [rbacGuard, auditTap],
+      middlewares: [twoFactorGuard, rbacGuard, auditTap],
     },
     {
       // 스토어 주문 단건 조회 IDOR 방지(인증 고객은 본인 주문만).

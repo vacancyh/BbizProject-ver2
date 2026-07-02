@@ -83,7 +83,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     author_email: body.author_email ?? null,
     rating: null,
     title: null,
-    content: body.content.trim(),
+    content: (body.content ?? "").trim(),
     status: "pending",
   })
 

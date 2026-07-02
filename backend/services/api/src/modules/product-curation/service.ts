@@ -22,6 +22,7 @@ import {
   filterPopularTerms,
   topViewedProducts,
   aggregateWishlistByProduct,
+  rankBestProducts,
   containsBannedWord,
   normalizeSearchTerm,
   type BannedWordScope,
@@ -159,6 +160,40 @@ class ProductCurationModuleService extends MedusaService({
     return aggregated.slice(0, Math.min(limit, 100))
   }
 
+  /**
+   * 베스트(인기) 상품 랭킹 — 판매수량 + 조회수 + 위시 수 가중 합산.
+   * 판매수량(sales)은 기준기간(최근 N일) 주문 집계로, 라우트에서 주입한다
+   * (모듈은 코어 order 데이터를 직접 조회하지 않음 — 가드레일).
+   *
+   * @param limit 반환 개수(기본 20, 최대 100)
+   * @param sales [{product_id, qty}] 최근 N일 판매수량(선택)
+   * @returns { product_id, score, views, wishCount, sales }[] score DESC
+   */
+  async getBestProducts(
+    limit: number = 20,
+    sales: Array<{ product_id: string; qty: number }> = []
+  ): Promise<
+    Array<{
+      product_id: string
+      score: number
+      views: number
+      wishCount: number
+      sales: number
+    }>
+  > {
+    const cap = Math.min(Math.max(1, limit), 100)
+    const views = (await this.listProductViewCounts({})).map((r: any) => ({
+      product_id: r.product_id as string,
+      count: Number(r.count),
+    }))
+    const wishRows = (await this.listProductWishlists({})).map((r: any) => ({
+      product_id: r.product_id as string,
+      customer_id: r.customer_id as string,
+    }))
+    const wishlists = aggregateWishlistByProduct(wishRows)
+    return rankBestProducts(views, wishlists, sales, cap)
+  }
+
   // ─── 인기 검색어(PopularSearchTerm) ────────────────────────────────────────
 
   /**
@@ -203,18 +238,20 @@ class ProductCurationModuleService extends MedusaService({
    * 인기 검색어 목록(금칙어 제외).
    *
    * @param limit 반환 개수(기본 10)
-   * @returns { term, count }[] count DESC 정렬, 금칙어 제외
+   * @param minCount 최소 누적 검색 횟수(기본 1) — 1회성/오타 유입 노출 방지
+   * @returns { term, count }[] count DESC 정렬, 금칙어·미달 제외
    */
-  async getPopularTerms(limit: number = 10): Promise<
-    Array<{ term: string; count: number }>
-  > {
+  async getPopularTerms(
+    limit: number = 10,
+    minCount: number = 1
+  ): Promise<Array<{ term: string; count: number }>> {
     const items = await this.listPopularSearchTerms({})
     const mapped = items.map((r: any) => ({
       term: r.term as string,
       count: Number(r.count),
       is_banned: Boolean(r.is_banned),
     }))
-    return filterPopularTerms(mapped, limit)
+    return filterPopularTerms(mapped, limit, minCount)
   }
 
   // ─── 금칙어(BannedWord) ───────────────────────────────────────────────────

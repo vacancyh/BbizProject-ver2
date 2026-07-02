@@ -65,7 +65,9 @@
 | products.sales-channels | 판매채널 연결 | TODO | MATCH | REST | 상품 | — | |
 | (보강) 상품정보고시·KC·원산지 | 고시 템플릿/검증/버저닝 | DONE | GAP_B | MODULE | 상품 | ours-only/product-classification.md | 분류(상품유형)별 고시 템플릿 + 상품 metadata 연결 + 게시 전 고시 필수항목 검증(실 DB 검증) · KC/버저닝 후속 |
 | (보강) 타임세일 | 기간·재고 제한, 종료 시 원가 복원 | TODO | GAP_B | MODULE | 상품 | ours-only/flash-sale.md | flash-sale module |
-| (보강) 상품통계·홈큐레이션 | 조회수/판매량/위시·인기검색어·베스트 | DOING | GAP_B | MODULE | 상품 | ours-only/curation-analytics.md | curation module(테이블 마이그레이션 적용·500 해결, recordSearch 금칙어 확인 반영) |
+| (보강) 베스트 상품 랭킹 | 최근N일 판매수량×10+조회수+위시×5 가중 | DONE | GAP_B | MODULE | 상품 | ours-only/curation-analytics.md | product-curation `rankBestProducts` + `GET /store/best-products?limit&days` |
+| (보강) 상품 조회수 트래킹 | 상품 상세 진입 시 조회수 집계 | DONE | GAP_B | MODULE | 상품 | ours-only/curation-analytics.md | `POST /store/products/:id/view` + 스토어 `view-tracker`(세션당 1회) |
+| (보강) 인기 검색어 실집계 | 검색어 집계·금칙어 제외·노출 임계 | DONE | GAP_B | MODULE | 상품 | ours-only/curation-analytics.md | `GET/POST /store/popular-search-terms`(최소 2회 임계 + IP rate limit) |
 | (보강) 재고 동시성 | 원자적 차감·음수방지·배치 충돌 | TODO | GAP_B | MODULE | 상품 | ours-only/inventory-concurrency.md | inventory 래핑+락 |
 
 ### 3) product-variants → **상품 관리**(하위)
@@ -204,6 +206,13 @@
 | users.invite | 관리자 초대 | TODO | MATCH | REST | 설정 | — | |
 | users.metadata | 메타데이터 | TODO | MATCH | REST | 설정 | — | |
 
+### 16.5) admin-2fa → **쇼핑몰 설정 > 2단계 인증(2FA)** (신규, GAP_B)
+| Medusa 기능(화면·액션) | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 도메인 | 문서경로 | 비고 |
+|---|---|---|---|---|---|---|---|
+| (없음) | 2FA 등록(QR/수동키)·활성화·해제 | DONE | GAP_B | MODULE | 설정 | ours-only/admin-2fa.md | `admin-2fa` 모듈(`admin_totp`), `POST /admin/2fa/setup|activate`, 순수 JS TOTP(RFC6238) |
+| (없음) | 로그인 2단계 검증·서버측 게이팅 | DONE | GAP_B | MODULE+WRAP | 설정 | ours-only/admin-2fa.md | `POST /admin/2fa/verify` + `twoFactorGuard` 미들웨어(미검증 토큰 `/admin/*` 403), `admin_totp_session` |
+| (없음) | 백업(복구) 코드·시크릿 암호화 | DONE | GAP_B | MODULE | 설정 | ours-only/admin-2fa.md | 1회용 코드 10개(`admin_2fa_backup_code`, 해시), 시크릿 AES-256-GCM(`_utils/secret-crypto.ts`) |
+
 ### 17) regions
 | Medusa 기능(화면·액션) | 우리 화면 대응 | 상태 | 갭유형 | 연동 | 도메인 | 문서경로 | 비고 |
 |---|---|---|---|---|---|---|---|
@@ -308,6 +317,8 @@
 | 관리자 권한(RBAC) — SUPER/OPERATION/CS/MARKETER + 메뉴·기능별 CRUD 2계층 | 권한 관리 | DONE | GAP_B | MODULE | rbac | ours-only/rbac.md | rbac 모듈 + middlewares.ts 권한검사(write 403 + 보안메뉴 read super 전용 + 점검모드 super 필요) + /permissions 화면 |
 | 감사 로그 — 모든 write append-only·5년·PII 마스킹 | 감사 로그 조회 | DONE | GAP_B | MODULE | audit | ours-only/audit-log.md | audit 모듈 + middlewares.ts 기록 + PII 마스킹(검증) + /audit-logs 화면 |
 | 정책 저장소 — system_policies 통합·이중확인·변경이력(SUPER) | 정책 관리 | DONE | GAP_B | MODULE | policy | ours-only/policy-store.md | policy 모듈 + 이중확인(409) + 변경이력 + /policies 화면 |
+| 관리자 2FA(TOTP) — 서버측 세션 게이팅·백업코드·시크릿 암호화·QR | 2단계 인증 | DONE | GAP_B | MODULE+WRAP | admin-2fa | ours-only/admin-2fa.md | §16.5 참조. `twoFactorGuard` 미들웨어가 미검증 토큰 `/admin/*` 403 |
+| 보안 하드닝 — 주문 IDOR 가드·인증/검색어 rate limit·비밀번호 정책·입력 길이 상한·보안 헤더/CSP | (횡단) | DONE | GAP_B | WRAP | (middlewares/_utils) | ours-only/security-hardening.md | `middlewares.ts`(IDOR·rate limit·비번정책) + `_utils/{rate-limit,text,secret-crypto}.ts` + next.config CSP. rate limit은 캐시 추상화(Redis-ready) |
 
 ---
 

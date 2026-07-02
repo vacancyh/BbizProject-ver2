@@ -69,6 +69,27 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     }
     throw new Error("UNAUTHORIZED");
   }
+  if (res.status === 403) {
+    // 2FA 세션 미검증(서버측 게이팅) → 재로그인+인증 유도.
+    let code: string | undefined;
+    try {
+      code = ((await res.clone().json()) as { code?: string })?.code;
+    } catch {
+      // ignore
+    }
+    if (code === "2FA_REQUIRED") {
+      clearToken();
+      if (
+        typeof window !== "undefined" &&
+        !redirecting &&
+        window.location.pathname !== "/login"
+      ) {
+        redirecting = true;
+        window.location.replace("/login?twofa=1");
+      }
+      throw new Error("2FA_REQUIRED");
+    }
+  }
   if (!res.ok) throw new Error(`요청 실패: ${res.status}`);
   return (await res.json()) as T;
 }

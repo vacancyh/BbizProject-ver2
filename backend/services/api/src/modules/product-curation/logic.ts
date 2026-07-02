@@ -20,10 +20,11 @@ export type BannedWordScope = "all" | "search" | "product_name" | "review"
  */
 export function filterPopularTerms(
   terms: Array<{ term: string; count: number; is_banned: boolean }>,
-  limit: number = 10  // TODO(사장님결정): 기본 노출 개수(현재 10개)
+  limit: number = 10, // TODO(사장님결정): 기본 노출 개수(현재 10개)
+  minCount: number = 1 // 최소 누적 검색 횟수(1회성/오타 유입 노출 방지)
 ): Array<{ term: string; count: number }> {
   return terms
-    .filter((t) => !t.is_banned)
+    .filter((t) => !t.is_banned && Number(t.count) >= minCount)
     .sort((a, b) => b.count - a.count)
     .slice(0, limit)
     .map(({ term, count }) => ({ term, count }))
@@ -58,6 +59,59 @@ export function aggregateWishlistByProduct(
   return Array.from(map.entries())
     .map(([product_id, wishCount]) => ({ product_id, wishCount }))
     .sort((a, b) => b.wishCount - a.wishCount)
+}
+
+/**
+ * 베스트(인기) 상품 랭킹 — 판매수량 + 조회수 + 위시 수를 가중 합산한 popularity score 로 정렬.
+ *  - score = sales * SALE_WEIGHT + views * VIEW_WEIGHT + wishCount * WISH_WEIGHT
+ *  - 신호 강도: 실주문 판매(가장 강함) > 찜 > 조회. 가중치도 그 순서.
+ *  - sales 는 기준기간(최근 N일) 주문 라인아이템 수량 합(route 에서 집계해 주입).
+ *    views/wishCount 는 누적값(이벤트별 타임스탬프 미보유). 기간 필터는 sales 에 적용.
+ */
+export function rankBestProducts(
+  views: Array<{ product_id: string; count: number }>,
+  wishlists: Array<{ product_id: string; wishCount: number }>,
+  sales: Array<{ product_id: string; qty: number }> = [],
+  limit: number = 20,
+  weights: { sale: number; view: number; wish: number } = {
+    sale: 10,
+    view: 1,
+    wish: 5,
+  }
+): Array<{
+  product_id: string
+  score: number
+  views: number
+  wishCount: number
+  sales: number
+}> {
+  const map = new Map<string, { views: number; wishCount: number; sales: number }>()
+  const get = (id: string) => {
+    let cur = map.get(id)
+    if (!cur) {
+      cur = { views: 0, wishCount: 0, sales: 0 }
+      map.set(id, cur)
+    }
+    return cur
+  }
+  for (const v of views) get(v.product_id).views += Number(v.count) || 0
+  for (const w of wishlists) get(w.product_id).wishCount += Number(w.wishCount) || 0
+  for (const s of sales) get(s.product_id).sales += Number(s.qty) || 0
+
+  return Array.from(map.entries())
+    .map(([product_id, { views, wishCount, sales }]) => ({
+      product_id,
+      views,
+      wishCount,
+      sales,
+      score:
+        sales * weights.sale + views * weights.view + wishCount * weights.wish,
+    }))
+    .filter((r) => r.score > 0)
+    .sort(
+      (a, b) => b.score - a.score || b.sales - a.sales || b.wishCount - a.wishCount
+    )
+    .slice(0, Math.max(0, limit))
 }
 
 /**

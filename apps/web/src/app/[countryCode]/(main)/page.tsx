@@ -4,6 +4,7 @@ import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
 import HomePopup from "@modules/home/components/home-popup"
 import HomeCuration from "@modules/home/components/home-curation"
+import BestProducts from "@modules/home/components/best-products"
 import NewArrivals from "@modules/home/components/new-arrivals"
 import TimeSaleSection from "@modules/home/components/time-sale"
 import { listCollections } from "@lib/data/collections"
@@ -40,6 +41,7 @@ export default async function Home(props: {
       <HomePopup banners={popupBanners} />
       <Hero />
       <HomeCuration region={region} />
+      <BestProducts region={region} />
       <TimeSaleSection countryCode={countryCode} region={region} />
       <NewArrivals region={region} />
       <div className="py-12">

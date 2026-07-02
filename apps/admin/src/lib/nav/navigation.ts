@@ -103,6 +103,7 @@ export const NAVIGATION: NavGroup[] = [
       { id: "banners", label: "배너·팝업", href: "/settings/banners", icon: "Image", gap: null, order: 19 },
       { id: "home-curation", label: "홈 큐레이션", href: "/settings/home-curation", icon: "Sparkles", gap: null, order: 20 },
       { id: "maintenance", label: "점검 모드", href: "/settings/maintenance", icon: "Wrench", gap: null, order: 21 },
+      { id: "security-2fa", label: "2단계 인증(2FA)", href: "/settings/security", icon: "ShieldCheck", gap: null, order: 22 },
     ],
   },
   {

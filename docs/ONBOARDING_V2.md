@@ -17,6 +17,8 @@ Shop 프로젝트 — 초보 개발자 상세 온보딩 (버전 2)
 - ai/: AI 프롬프트, 정책, 평가 스크립트
 - docs/: 프로젝트 문서(온보딩 포함)
 
+> **최근 구현 커스텀 기능**(참고): 관리자 2FA(`modules/admin-2fa`, `/settings/security`) · 상품 큐레이션·분석(`modules/product-curation` — 베스트/조회수/인기검색어) · 보안 하드닝(주문 IDOR·rate limit(Redis-ready)·비번정책·입력상한·CSP). 전체 현황은 `apps/admin/FEATURE_MATRIX.md`, 화면은 `07_화면별_백로그.md`, 운영/보안은 `docs/실서비스_연동_백로그.md`.
+
 2. 필수 사전 설치
 - Git
 - Node.js >= 20 (권장 최신 LTS 이상)

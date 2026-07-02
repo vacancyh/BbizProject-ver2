@@ -126,5 +126,9 @@ module.exports = defineConfig({
       // 고객센터 콘텐츠(GAP) — 공지/FAQ 관리(admin) + 노출(store).
       resolve: "./src/modules/cms",
     },
+    {
+      // 관리자 2FA(TOTP) — 백오피스 2단계 인증(무비용, 옵트인).
+      resolve: "./src/modules/admin-2fa",
+    },
   ],
 })

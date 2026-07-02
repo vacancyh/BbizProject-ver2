@@ -7,8 +7,8 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 const KEY = "_recent_searches"
 const MAX = 8
 
-// 인기 검색어(큐레이션) — 운영 시 관리자 관리/집계로 교체 가능.
-const POPULAR = ["티셔츠", "니트", "패딩", "셔츠", "벨트", "바지", "가디건"]
+// 인기 검색어 기본값(실집계가 아직 없을 때 폴백).
+const POPULAR_FALLBACK = ["티셔츠", "니트", "패딩", "셔츠", "벨트", "바지", "가디건"]
 
 function readRecent(): string[] {
   try {
@@ -20,10 +20,18 @@ function readRecent(): string[] {
   }
 }
 
-/** 검색 제안 — 최근 검색어(localStorage) + 인기 검색어. currentQuery 있으면 최근에 기록. */
-const SearchSuggestions = ({ currentQuery }: { currentQuery?: string }) => {
+/** 검색 제안 — 최근 검색어(localStorage) + 인기 검색어(실집계). currentQuery 있으면 최근에 기록. */
+const SearchSuggestions = ({
+  currentQuery,
+  popularTerms,
+}: {
+  currentQuery?: string
+  popularTerms?: string[]
+}) => {
   const { countryCode } = useParams() as { countryCode: string }
   const [recent, setRecent] = useState<string[]>([])
+  const popular =
+    popularTerms && popularTerms.length > 0 ? popularTerms : POPULAR_FALLBACK
 
   useEffect(() => {
     let list = readRecent()
@@ -82,7 +90,7 @@ const SearchSuggestions = ({ currentQuery }: { currentQuery?: string }) => {
         <span className="text-small-regular text-ui-fg-muted mr-1">
           인기 검색어
         </span>
-        {POPULAR.map((t) => (
+        {popular.map((t) => (
           <Chip key={"p-" + t} term={t} />
         ))}
       </div>

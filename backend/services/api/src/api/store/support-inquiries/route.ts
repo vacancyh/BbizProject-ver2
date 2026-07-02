@@ -46,7 +46,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     author_email: b.author_email,
     rating: null,
     title: `[1:1문의/${category}] ${subject}`,
-    content: b.content.trim(),
+    content: (b.content ?? "").trim(),
     status: "pending",
   })
 

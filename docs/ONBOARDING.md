@@ -23,6 +23,12 @@
 - 보조 도구: `scripts/healthcheck.ps1`(전 서비스/포트 상태 점검), 관리자 `pnpm test:sweep`(전 화면 헬스 스윕). CI: `.github/workflows/ci.yml`(타입체크·린트 게이트).
 - 셋업 상세: `docs/main_plan/user_plan/bizproject/프런트개발_셋업_가이드.md` 참고.
 
+핵심 커스텀 기능(최근 구현 · 참고 문서)
+- 관리자 2FA(TOTP): `설정 > 2단계 인증`(`/settings/security`). 모듈 `backend/services/api/src/modules/admin-2fa`. → `apps/admin/docs/gaps/ours-only/admin-2fa.md`
+- 상품 큐레이션·분석: 베스트 랭킹(`GET /store/best-products`)·조회수 트래킹·인기검색어. 모듈 `product-curation`. → `.../ours-only/curation-analytics.md`
+- 보안 하드닝: 주문 IDOR 가드·rate limit(Redis-ready)·비번정책·입력상한·CSP. → `.../ours-only/security-hardening.md`
+- 기능 전체 현황: `apps/admin/FEATURE_MATRIX.md`, 화면 현황: `docs/main_plan/user_plan/bizproject/07_화면별_백로그.md`, 운영/보안: `docs/실서비스_연동_백로그.md`
+
 핵심 기술 스택
 - 백엔드: Medusa (Node/TypeScript)
 - 프론트: Next.js (React) — apps/web (스토어프런트), apps/admin (관리자)
