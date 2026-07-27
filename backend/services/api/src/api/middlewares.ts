@@ -430,13 +430,56 @@ function passwordPolicyGuard(
   return next()
 }
 
+/** 보안 응답 헤더(보안점검 2026-07-27 L1) — 백엔드 API 방어심화(프론트는 next.config 에서 별도 설정). */
+function securityHeaders(
+  _req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  res.setHeader("X-Content-Type-Options", "nosniff")
+  res.setHeader("X-Frame-Options", "DENY")
+  res.setHeader("Referrer-Policy", "no-referrer")
+  next()
+}
+
+/** 비회원 주문조회 레이트리밋(보안점검 2026-07-27 L2) — IP 기준 분당 30회, 열거/크리덴셜스터핑 완화. fail-open. */
+async function orderLookupRateLimit(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    const fwd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
+    const ip = fwd || (req as any).ip || "unknown"
+    const n = await rlIncr(req.scope, `rl:order-lookup:${ip}`, 60_000)
+    if (n > 30) {
+      res.status(429).json({ message: "요청이 많습니다. 잠시 후 다시 시도해 주세요." })
+      return
+    }
+  } catch {
+    // fail-open(가용성 우선)
+  }
+  next()
+}
+
 export default defineMiddlewares({
   routes: [
+    {
+      // 보안 응답 헤더 — 전 경로.
+      matcher: "/*",
+      middlewares: [securityHeaders],
+    },
     {
       // 인증 무차별 대입 방어(실패 기반) + 비밀번호 정책.
       matcher: "/auth/*",
       method: ["POST"],
       middlewares: [authRateLimit, passwordPolicyGuard],
+    },
+    {
+      // 비회원 주문조회 레이트리밋(열거 완화).
+      matcher: "/store/orders/lookup",
+      method: ["POST"],
+      middlewares: [orderLookupRateLimit],
     },
     {
       // GET 포함 — rbacGuard 가 보안메뉴 조회(read) 권한도 검사. auditTap 은 write 만 기록.

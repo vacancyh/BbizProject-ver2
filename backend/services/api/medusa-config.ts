@@ -38,7 +38,9 @@ module.exports = defineConfig({
     // 운영(https) 배포 시 COOKIE_SECURE=true 로 설정하세요.
     // cookieOptions = projectConfig 레벨(http 안 아님), express-session 의 cookie 옵션입니다.
     cookieOptions: {
-      secure: process.env.COOKIE_SECURE === "true",
+      // 보안점검 2026-07-27(M8): 운영은 기본 secure=true(https). http 종단 프록시면 COOKIE_SECURE=false 로 해제.
+      // dev 는 기존과 동일(기본 false — 로컬 http 세션 유지).
+      secure: IS_PROD ? process.env.COOKIE_SECURE !== "false" : process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
       httpOnly: true,
     },

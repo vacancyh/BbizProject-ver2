@@ -14,8 +14,19 @@ const PHONE_RE = /(\d{2,3})[-\s]?(\d{3,4})[-\s]?(\d{4})/g
 const RRN_RE = /(\d{6})[-\s]?([1-4])\d{6}/g
 const EMAIL_RE = /([A-Za-z0-9._%+-])([A-Za-z0-9._%+-]*)(@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g
 
-// 키 이름만으로 전체 마스킹할 민감 필드
+// 키 이름만으로 전체 마스킹할 민감 필드(정확 일치)
 const SECRET_KEYS = ["password", "token", "secret", "api_key", "apikey", "authorization"]
+// 키 이름에 포함되면 마스킹(부분 일치) — access_token/refresh_token/client_secret 등 커버 (보안점검 M5)
+const SECRET_KEY_SUBSTR = ["token", "secret", "password", "apikey", "api_key", "passwd"]
+// PII 키(값 패턴이 없어도 키 기준으로 마스킹) — 이름/주소/전화/사업자번호 등 (보안점검 M5)
+const PII_KEYS = [
+  "name", "first_name", "last_name", "full_name", "author_name", "company_name",
+  "address", "address_1", "address_2", "city", "phone", "biz_no", "bizno", "rrn", "identifier",
+]
+
+function isSecretKey(lk: string): boolean {
+  return SECRET_KEYS.includes(lk) || SECRET_KEY_SUBSTR.some((s) => lk.includes(s))
+}
 
 /** 문자열 1건 마스킹 */
 export function maskString(input: string): string {
@@ -38,8 +49,12 @@ export function maskPii<T>(value: T): T {
   if (typeof value === "object") {
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      if (SECRET_KEYS.includes(k.toLowerCase())) {
+      const lk = k.toLowerCase()
+      if (isSecretKey(lk)) {
         out[k] = "********"
+      } else if (PII_KEYS.includes(lk) && typeof v === "string") {
+        // 키 기준 PII 마스킹: 첫 글자만 남기고 마스킹(값 패턴 없어도 적용)
+        out[k] = v ? `${v.slice(0, 1)}***` : v
       } else {
         out[k] = maskPii(v)
       }

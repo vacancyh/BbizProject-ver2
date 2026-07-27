@@ -28,6 +28,17 @@
 | 3 | 공개 예시의 실제 비번 제거 | `.env.example` | `ADMIN_PASSWORD=djemal…` → `CHANGE_ME_LOCAL_ONLY` |
 | 4 | 배너 URL 스킴 검증(POST) | `admin/banners/route.ts` | `javascript:`/`data:` 차단. 동적검증: 정상 201 / 악성 400 |
 
+### 5차 — MEDIUM/LOW 하드닝 (**회귀검증 완료: 통합 125/125, 헤더·레이트리밋 동적확인**)
+| # | ID | 항목 | 파일 | 효과 |
+|---|---|---|---|---|
+| 16 | **M5** | 감사로그 PII 마스킹 강화 | `modules/audit/utils/mask-pii.ts` | 키 부분일치(`*token*`/`*secret*` 등) + 이름·주소·전화·biz_no·identifier 키 마스킹 추가 |
+| 17 | **M8** | 운영 쿠키 `secure` 기본 true | `medusa-config.ts` | `NODE_ENV=production` 기본 `secure:true`(escape hatch `COOKIE_SECURE=false`), dev 불변 |
+| 18 | **L1** | 백엔드 API 보안 헤더 | `middlewares.ts` `securityHeaders` | 전 경로 `X-Content-Type-Options:nosniff`·`X-Frame-Options:DENY`·`Referrer-Policy:no-referrer`. 동적확인: 응답 헤더 존재 |
+| 19 | **L2** | 비회원 주문조회 레이트리밋 | `middlewares.ts` `orderLookupRateLimit` | IP 분당 30회 초과 429(fail-open). 동적확인: 초과 시 429 |
+| — | **M6** | REVALIDATE_SECRET | (코드 변경 불필요) | 코드에 약한 하드코딩 폴백 없음(미설정 시 토큰 없이 호출). 템플릿은 1차에서 placeholder 화 완료 |
+
+> **보류(위험/정책 결정 필요, 문서화 유지)**: **M1**(RBAC/2FA/denylist guard fail-open→closed) = 캐시/DB 장애 시 관리자 전체 차단 가능(가용성 리스크) → 알림+선택적 적용 권장. **M2**(환불/취소 SUPER 게이트) = operation 역할 운영자 환불 차단될 수 있어 권한 정책 결정 필요. **M3**(2FA 강제 모드) = 미등록 관리자 잠금 위험 → opt-in 플래그로 도입 권장. **M7**(백업코드 salt+slow-hash) = 기존 해시 백업코드 무효화(재발급 필요) → 마이그레이션 동반 필요. (verify 라우트 레이트리밋은 후속 적용 가능)
+
 ### 4차 — H4~H7 (암호화 · PIPA) (**회귀검증 완료: 통합 125/125, H4/H5/H6/H7 검증 PASS**)
 | # | ID | 항목 | 파일 | 효과 |
 |---|---|---|---|---|
