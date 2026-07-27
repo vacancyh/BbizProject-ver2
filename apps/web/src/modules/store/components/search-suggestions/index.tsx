@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const KEY = "_recent_searches"
@@ -28,7 +27,6 @@ const SearchSuggestions = ({
   currentQuery?: string
   popularTerms?: string[]
 }) => {
-  const { countryCode } = useParams() as { countryCode: string }
   const [recent, setRecent] = useState<string[]>([])
   const popular =
     popularTerms && popularTerms.length > 0 ? popularTerms : POPULAR_FALLBACK

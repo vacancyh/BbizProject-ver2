@@ -13,8 +13,17 @@ const formatDateTime = (v?: string | Date | null) =>
       }).format(new Date(v))
     : null
 
+type TrackingLabel = { tracking_number?: string | null; tracking_url?: string | null }
+type TrackingFulfillment = {
+  id?: string
+  labels?: TrackingLabel[]
+  shipped_at?: string | Date | null
+  delivered_at?: string | Date | null
+  canceled_at?: string | Date | null
+}
+
 const ShippingTracking = ({ order }: { order: HttpTypes.StoreOrder }) => {
-  const fulfillments = (order.fulfillments ?? []) as any[]
+  const fulfillments = (order.fulfillments ?? []) as unknown as TrackingFulfillment[]
 
   return (
     <div data-testid="shipping-tracking">
@@ -29,7 +38,7 @@ const ShippingTracking = ({ order }: { order: HttpTypes.StoreOrder }) => {
       ) : (
         <ul className="flex flex-col gap-y-4">
           {fulfillments.map((f, idx) => {
-            const labels: any[] = f.labels ?? []
+            const labels = f.labels ?? []
             const shippedAt = formatDateTime(f.shipped_at)
             const deliveredAt = formatDateTime(f.delivered_at)
             const stage = f.canceled_at
