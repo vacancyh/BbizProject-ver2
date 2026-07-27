@@ -1,56 +1,73 @@
-# 통합테스트 (API 계층)
+# 통합테스트 (분할·다중방법, API 계층)
 
-BbizProject 백엔드의 `/store` · `/admin` · `/auth` HTTP API를 직접 호출해
-**계정 등록/로그인 · 사용자 기능 · 관리자 기능 · 연계 시나리오 · 검색조건**을 검증한다.
-UI(브라우저) 없이 API만으로 돌아가므로 빠르고 안정적이며, 응답 근거가 명확하다.
+BbizProject 백엔드의 `/store` · `/admin` · `/auth` API를 직접 호출해 전 기능·연계·검색을 검증한다.
+**도메인별로 분할된 suite** + **여러 검증 방법**(happy-path · 부정/경계 · 동시성 · DB 교차검증 · 멱등성 · 권한 매트릭스)으로,
+한 영역이 실패해도 다른 영역에 영향 없이 독립 실행된다.
 
-## 파일
+## 구조
 
-| 파일 | 내용 |
-|---|---|
-| `run-integration-tests.mjs` | 테스트 드라이버(Node, 의존성 없음). 91개 케이스. |
-| `REPORT.md` | 최근 실행 결과(영역별 표 + 실패 목록). 드라이버가 자동 생성. |
-| `results.json` | 기계용 결과(케이스별 status/pass/근거). |
-| `FINDINGS.md` | **큐레이션된 발견사항** — 실패 케이스 근본원인 + 조치법. |
+```
+통합테스트/
+├─ run-all.mjs          # 러너: suite 들을 독립 실행·집계. 특정 도메인만도 실행 가능
+├─ setup-test-db.sh     # 임시 DB(shop_test) 생성→마이그레이션→시드→누락테이블 보강→키 출력
+├─ lib/
+│  ├─ harness.mjs       # HTTP 클라이언트·기록기·로그인·리포트 생성
+│  └─ db.mjs            # DB 교차검증(docker psql)
+├─ suites/
+│  ├─ 01-auth.mjs           # A. 인증·계정
+│  ├─ 02-customer.mjs       # B. 사용자 기능
+│  ├─ 03-catalog.mjs        # C. 카탈로그·콘텐츠
+│  ├─ 04-checkout.mjs       # D. 장바구니·주문·결제
+│  ├─ 05-admin.mjs          # E. 관리자 기능
+│  ├─ 06-linkage.mjs        # F. 연계 시나리오
+│  ├─ 07-search.mjs         # G. 검색조건(상품/주문/회원/리뷰)
+│  ├─ 08-negative-edge.mjs  # H. 부정·경계
+│  ├─ 09-concurrency.mjs    # I. 동시성·레이스
+│  └─ 10-idempotency-rbac.mjs # J. 멱등성·권한매트릭스·회원탈퇴
+├─ REPORT.md            # 최근 실행 결과(도메인별 표) — 자동 생성
+├─ results.json         # 기계용 결과 — 자동 생성
+└─ FINDINGS.md          # 큐레이션된 발견사항·비고
+```
 
-## 검증 영역 (91 케이스)
+## 검증 방법(다중)
 
-- **A. 인증·계정** — 관리자/고객 로그인·실패, 회원가입, 중복가입 차단, 데모계정 4종 로그인, 미인증 차단
-- **B. 사용자 기능** — 내정보, 배송지 CRUD, 적립금, 멤버십 등급, 동의 조회/변경, 주문 목록/상세, 위시리스트
-- **C. 스토어 카탈로그·콘텐츠** — 상품 목록/상세, 리뷰/문의/고시, 쿠폰·타임세일·배너·공지·FAQ·큐레이션·베스트·인기검색어·약관
-- **D. 장바구니·주문·결제** — 카트 생성→배송지→배송옵션→쿠폰→적립금→결제세션→주문완료(실제 체크아웃 1건)
-- **E. 관리자 기능** — 상품/주문/회원/리뷰큐/프로모션/배너 CRUD/대시보드 + 권한차단(RBAC)·미인증 차단
-- **F. 연계 시나리오** — 리뷰 pending→관리자 승인→스토어 노출 / 주문→관리자 검색 / 쿠폰 admin→store / 관리자 적립→고객 잔액 / 문의→답변 / 비회원 주문조회
-- **G. 검색조건(영역별 분리)** — G1 상품검색 / G2 주문검색(admin) / G3 회원검색(admin) / G4 리뷰·문의검색(admin), 각 필터·페이지네이션·정렬 케이스
-- **Z. 회원 탈퇴(파괴적)** — 탈퇴 후 접근 차단 확인(신규 임시계정으로만 수행)
+| 방법 | 설명 | 예 |
+|---|---|---|
+| happy-path | 정상 요청→기대 응답 | 로그인, 주문, 검색 |
+| 부정·경계(H) | 잘못된 입력·경계값이 안전 거부/정제되는지 | 빈 비번, 별점 범위초과, 위조토큰 |
+| 동시성·레이스(I) | 동시 요청에 중복/오버셀/유실 없는지 | 중복가입 1건만, 동시적립 lost-update 없음 |
+| DB 교차검증 | API 응답 말고 실제 DB 행을 확인 | 위시리스트 행, 원장 합계=잔액, 주문 레코드 |
+| 멱등성(J) | 같은 요청 반복해도 안전 | 반복 찜 dedup, 반복 동의 |
+| 권한 매트릭스(J) | (미인증/고객/관리자) × 엔드포인트 접근표 | admin=401/401/200, me=401/200/401 |
 
-## 재실행 방법
+## 실행
 
-전제: Docker(`shop-postgres`/`shop-redis`) 기동. 기존 dev 백엔드(:9000)와 **충돌하지 않도록** 별도 DB·포트를 쓴다.
+전제: Docker(`shop-postgres`/`shop-redis`) 기동. 기존 dev 백엔드(:9000)와 **별도 DB·포트**를 쓴다.
 
 ```bash
+# 1) 임시 테스트 DB 준비 (스크립트가 마지막에 PUBKEY 를 출력)
+bash docs/main_plan/user_plan/bizproject/통합테스트/setup-test-db.sh
+
+# 2) 테스트 백엔드를 별도 포트로 기동 (in-memory redis 로 자동 격리)
 cd backend/services/api
+DATABASE_URL="postgres://shop:shop_local_2026@127.0.0.1:5434/shop_test" PORT=9009 npx medusa develop &
+#  → "Server is ready on port: 9009" 대기 (curl http://localhost:9009/health = 200)
 
-# 1) 임시 테스트 DB 생성 + 마이그레이션 + 시드
-docker exec shop-postgres psql -U shop -d shop -c "DROP DATABASE IF EXISTS shop_test; CREATE DATABASE shop_test;"
-DB="postgres://shop:shop_local_2026@127.0.0.1:5434/shop_test"
-DATABASE_URL="$DB" NODE_TLS_REJECT_UNAUTHORIZED=0 npx medusa db:migrate
-DATABASE_URL="$DB" NODE_TLS_REJECT_UNAUTHORIZED=0 npx medusa exec ./src/scripts/seed-all.ts
-
-# 2) 테스트 백엔드를 별도 포트(:9009)로 기동 (in-memory redis 로 격리됨)
-DATABASE_URL="$DB" PORT=9009 NODE_TLS_REJECT_UNAUTHORIZED=0 npx medusa develop &
-#   → "Server is ready on port: 9009" 대기 (curl http://localhost:9009/health = 200)
-
-# 3) 퍼블리셔블 키 조회 후 드라이버 실행
-PUBKEY=$(docker exec shop-postgres psql -U shop -d shop_test -t -c "select token from api_key where type='publishable' limit 1;" | tr -d ' ')
+# 3) 테스트 실행
 cd ../../../docs/main_plan/user_plan/bizproject/통합테스트
-BASE=http://localhost:9009 PUBKEY=$PUBKEY RUN_STAMP="$(date '+%Y-%m-%d %H:%M:%S')" node run-integration-tests.mjs
+BASE=http://localhost:9009 PUBKEY=<위 출력값> RUN_STAMP="$(date '+%F %T')" node run-all.mjs
 
-# 4) 정리
-#   백엔드 프로세스 종료 후:
+#    특정 도메인만:  node run-all.mjs 05-admin 07-search
+#    (파일명 접두/부분 매칭 — "분할 사용")
+
+# 4) 정리 (백엔드 종료 후)
 docker exec shop-postgres psql -U shop -d shop -c "DROP DATABASE shop_test;"
 ```
 
-- 드라이버는 `BASE`, `PUBKEY` 환경변수만 있으면 어떤 시드된 백엔드에도 붙는다.
+- 데이터는 임시 `shop_test`에만 쓰므로 dev `shop` DB는 오염되지 않는다.
 - 종료코드: 실패 케이스가 있으면 1, 전부 통과면 0.
-- 데이터는 임시 DB(`shop_test`)에만 쓰므로 dev `shop` DB는 오염되지 않는다.
+
+## ⚠️ setup-test-db.sh 의 "누락 테이블 보강"에 대해
+`product-curation`(위시리스트/조회수), `customer-dormancy`(휴면) 모듈은 **마이그레이션이 누락/stale**이라
+깨끗한 DB에서 해당 테이블이 안 생긴다(상세: `FINDINGS.md`). 통합테스트는 임시 DB에만 이 테이블을 수동 생성해
+기능을 검증한다 — **소스(운영 마이그레이션)는 건드리지 않는다.** 근본 해결은 FINDINGS.md 참고.
