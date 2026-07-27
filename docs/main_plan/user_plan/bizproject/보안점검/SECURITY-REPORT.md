@@ -37,7 +37,17 @@
 | 19 | **L2** | 비회원 주문조회 레이트리밋 | `middlewares.ts` `orderLookupRateLimit` | IP 분당 30회 초과 429(fail-open). 동적확인: 초과 시 429 |
 | — | **M6** | REVALIDATE_SECRET | (코드 변경 불필요) | 코드에 약한 하드코딩 폴백 없음(미설정 시 토큰 없이 호출). 템플릿은 1차에서 placeholder 화 완료 |
 
-> **보류(위험/정책 결정 필요, 문서화 유지)**: **M1**(RBAC/2FA/denylist guard fail-open→closed) = 캐시/DB 장애 시 관리자 전체 차단 가능(가용성 리스크) → 알림+선택적 적용 권장. **M2**(환불/취소 SUPER 게이트) = operation 역할 운영자 환불 차단될 수 있어 권한 정책 결정 필요. **M3**(2FA 강제 모드) = 미등록 관리자 잠금 위험 → opt-in 플래그로 도입 권장. **M7**(백업코드 salt+slow-hash) = 기존 해시 백업코드 무효화(재발급 필요) → 마이그레이션 동반 필요. (verify 라우트 레이트리밋은 후속 적용 가능)
+### 6차 — M1/M2/M3/M7 (opt-in 플래그) (**회귀검증 완료: 플래그 OFF 통합 125/125, 플래그 ON 스모크 PASS**)
+> 모두 **기본 비활성**(현행 동작 유지). 환경변수로 켜면 강제 — 운영에서 준비되면 활성화.
+
+| # | ID | 항목 | 플래그(env) | 동작 |
+|---|---|---|---|---|
+| 20 | **M1** | 가드 fail-open→**fail-closed** | `SECURITY_GUARD_FAIL_CLOSED=true` | RBAC/2FA/denylist 가드 내부오류 시 503 차단(기본: 통과) |
+| 21 | **M2** | 환불/취소 **super 전용** | `ADMIN_MONEY_ACTIONS_SUPER_ONLY=true` | `/admin/orders/:id/refund`·`/admin/orders-kr/:id/cancel` 를 super 만 허용(그 외 403) |
+| 22 | **M3** | **2FA 필수** 모드 | `ADMIN_2FA_REQUIRED=true` | 2FA 미등록 관리자의 **쓰기 차단**(403 `2FA_ENROLL_REQUIRED`), 읽기는 허용(UI·등록 접근). 스모크: GET 200 / POST 403 확인 |
+| 23 | **M7** | 백업코드 HMAC 페퍼 + verify 레이트리밋 | (상시) | 백업코드 HMAC-SHA256 페퍼(레거시 sha256 하위호환 검증) / `/admin/2fa/verify`·`backup-codes` 5분 20회 초과 429. 스모크: 20→429 확인 |
+
+> M7 은 하위호환(기존 백업코드 그대로 검증, 신규는 페퍼) + 레이트리밋이라 **상시 적용**(플래그 불필요). M1~M3 는 opt-in.
 
 ### 4차 — H4~H7 (암호화 · PIPA) (**회귀검증 완료: 통합 125/125, H4/H5/H6/H7 검증 PASS**)
 | # | ID | 항목 | 파일 | 효과 |

@@ -111,6 +111,21 @@ function actorIdOf(req: MedusaRequest): string | null {
   return (req as any).auth_context?.actor_id ?? null
 }
 
+// 보안 강화 opt-in 플래그(보안점검 2026-07-27) — 기본 비활성(현행 동작 유지), 켜면 강제.
+const GUARD_FAIL_CLOSED = process.env.SECURITY_GUARD_FAIL_CLOSED === "true" // M1: 가드 내부오류 시 차단
+const ADMIN_2FA_REQUIRED = process.env.ADMIN_2FA_REQUIRED === "true"       // M3: 2FA 미등록 관리자 쓰기 차단
+const MONEY_ACTIONS_SUPER_ONLY = process.env.ADMIN_MONEY_ACTIONS_SUPER_ONLY === "true" // M2: 환불/취소 super 전용
+
+/** 가드 내부오류 처리 — 기본 fail-open(next), 플래그 시 503(fail-closed). */
+function guardError(res: MedusaResponse, next: MedusaNextFunction, tag: string, e: unknown) {
+  console.warn(`[${tag}] 가드 오류:`, (e as Error)?.message)
+  if (GUARD_FAIL_CLOSED) {
+    res.status(503).json({ message: "보안 검사를 일시적으로 수행할 수 없습니다. 잠시 후 다시 시도해 주세요.", code: "GUARD_UNAVAILABLE" })
+    return
+  }
+  return next()
+}
+
 /** RBAC 권한 검사 미들웨어 (write 거부 시 403) */
 async function rbacGuard(
   req: MedusaRequest,
@@ -139,9 +154,7 @@ async function rbacGuard(
     }
     return next()
   } catch (e) {
-    // 내부 오류 시 fail-open(잠금 방지). 운영 모니터링은 후속.
-    console.warn("[rbac] 권한검사 오류, 통과 처리:", (e as Error)?.message)
-    return next()
+    return guardError(res, next, "rbac", e)
   }
 }
 
@@ -161,8 +174,8 @@ async function tokenDenylistGuard(
       res.status(401).json({ message: "로그아웃된 세션입니다. 다시 로그인해 주세요.", code: "TOKEN_REVOKED" })
       return
     }
-  } catch {
-    // fail-open
+  } catch (e) {
+    return guardError(res, next, "token-denylist", e)
   }
   return next()
 }
@@ -190,7 +203,17 @@ async function twoFactorGuard(
       ADMIN_2FA_MODULE
     ) as unknown as Admin2faModuleService
     const row = await svc.getByUser(userId)
-    if (!row || !row.enabled) return next() // 2FA 미활성 → 통과
+    if (!row || !row.enabled) {
+      // M3(opt-in): 2FA 필수 모드면 미등록 관리자의 쓰기 차단(읽기는 허용 → UI 로드·2FA 등록 페이지 접근 가능)
+      if (ADMIN_2FA_REQUIRED && WRITE_METHODS.includes(req.method)) {
+        res.status(403).json({
+          message: "관리자 2단계 인증 등록이 필요합니다. 설정에서 2FA를 활성화해 주세요.",
+          code: "2FA_ENROLL_REQUIRED",
+        })
+        return
+      }
+      return next() // 2FA 미활성 → 통과(기본)
+    }
 
     const h = req.headers.authorization ?? ""
     const tok = h.startsWith("Bearer ") ? h.slice(7) : null
@@ -202,8 +225,7 @@ async function twoFactorGuard(
     })
     return
   } catch (e) {
-    console.warn("[2fa] 게이팅 오류, 통과 처리:", (e as Error)?.message)
-    return next()
+    return guardError(res, next, "2fa", e)
   }
 }
 
@@ -462,12 +484,80 @@ async function orderLookupRateLimit(
   next()
 }
 
+/** M2(opt-in): 환불/취소 등 금전 액션을 super 등급만 허용. 기본 비활성. */
+async function moneyActionSuperGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  if (!MONEY_ACTIONS_SUPER_ONLY) return next()
+  try {
+    const userId = actorIdOf(req)
+    if (!userId) return next() // 미인증은 Medusa auth 가 처리
+    const rbac = req.scope.resolve(RBAC_MODULE) as unknown as RbacModuleService
+    const role = await rbac.getUserRole(userId)
+    if (role !== "super") {
+      res.status(403).json({
+        message: "이 작업(환불/취소)은 최고관리자(super)만 수행할 수 있습니다.",
+        code: "SUPER_REQUIRED",
+      })
+      return
+    }
+  } catch (e) {
+    return guardError(res, next, "money-super", e)
+  }
+  return next()
+}
+
+/** M7: 2FA 검증 시도 레이트리밋 — user(또는 IP) 기준 5분 20회 초과 429(온라인 브루트포스 완화). fail-open. */
+async function twoFaVerifyRateLimit(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    const uid = actorIdOf(req)
+    const fwd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
+    const who = uid || fwd || (req as any).ip || "unknown"
+    const n = await rlIncr(req.scope, `rl:2fa-verify:${who}`, 5 * 60_000)
+    if (n > 20) {
+      res.status(429).json({ message: "인증 시도가 많습니다. 잠시 후 다시 시도해 주세요.", code: "TOO_MANY_ATTEMPTS" })
+      return
+    }
+  } catch {
+    // fail-open
+  }
+  return next()
+}
+
 export default defineMiddlewares({
   routes: [
     {
       // 보안 응답 헤더 — 전 경로.
       matcher: "/*",
       middlewares: [securityHeaders],
+    },
+    {
+      // M2(opt-in): 금전 액션 super 게이트.
+      matcher: "/admin/orders/:id/refund",
+      method: ["POST"],
+      middlewares: [moneyActionSuperGuard],
+    },
+    {
+      matcher: "/admin/orders-kr/:id/cancel",
+      method: ["POST"],
+      middlewares: [moneyActionSuperGuard],
+    },
+    {
+      // M7: 2FA 검증/백업코드 시도 레이트리밋.
+      matcher: "/admin/2fa/verify",
+      method: ["POST"],
+      middlewares: [twoFaVerifyRateLimit],
+    },
+    {
+      matcher: "/admin/2fa/backup-codes",
+      method: ["POST"],
+      middlewares: [twoFaVerifyRateLimit],
     },
     {
       // 인증 무차별 대입 방어(실패 기반) + 비밀번호 정책.

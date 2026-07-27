@@ -14,10 +14,20 @@ export function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex")
 }
 
-/** 백업 코드 정규화(대문자·공백/하이픈 제거) 후 sha256. */
+/** 백업 코드 페퍼 키(보안점검 2026-07-27 M7) — 전용 2FA 키 우선. DB-only 유출 시 해시 무력화 방어. */
+function pepperKey(): string {
+  return process.env.ADMIN_2FA_SECRET_KEY || process.env.COOKIE_SECRET || "dev-insecure-2fa-key"
+}
+function normalizeCode(code: string): string {
+  return String(code).toUpperCase().replace(/[^A-Z0-9]/g, "")
+}
+/** 백업 코드 해시 — HMAC-SHA256 페퍼(서버 키). 무염 sha256 대비 DB 단독 유출 방어. */
 function hashBackupCode(code: string): string {
-  const norm = String(code).toUpperCase().replace(/[^A-Z0-9]/g, "")
-  return crypto.createHash("sha256").update(norm).digest("hex")
+  return crypto.createHmac("sha256", pepperKey()).update(normalizeCode(code)).digest("hex")
+}
+/** 레거시 무페퍼 sha256 해시 — 기존 발급 코드 하위호환 검증용. */
+function legacyHashBackupCode(code: string): string {
+  return crypto.createHash("sha256").update(normalizeCode(code)).digest("hex")
 }
 
 /** 사람이 읽기 쉬운 1회용 코드(예: A1B2-C3D4). */
@@ -109,15 +119,19 @@ class Admin2faModuleService extends MedusaService({
    * @returns 일치하는 미사용 코드가 있으면 소진 후 true.
    */
   async consumeBackupCode(userId: string, code: string): Promise<boolean> {
-    const code_hash = hashBackupCode(code)
-    const rows = await this.listAdmin2faBackupCodes({
-      user_id: userId,
-      code_hash,
-      used: false,
-    })
-    if (!rows.length) return false
-    await this.updateAdmin2faBackupCodes([{ id: rows[0].id, used: true }])
-    return true
+    // 신규(HMAC 페퍼) 우선, 없으면 레거시(무염 sha256)로 하위호환 검증
+    for (const code_hash of [hashBackupCode(code), legacyHashBackupCode(code)]) {
+      const rows = await this.listAdmin2faBackupCodes({
+        user_id: userId,
+        code_hash,
+        used: false,
+      })
+      if (rows.length) {
+        await this.updateAdmin2faBackupCodes([{ id: rows[0].id, used: true }])
+        return true
+      }
+    }
+    return false
   }
 
   /** 해당 user의 모든 백업 코드 폐기(2FA 해제 시). */
