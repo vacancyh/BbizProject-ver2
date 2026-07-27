@@ -36,7 +36,7 @@
 | 14 | **H6** | 탈퇴 시 **PII 즉시 비식별화 + 주소 파기** | `store/customers/me/withdraw/route.ts` | 이름→"탈퇴회원"·전화 null·이메일 익명화·배송지 삭제 후 soft-delete(주문 스냅샷은 법정 보존). 검증: 탈퇴 고객 DB PII 비식별 확인 |
 | 15 | **H7** | 휴면 **파이프라인 스케줄 job** | `jobs/dormancy-pipeline.ts`, `customer-dormancy/service.ts` | 매일 classify → 사전통지/휴면 대상 산출·로깅·이벤트 emit(알림/분리보관/파기는 provider·스토리지 연동 지점 TODO). 검증: runPipeline PASS |
 
-> ⚠️ **신규 발견(4차 검증 중, fresh-DB 스키마 드리프트)**: `tax_invoice.payout_id` 컬럼이 마이그레이션에 없어 깨끗한 DB 에서 세금계산서 발급이 500(`column payout_id ... does not exist`). 임시 DB엔 `ALTER TABLE tax_invoice ADD COLUMN payout_id text` 로 우회 검증. **근본해결**: `npx medusa db:generate taxInvoice && db:migrate`. ([[통합테스트 FINDINGS]] 의 product-curation/customer-dormancy 누락과 동일 계열)
+> ✅ **해결됨(2026-07-27)**: `tax_invoice.payout_id` 드리프트 + product-curation·customer-dormancy 누락 테이블을 **정식 마이그레이션으로 근본 해결**(db:generate + tax-invoice 수동 ALTER 마이그레이션). fresh `db:migrate` 만으로 전부 생성 확인 → 통합 125/125 + 세금계산서 발급 201. ([[통합테스트 FINDINGS]])
 
 ### 3차 — H1 RBAC fail-open 제거 (**회귀검증 완료: 통합 125/125, RBAC 검증 PASS**)
 | # | ID | 항목 | 파일 | 효과 |

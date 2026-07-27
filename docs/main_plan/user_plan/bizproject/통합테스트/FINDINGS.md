@@ -29,21 +29,14 @@
   store-me(미인증 401·고객 200·관리자 401/403) 모두 기대대로.
 - **부정·경계**: 잘못된 별점(9)은 4xx 또는 **1~5로 정제** 저장(DB에 범위 밖 값 0건) — 무결성 유지.
 
-## 🟡 참고 — "새 환경 마이그레이션 누락"은 여전히 유효 (별도 조치 필요)
+## ✅ 해결됨 — "새 환경 마이그레이션 누락" (2026-07-27)
 
-지난 회차 발견과 동일. `product-curation`(위시리스트·조회수)·`customer-dormancy`(휴면) 모듈은
-마이그레이션이 누락/stale 이라 **깨끗한 DB에서 해당 테이블이 생성되지 않는다** →
-위시리스트/베스트/휴면 엔드포인트가 500.
-
-- 이번 통합테스트는 **임시 DB(shop_test)에만 해당 테이블을 수동 생성**(`setup-test-db.sh` 4단계)하여
-  기능 자체를 초록으로 검증했다. **운영 소스는 건드리지 않았다.**
-- 근본 해결(권장):
-  ```bash
-  cd backend/services/api
-  npx medusa db:generate productCuration customerDormancy
-  npx medusa db:migrate
-  ```
-  적용하면 `setup-test-db.sh`의 수동 테이블 보강 단계는 불필요해진다.
+`product-curation`(위시리스트·조회수·인기검색어)·`customer-dormancy`(휴면)·`tax-invoice`(payout_id)
+마이그레이션 누락/드리프트를 **정식 마이그레이션으로 근본 해결**:
+- `npx medusa db:generate productCuration customerDormancy` → 신규 create-table 마이그레이션 생성
+- `tax_invoice.payout_id` 는 db:generate 가 diff 를 못 잡아(create-if-not-exists 순서 문제) **수동 ALTER 마이그레이션**(`tax-invoice/migrations/Migration20260727043000.ts`) 추가.
+- 검증: **수동 우회 없이** fresh `db:migrate` 만으로 4개 테이블 + payout_id 생성 확인 → 통합 125/125 + 세금계산서 발급 201.
+- `setup-test-db.sh` 의 수동 테이블 보강 단계는 제거됨.
 
 ## 관찰 메모
 

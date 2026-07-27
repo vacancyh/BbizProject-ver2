@@ -67,7 +67,7 @@ docker exec shop-postgres psql -U shop -d shop -c "DROP DATABASE shop_test;"
 - 데이터는 임시 `shop_test`에만 쓰므로 dev `shop` DB는 오염되지 않는다.
 - 종료코드: 실패 케이스가 있으면 1, 전부 통과면 0.
 
-## ⚠️ setup-test-db.sh 의 "누락 테이블 보강"에 대해
-`product-curation`(위시리스트/조회수), `customer-dormancy`(휴면) 모듈은 **마이그레이션이 누락/stale**이라
-깨끗한 DB에서 해당 테이블이 안 생긴다(상세: `FINDINGS.md`). 통합테스트는 임시 DB에만 이 테이블을 수동 생성해
-기능을 검증한다 — **소스(운영 마이그레이션)는 건드리지 않는다.** 근본 해결은 FINDINGS.md 참고.
+## ✅ 마이그레이션 누락 근본 해결(2026-07-27)
+`product-curation`(위시리스트/조회수)·`customer-dormancy`(휴면)·`tax-invoice`(payout_id) 누락/드리프트는
+정식 마이그레이션으로 해결됨(FINDINGS.md 참조). 이제 fresh `db:migrate` 만으로 모든 테이블이 생성되어
+`setup-test-db.sh` 의 수동 테이블 보강 단계는 제거됐다.
