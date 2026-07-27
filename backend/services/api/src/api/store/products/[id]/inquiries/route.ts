@@ -11,10 +11,18 @@ import { REVIEW_MODULE } from "../../../../../modules/review"
 import type ReviewModuleService from "../../../../../modules/review/service"
 import { checkText } from "../../../../_utils/text"
 
+// 작성자명 서버측 마스킹(보안점검 2026-07-27) — 리뷰와 동일 정책(공개 Q&A 에 실명 노출 방지).
+function maskName(name?: string | null): string {
+  if (!name) return "익명"
+  const n = String(name).trim()
+  if (!n) return "익명"
+  return n.length <= 1 ? n + "*" : n[0] + "**"
+}
+
 function toStoreInquiry(r: any) {
   return {
     id: r.id,
-    author: r.author_name ?? "익명",
+    author: maskName(r.author_name),
     content: r.content,
     created_at:
       r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),

@@ -530,12 +530,67 @@ async function twoFaVerifyRateLimit(
   return next()
 }
 
+/** IP 기준 레이트리밋 팩토리(보안점검 2026-07-27 2차) — 익명 쓰기/스캔 남용 완화. fail-open. */
+function ipRateLimit(bucket: string, max: number, windowMs = 60_000) {
+  return async function (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
+    try {
+      const fwd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
+      const ip = fwd || (req as any).ip || "unknown"
+      const n = await rlIncr(req.scope, `rl:${bucket}:${ip}`, windowMs)
+      if (n > max) {
+        res.status(429).json({ message: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.", code: "RATE_LIMITED" })
+        return
+      }
+    } catch {
+      // fail-open(가용성 우선)
+    }
+    return next()
+  }
+}
+// 익명 쓰기(리뷰/문의/지원/재입고): 분당 20회. 조회수: 분당 120. 베스트(스캔): 분당 60.
+const publicWriteRateLimit = ipRateLimit("public-write", 20)
+const viewRateLimit = ipRateLimit("product-view", 120)
+const bestProductsRateLimit = ipRateLimit("best-products", 60)
+
 export default defineMiddlewares({
   routes: [
     {
       // 보안 응답 헤더 — 전 경로.
       matcher: "/*",
       middlewares: [securityHeaders],
+    },
+    {
+      // 익명 쓰기 스팸/저장소 증식 완화(리뷰).
+      matcher: "/store/products/:id/reviews",
+      method: ["POST"],
+      middlewares: [publicWriteRateLimit],
+    },
+    {
+      matcher: "/store/products/:id/inquiries",
+      method: ["POST"],
+      middlewares: [publicWriteRateLimit],
+    },
+    {
+      matcher: "/store/support-inquiries",
+      method: ["POST"],
+      middlewares: [publicWriteRateLimit],
+    },
+    {
+      matcher: "/store/restock-notifications",
+      method: ["POST"],
+      middlewares: [publicWriteRateLimit],
+    },
+    {
+      // 조회수 기록 남용(쓰기 증폭·랭킹 조작) 완화.
+      matcher: "/store/products/:id/view",
+      method: ["POST"],
+      middlewares: [viewRateLimit],
+    },
+    {
+      // 베스트 랭킹(주문/뷰/위시 전체 스캔) 익명 남용 완화.
+      matcher: "/store/best-products",
+      method: ["GET"],
+      middlewares: [bestProductsRateLimit],
     },
     {
       // M2(opt-in): 금전 액션 super 게이트.

@@ -24,6 +24,7 @@
  * Next.js 15 App Router on-demand revalidation 공식 패턴 사용.
  * (참고: https://nextjs.org/docs/app/building-your-application/caching#on-demand-revalidation)
  */
+import { timingSafeEqual } from "node:crypto"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import {
@@ -31,6 +32,9 @@ import {
   pathsForRevalidate,
   type RevalidateType,
 } from "@lib/data/revalidate-tags"
+
+// 보안점검 2026-07-27: 커스텀 태그 무단 무효화(캐시 DoS) 방지용 허용 태그 집합.
+const ALLOWED_TAGS = new Set(Object.values(TYPE_TAG_MAP).flat() as string[])
 
 /**
  * 태그/경로 매핑은 단일 출처(revalidate-tags.ts)에서 가져온다.
@@ -45,12 +49,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (secret) {
     const authHeader = req.headers.get("authorization") ?? ""
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : ""
-    if (token !== secret) {
+    // 상수시간 비교(타이밍 사이드채널 방지). 길이 불일치는 즉시 실패.
+    const a = new Uint8Array(Buffer.from(token))
+    const b = new Uint8Array(Buffer.from(secret))
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+  } else if (process.env.NODE_ENV === "production") {
+    // 보안점검 2026-07-27: 운영에서 시크릿 미설정이면 비인증 무효화를 막기 위해 fail-closed.
+    console.error("[revalidate] REVALIDATE_SECRET 미설정 — 운영에서 요청 거부(503).")
+    return NextResponse.json({ error: "revalidate secret not configured" }, { status: 503 })
   } else {
-    // 시크릿 미설정 — 개발 편의상 허용하나 경고 로그
-    console.warn("[revalidate] REVALIDATE_SECRET 환경변수가 설정되지 않았습니다. 보안 취약 상태입니다.")
+    console.warn("[revalidate] REVALIDATE_SECRET 미설정 — 개발 전용 허용. 운영은 필수.")
   }
 
   // ── 요청 파싱 ─────────────────────────────────────────
@@ -75,8 +85,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const purgedTags: string[] = []
   const purgedPaths: string[] = []
 
-  // ── 커스텀 태그 직접 무효화 ────────────────────────────
+  // ── 커스텀 태그 직접 무효화 (허용 태그만 — 캐시 무효화 DoS 방지) ──
   if (customTags?.length) {
+    const invalid = customTags.filter((t) => !ALLOWED_TAGS.has(t))
+    if (invalid.length) {
+      return NextResponse.json(
+        { error: `허용되지 않은 tag: ${invalid.join(", ")}` },
+        { status: 400 }
+      )
+    }
     for (const tag of customTags) {
       revalidateTag(tag)
       purgedTags.push(tag)

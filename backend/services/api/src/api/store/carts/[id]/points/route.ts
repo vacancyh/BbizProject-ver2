@@ -59,6 +59,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     res.status(404).json({ message: "장바구니를 찾을 수 없습니다." })
     return
   }
+  // 보안점검 2026-07-27(IDOR): 본인 소유 장바구니만 허용(타인 카트 조작·적립금 탈취 방지)
+  if (cart.customer_id !== customerId) {
+    res.status(403).json({ message: "본인 장바구니에만 적립금을 사용할 수 있습니다." })
+    return
+  }
   if (points > cart.item_total) {
     res.status(400).json({ message: "주문 금액을 초과해 사용할 수 없습니다." })
     return
@@ -129,6 +134,11 @@ export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
   const cart = await getCart(req, cartId)
   if (!cart) {
     res.status(404).json({ message: "장바구니를 찾을 수 없습니다." })
+    return
+  }
+  // 보안점검 2026-07-27(IDOR): 본인 소유 장바구니만 허용(타인 카트 적립금 복원 탈취 방지)
+  if (cart.customer_id !== customerId) {
+    res.status(403).json({ message: "본인 장바구니만 처리할 수 있습니다." })
     return
   }
   const code = pointsCode(cartId)

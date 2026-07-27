@@ -1,5 +1,5 @@
 {
-  "stamp": "2026-07-27 14:04:31",
+  "stamp": "2026-07-27 14:35:14",
   "base": "http://localhost:9009",
   "total": 125,
   "passed": 125,
@@ -38,7 +38,7 @@
       "expect": "200+token",
       "status": 200,
       "pass": true,
-      "evidence": "itest_1785128672914@kr-itest.local",
+      "evidence": "itest_1785130515813@kr-itest.local",
       "err": null
     },
     {
@@ -50,7 +50,7 @@
       "expect": "200/201",
       "status": 200,
       "pass": true,
-      "evidence": "cus_01KYGZBQRY7A8CTNQ6QW64HXHS",
+      "evidence": "cus_01KYH13ZFKH2PB1484CT2D7ZZP",
       "err": null
     },
     {
@@ -338,7 +338,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "Medusa T-Shirt",
+      "evidence": "Medusa Shorts",
       "err": null
     },
     {
@@ -530,7 +530,7 @@
       "expect": "KRW",
       "status": 200,
       "pass": true,
-      "evidence": "reg_01KYGZACG2J8KPXR2E1MT7ZG3Z",
+      "evidence": "reg_01KYH0C136T6CY83DTDG8W4HS7",
       "err": null
     },
     {
@@ -542,7 +542,7 @@
       "expect": "200+cart",
       "status": 200,
       "pass": true,
-      "evidence": "cart_01KYGZBT3JBPZD7BBP0RZRRRTV",
+      "evidence": "cart_01KYH141NNH50FT5A79WPWRV3R",
       "err": null
     },
     {
@@ -614,7 +614,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "pay_col_01KYGZBVSYAXEYRK5EED4KS39H",
+      "evidence": "pay_col_01KYH143AKGV24111A3ZW7S5DH",
       "err": null
     },
     {
@@ -638,7 +638,7 @@
       "expect": "200+order",
       "status": 200,
       "pass": true,
-      "evidence": "order_01KYGZBW17X321VMCPMQYHM9BS",
+      "evidence": "order_01KYH143JAX0DN1GQM7B4PX9A0",
       "err": null
     },
     {
@@ -806,7 +806,7 @@
       "expect": "pending 노출",
       "status": 200,
       "pass": true,
-      "evidence": "rev_01KYGZBWZZXKM2XTRK7G4GHHTX",
+      "evidence": "rev_01KYH144G40RK4568D4SEVVAJD",
       "err": null
     },
     {
@@ -854,7 +854,7 @@
       "expect": "WELCOME10",
       "status": 200,
       "pass": true,
-      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-7BBP0RZRRRTV\"]",
+      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-T5A79WPWRV3R\"]",
       "err": null
     },
     {

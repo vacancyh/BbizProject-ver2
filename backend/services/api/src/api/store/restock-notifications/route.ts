@@ -20,6 +20,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     res.status(400).json({ message: "variant_id 와 email 은 필수입니다." })
     return
   }
+  // 보안점검 2026-07-27: 정규식 검증 전 길이 상한(ReDoS 방지) — RFC 상한 254
+  if (email.length > 254 || String(body.variant_id).length > 128) {
+    res.status(400).json({ message: "입력값이 너무 깁니다." })
+    return
+  }
   // 간단한 이메일 형식 검증
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ message: "올바른 이메일 주소를 입력해 주세요." })
