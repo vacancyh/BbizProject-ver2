@@ -157,10 +157,13 @@ class RbacModuleService extends MedusaService({
   /**
    * 미들웨어 권한 판정.
    *
-   * 부트스트랩 정책(마이그레이션 잠금 방지):
-   *  - 등급 미지정 관리자 = 전체 허용(true)
+   * 권한 정책(보안점검 2026-07-27 — fail-open 제거):
    *  - super 등급 = 전체 허용(true)
-   *  - 그 외 = 해당 메뉴 권한 행의 can_<action> 값(행 없으면 false)
+   *  - 배정된 등급 = 해당 메뉴 권한 행의 can_<action> 값(행 없으면 false)
+   *  - 등급 미지정 관리자 = **부트스트랩 grace**: super 관리자가 아직 없으면 허용(초기 설정 중
+   *    자기잠금 방지), super 가 1명이라도 존재하면(정식 운영) 최소권한으로 차단(fail-closed).
+   *    → 신규/시드 환경(seed-all 이 bootstrap admin 에 super 부여)은 즉시 강제,
+   *      기존 환경은 super 배정 전까지 동작 불변(무중단 마이그레이션).
    */
   async checkPermission(
     userId: string,
@@ -168,15 +171,23 @@ class RbacModuleService extends MedusaService({
     action: RbacAction
   ): Promise<boolean> {
     const roleKey = await this.getUserRole(userId)
-    // logic.ts evaluatePermission 위임: 미할당/super 단락 + 권한 행 조회
-    if (!roleKey || roleKey === "super") {
-      return evaluatePermission(roleKey, menuId, action, [])
+    if (roleKey === "super") return true
+    if (roleKey) {
+      const rp = await this.listRolePermissions({
+        role_key: roleKey,
+        menu_id: menuId,
+      })
+      return evaluatePermission(roleKey, menuId, action, rp as PermRow[])
     }
-    const rp = await this.listRolePermissions({
-      role_key: roleKey,
-      menu_id: menuId,
-    })
-    return evaluatePermission(roleKey, menuId, action, rp as PermRow[])
+    // 미할당(null): super 존재 여부로 grace/차단 결정
+    const supers = await this.listUserRoles({ role_key: "super" })
+    return supers.length === 0
+  }
+
+  /** super 등급 관리자가 1명 이상 존재하는지(부트스트랩 완료 여부). */
+  async hasSuperAdmin(): Promise<boolean> {
+    const supers = await this.listUserRoles({ role_key: "super" })
+    return supers.length > 0
   }
 }
 

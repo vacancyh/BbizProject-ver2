@@ -1,5 +1,5 @@
 {
-  "stamp": "2026-07-27 12:27:17",
+  "stamp": "2026-07-27 12:41:24",
   "base": "http://localhost:9009",
   "total": 125,
   "passed": 125,
@@ -38,7 +38,7 @@
       "expect": "200+token",
       "status": 200,
       "pass": true,
-      "evidence": "itest_1785122839206@kr-itest.local",
+      "evidence": "itest_1785123685679@kr-itest.local",
       "err": null
     },
     {
@@ -50,7 +50,7 @@
       "expect": "200/201",
       "status": 200,
       "pass": true,
-      "evidence": "cus_01KYGSSPSECHCNMH069X74GHMA",
+      "evidence": "cus_01KYGTKHEXMV5FE7ASVT8AXXRZ",
       "err": null
     },
     {
@@ -530,7 +530,7 @@
       "expect": "KRW",
       "status": 200,
       "pass": true,
-      "evidence": "reg_01KYGSR06MPZDYSHEZ7V9DFRAC",
+      "evidence": "reg_01KYGTH3SNDZSYZVR8DW4V1PNP",
       "err": null
     },
     {
@@ -542,7 +542,7 @@
       "expect": "200+cart",
       "status": 200,
       "pass": true,
-      "evidence": "cart_01KYGSSS0HQ28MKXZCWTQBC4BQ",
+      "evidence": "cart_01KYGTKMBSPDFS3Q9BQBN5YKBC",
       "err": null
     },
     {
@@ -614,7 +614,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "pay_col_01KYGSSTGQ136EWZD38X0Y2NQY",
+      "evidence": "pay_col_01KYGTKP760SERDX1MX33WCR4R",
       "err": null
     },
     {
@@ -638,7 +638,7 @@
       "expect": "200+order",
       "status": 200,
       "pass": true,
-      "evidence": "order_01KYGSSTSBATGFMKK3RYN6HEYN",
+      "evidence": "order_01KYGTKPEHB72RD7QV4S604560",
       "err": null
     },
     {
@@ -806,7 +806,7 @@
       "expect": "pending 노출",
       "status": 200,
       "pass": true,
-      "evidence": "rev_01KYGSSVRWP11TSQK1MGAYTTNZ",
+      "evidence": "rev_01KYGTKQBHA3NDTMY5KD86Q70R",
       "err": null
     },
     {
@@ -854,7 +854,7 @@
       "expect": "WELCOME10",
       "status": 200,
       "pass": true,
-      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-KXZCWTQBC4BQ\"]",
+      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-3Q9BQBN5YKBC\"]",
       "err": null
     },
     {

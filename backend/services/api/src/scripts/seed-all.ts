@@ -30,14 +30,31 @@ import seedDemoAccounts from "./seed-demo-accounts"
 import seedStateMachine from "../modules/state-machine/seed"
 import seedRmaExtension from "../modules/rma-extension/seed"
 
-/** 관리자 user 계정이 하나도 없으면 emailpass 로그인 가능한 admin 을 생성. */
+/** 관리자 user 계정이 하나도 없으면 emailpass 로그인 가능한 admin 을 생성 + super 등급 부여(RBAC 부트스트랩). */
 async function ensureAdmin(container: any, logger: any): Promise<void> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const rbac: any = container.resolve("rbac")
+
+  // RBAC 기본 등급/권한 매트릭스 시드(idempotent) — 어떤 환경이든 등급 매트릭스 보장
+  try {
+    const r = await rbac.seedDefaults()
+    logger.info(`[admin] RBAC 기본 등급/권한 시드: roles=${r.roles} perms=${r.permissions}`)
+  } catch (e: any) {
+    logger.warn(`[admin] RBAC seedDefaults 경고(무시): ${e?.message}`)
+  }
+
   const { data: users } = await query.graph({ entity: "user", fields: ["id"] })
   if ((users as any[]).length > 0) {
-    logger.info(`[admin] 관리자 존재(skip): ${(users as any[]).length}명`)
+    // 기존 환경: 관리자 잠금 방지 위해 자동 super 부여는 하지 않음(super 배정 전까지 grace).
+    const hasSuper = await rbac.hasSuperAdmin().catch(() => false)
+    logger.info(`[admin] 관리자 존재(skip 생성): ${(users as any[]).length}명 · super존재=${hasSuper}`)
+    if (!hasSuper) {
+      logger.info(`[admin] ⚠ super 등급 관리자가 없어 RBAC 는 grace(허용) 상태. 정식 강제하려면 super 배정 필요: `
+        + `POST /admin/rbac/users/:id {role_key:"super"}`)
+    }
     return
   }
+
   const email = process.env.ADMIN_EMAIL || "admin@shop.local"
   const password = process.env.ADMIN_PASSWORD || "admin1234!"
   const authModule: any = container.resolve(Modules.AUTH)
@@ -53,7 +70,14 @@ async function ensureAdmin(container: any, logger: any): Promise<void> {
       { id: reg.authIdentity.id, app_metadata: { ...meta, user_id: user.id } },
     ])
   }
-  logger.info(`[admin] 관리자 생성: ${email} / ${password}`)
+  // 부트스트랩 super 부여 → 이 시점부터 미배정 관리자는 fail-closed(차단)
+  try {
+    await rbac.assignRole(user.id, "super")
+    logger.info(`[admin] 관리자 생성 + super 등급 부여: ${email}`)
+  } catch (e: any) {
+    logger.warn(`[admin] super 등급 부여 경고(무시): ${e?.message}`)
+    logger.info(`[admin] 관리자 생성: ${email}`)
+  }
 }
 
 /** RMA 시드는 비멱등 → 정책이 이미 있으면 건너뛴다. */

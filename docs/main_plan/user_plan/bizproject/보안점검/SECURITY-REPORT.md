@@ -28,6 +28,13 @@
 | 3 | 공개 예시의 실제 비번 제거 | `.env.example` | `ADMIN_PASSWORD=djemal…` → `CHANGE_ME_LOCAL_ONLY` |
 | 4 | 배너 URL 스킴 검증(POST) | `admin/banners/route.ts` | `javascript:`/`data:` 차단. 동적검증: 정상 201 / 악성 400 |
 
+### 3차 — H1 RBAC fail-open 제거 (**회귀검증 완료: 통합 125/125, RBAC 검증 PASS**)
+| # | ID | 항목 | 파일 | 효과 |
+|---|---|---|---|---|
+| 11 | **H1** | RBAC fail-open 제거(자기치유 fail-closed) | `rbac/service.ts`, `seed-all.ts` | 미배정 관리자: super 존재 시 **차단**, 없으면 grace(허용). seed-all 이 bootstrap admin 에 **super 부여** → 신규환경 즉시 강제, 기존환경 무중단. 검증: super=전체허용·cs=범위내만·미배정=차단, 통합 admin 125/125 |
+
+> C2(노출 시크릿 로테이션 + git 이력 스크럽)는 코드 자동적용 불가 → **`C2-시크릿-로테이션-절차.md`** 참조(본인 실행).
+
 ### 2차 — CRITICAL/HIGH + 하드닝 (**회귀검증 완료: 통합테스트 125/125, 프로브 방어 유지**)
 | # | ID | 항목 | 파일 | 효과 |
 |---|---|---|---|---|
@@ -73,7 +80,8 @@
 
 ## 🟠 HIGH
 
-### H1. RBAC가 역할 미지정 관리자에게 fail-open(전체 허용)
+### H1. RBAC가 역할 미지정 관리자에게 fail-open(전체 허용) — ✅ **적용(3차)**
+> 상태: `checkPermission` 을 자기치유 fail-closed 로 변경(super 존재 시 미배정 차단), `seed-all` 이 bootstrap admin 에 super 부여. 검증 PASS.
 - 위치: `src/modules/rbac/service.ts:160-180`, `logic.ts:47` ("roleKey null → 항상 true")
 - 영향: Medusa `user`는 기본 역할 없음 → **역할 미지정 관리자 = 전 메뉴 CRUD 허용**. 실질적으로 RBAC off.
 - 조치: 미지정 사용자를 **최소권한 기본 역할**로(또는 쓰기 deny), 부트스트랩용 break-glass는 별도.
