@@ -7,6 +7,12 @@
 apps/*/.env
 apps/*/.env.local
 
+# 인증 상태·테스트 산출물 (토큰/자격증명 유출 방지 — 보안점검 2026-07-27)
+**/.auth/
+**/state.json
+test-results/
+apps/*/test-results/
+
 # 의존성
 node_modules/
 apps/*/node_modules/

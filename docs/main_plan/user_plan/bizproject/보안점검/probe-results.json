@@ -1,0 +1,192 @@
+{
+  "base": "http://localhost:9009",
+  "stamp": "2026-07-27 11:36:22    ",
+  "total": 23,
+  "weak": 7,
+  "findings": [
+    {
+      "id": "IDOR-1",
+      "name": "타인 주문 상세 접근",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "vip→gold order = 404",
+      "remediation": "소유자 검증(actor_id===order.customer_id) 필요"
+    },
+    {
+      "id": "IDOR-2",
+      "name": "타인 주문 취소신청",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "= 403",
+      "remediation": "소유권 검증 필요"
+    },
+    {
+      "id": "IDOR-3",
+      "name": "타인 주문 구매확정",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "= 403",
+      "remediation": "소유권 검증 필요"
+    },
+    {
+      "id": "IDOR-4",
+      "name": "타인 주문 영수증신청",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "= 403",
+      "remediation": "소유권 검증 필요"
+    },
+    {
+      "id": "AUTH-1",
+      "name": "미인증 admin 접근",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "= 401",
+      "remediation": "관리자 인증 필수"
+    },
+    {
+      "id": "AUTH-2",
+      "name": "고객토큰 admin 접근",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "= 401",
+      "remediation": "actor_type=user 강제"
+    },
+    {
+      "id": "AUTH-3",
+      "name": "위조 JWT 거부",
+      "severity": "HIGH",
+      "result": "OK",
+      "evidence": "= 401",
+      "remediation": "서명검증 필수"
+    },
+    {
+      "id": "AUTH-4",
+      "name": "alg=none JWT 거부",
+      "severity": "CRITICAL",
+      "result": "OK",
+      "evidence": "= 401",
+      "remediation": "alg=none 반드시 거부"
+    },
+    {
+      "id": "PRIV-1",
+      "name": "리뷰 status=published 주입(모더레이션 우회)",
+      "severity": "MEDIUM",
+      "result": "OK",
+      "evidence": "pending 강제(정상)",
+      "remediation": "클라이언트 status 무시, 항상 pending"
+    },
+    {
+      "id": "HDR-x-content-type-options",
+      "name": "보안헤더 x-content-type-options",
+      "severity": "LOW",
+      "result": "WEAK",
+      "evidence": "누락(nosniff)",
+      "remediation": "백엔드/next.config 에 x-content-type-options 추가"
+    },
+    {
+      "id": "HDR-x-frame-options",
+      "name": "보안헤더 x-frame-options",
+      "severity": "MEDIUM",
+      "result": "WEAK",
+      "evidence": "누락(DENY/SAMEORIGIN)",
+      "remediation": "백엔드/next.config 에 x-frame-options 추가"
+    },
+    {
+      "id": "HDR-referrer-policy",
+      "name": "보안헤더 referrer-policy",
+      "severity": "LOW",
+      "result": "WEAK",
+      "evidence": "누락(no-referrer 등)",
+      "remediation": "백엔드/next.config 에 referrer-policy 추가"
+    },
+    {
+      "id": "HDR-strict-transport-security",
+      "name": "보안헤더 strict-transport-security",
+      "severity": "MEDIUM",
+      "result": "WEAK",
+      "evidence": "누락(HSTS)",
+      "remediation": "백엔드/next.config 에 strict-transport-security 추가"
+    },
+    {
+      "id": "HDR-content-security-policy",
+      "name": "보안헤더 content-security-policy",
+      "severity": "MEDIUM",
+      "result": "WEAK",
+      "evidence": "누락(CSP)",
+      "remediation": "백엔드/next.config 에 content-security-policy 추가"
+    },
+    {
+      "id": "HDR-permissions-policy",
+      "name": "보안헤더 permissions-policy",
+      "severity": "LOW",
+      "result": "WEAK",
+      "evidence": "누락(Permissions-Policy)",
+      "remediation": "백엔드/next.config 에 permissions-policy 추가"
+    },
+    {
+      "id": "COOKIE-1",
+      "name": "인증 쿠키 플래그",
+      "severity": "INFO",
+      "result": "INFO",
+      "evidence": "로그인이 Set-Cookie 없이 Bearer 토큰 방식",
+      "remediation": "토큰 저장은 클라이언트 책임(XSS 주의)"
+    },
+    {
+      "id": "RATE-1",
+      "name": "로그인 브루트포스 제한",
+      "severity": "HIGH",
+      "result": "WEAK",
+      "evidence": "codes=[401,401,401,401,401,401,401,401,401,401,401,401]",
+      "remediation": "로그인/가입에 rate-limit(예: 5/min/IP) 필요"
+    },
+    {
+      "id": "ENUM-1",
+      "name": "로그인 사용자 열거 방지",
+      "severity": "LOW",
+      "result": "OK",
+      "evidence": "존재=429 미존재=429",
+      "remediation": "존재/미존재 응답 동일화"
+    },
+    {
+      "id": "ENUM-2",
+      "name": "주문조회 열거 방지",
+      "severity": "LOW",
+      "result": "OK",
+      "evidence": "불일치=404",
+      "remediation": "불일치 시 404(정보 미노출)"
+    },
+    {
+      "id": "ERR-1",
+      "name": "에러 스택/내부정보 노출",
+      "severity": "MEDIUM",
+      "result": "OK",
+      "evidence": "일반화된 응답",
+      "remediation": "에러 응답에 스택/SQL/경로 미포함"
+    },
+    {
+      "id": "CORS-1",
+      "name": "CORS 임의 오리진 반사",
+      "severity": "MEDIUM",
+      "result": "OK",
+      "evidence": "ACAO=(none) creds=true",
+      "remediation": "허용 오리진 화이트리스트 고정"
+    },
+    {
+      "id": "BIZ-1",
+      "name": "음수 적립금 적용 차단",
+      "severity": "MEDIUM",
+      "result": "OK",
+      "evidence": "= 400",
+      "remediation": "points<=0 및 잔액초과 검증"
+    },
+    {
+      "id": "BIZ-2",
+      "name": "잔액초과 적립금 차단",
+      "severity": "MEDIUM",
+      "result": "OK",
+      "evidence": "= 400",
+      "remediation": "잔액 초과 사용 거부"
+    }
+  ]
+}

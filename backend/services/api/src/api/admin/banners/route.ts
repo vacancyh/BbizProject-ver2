@@ -32,12 +32,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     res.status(400).json({ message: "제목과 이미지 URL은 필수입니다." })
     return
   }
+  // URL 스킴 검증 — http(s) 또는 상대경로(/…)만 허용(javascript:/data: 등 차단). 보안점검 2026-07-27
+  const isSafeUrl = (u: string) => /^https?:\/\//i.test(u) || u.startsWith("/")
+  const link_url = b.link_url ? String(b.link_url).trim() : null
+  if (!isSafeUrl(image_url)) {
+    res.status(400).json({ message: "이미지 URL은 http(s):// 또는 / 로 시작해야 합니다." })
+    return
+  }
+  if (link_url && !isSafeUrl(link_url)) {
+    res.status(400).json({ message: "링크 URL 형식이 올바르지 않습니다(http(s):// 또는 /)." })
+    return
+  }
   const [created] = await cms.createBanners([
     {
       kind,
       title,
       image_url,
-      link_url: b.link_url ? String(b.link_url).trim() : null,
+      link_url,
       sort_order: Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 0,
       status: b.status === "draft" ? "draft" : "published",
       starts_at: b.starts_at ? new Date(String(b.starts_at)) : null,
