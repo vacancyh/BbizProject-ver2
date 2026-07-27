@@ -17,10 +17,13 @@ export default async function seedCsLegal({ container }: ExecArgs) {
   const { data: docs } = await query.graph({ entity: "legal_doc", fields: ["id", "type"] })
   const have = new Set((docs as any[]).map((d) => d.type))
   const want = [
+    { type: "terms_of_service", name: "이용약관", publish: true },
     { type: "privacy_policy", name: "개인정보처리방침", publish: true },
     { type: "marketing_consent", name: "마케팅 정보 수신 동의", publish: false },
     { type: "third_party_consent", name: "제3자 정보 제공 동의", publish: false },
   ]
+  // 시행일은 "오늘 이후"여야 함(legalDoc 검증). 하드코딩 과거 날짜는 시간이 지나면 실패하므로 내일로 계산.
+  const effectiveAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
   let legalCreated = 0
   for (const w of want) {
     if (have.has(w.type)) continue
@@ -28,7 +31,7 @@ export default async function seedCsLegal({ container }: ExecArgs) {
       type: w.type,
       version: "v1.0",
       body: `${w.name} (테스트 본문)\n\n본 문서는 테스트용 초안입니다. 운영 전 실제 약관 내용으로 교체하세요.`,
-      effective_at: new Date("2026-07-01"),
+      effective_at: effectiveAt,
       requires_consent: true,
     })
     if (w.publish) await legal.publishDoc(doc.id, actorId)
