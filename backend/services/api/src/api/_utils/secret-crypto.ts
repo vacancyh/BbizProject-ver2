@@ -11,11 +11,24 @@ import crypto from "crypto"
 
 const PREFIX = "v1:"
 
+let warnedFallback = false
+
 function key(): Buffer {
-  const raw =
-    process.env.ADMIN_2FA_SECRET_KEY ||
-    process.env.COOKIE_SECRET ||
-    "dev-insecure-2fa-key"
+  const dedicated = process.env.ADMIN_2FA_SECRET_KEY
+  // 보안점검 2026-07-27(H4): 운영에서는 전용 키 필수. 미설정 시 부팅/사용 실패(fail-fast).
+  if (!dedicated && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "[security] ADMIN_2FA_SECRET_KEY must be set to a dedicated random value in production (2FA at-rest encryption key)"
+    )
+  }
+  if (!dedicated && !warnedFallback) {
+    warnedFallback = true
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[security] ADMIN_2FA_SECRET_KEY 미설정 — COOKIE_SECRET/dev 폴백 사용(개발 전용). 운영은 전용 키 주입 필수."
+    )
+  }
+  const raw = dedicated || process.env.COOKIE_SECRET || "dev-insecure-2fa-key"
   return crypto.createHash("sha256").update(raw).digest()
 }
 

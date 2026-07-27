@@ -20,6 +20,7 @@ import {
   normalizeBizNo,
   canTransitionTaxInvoice,
 } from "./logic"
+import { encryptPii, decryptPii } from "./crypto"
 
 export type CreateInvoiceInput = {
   customerId: string
@@ -45,7 +46,8 @@ class TaxInvoiceModuleService extends MedusaService({
         customer_id: input.customerId,
         order_id: input.orderId ?? null,
         payout_id: input.payoutId ?? null,
-        biz_no: normalizeBizNo(input.bizNo),
+        // H5: 사업자번호 at-rest 암호화(검증은 평문으로 이미 수행). 검증 통과 = 항상 non-empty
+        biz_no: encryptPii(normalizeBizNo(input.bizNo)) as string,
         company_name: input.companyName ?? null,
         amount: input.amount,
         status: "pending",
@@ -66,9 +68,9 @@ class TaxInvoiceModuleService extends MedusaService({
     return row
   }
 
-  /** amount numeric→string 방지 정규화(§V0). */
+  /** amount numeric→string 방지 정규화(§V0) + biz_no 복호화(H5, 레거시 평문 호환). */
   private toView(row: any): any {
-    return row ? { ...row, amount: Number(row.amount) } : row
+    return row ? { ...row, amount: Number(row.amount), biz_no: decryptPii(row.biz_no) } : row
   }
 
   /** 1건 조회. */

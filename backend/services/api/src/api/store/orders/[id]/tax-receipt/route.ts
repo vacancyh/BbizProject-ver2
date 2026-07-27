@@ -77,9 +77,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const ops = req.scope.resolve(
       ORDER_OPS_KR_MODULE
     ) as unknown as OrderOpsKrModuleService
+    // H5(보안점검 2026-07-27): 식별번호(휴대폰/카드) 평문을 메모에 남기지 않고 마스킹 저장
+    const maskIdentifier = (raw: string): string => {
+      const d = raw.replace(/\D/g, "")
+      if (d.length <= 4) return "*".repeat(d.length)
+      return d.slice(0, 3) + "*".repeat(Math.max(2, d.length - 7)) + d.slice(-4)
+    }
     await ops.addMemo(
       orderId,
-      `[현금영수증 신청] 식별번호: ${body.identifier.trim()}`,
+      `[현금영수증 신청] 식별번호(마스킹): ${maskIdentifier(body.identifier.trim())}`,
       { id: customerId, email: order.email ?? null },
       "memo"
     )

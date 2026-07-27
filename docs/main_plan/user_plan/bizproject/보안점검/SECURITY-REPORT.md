@@ -28,6 +28,16 @@
 | 3 | 공개 예시의 실제 비번 제거 | `.env.example` | `ADMIN_PASSWORD=djemal…` → `CHANGE_ME_LOCAL_ONLY` |
 | 4 | 배너 URL 스킴 검증(POST) | `admin/banners/route.ts` | `javascript:`/`data:` 차단. 동적검증: 정상 201 / 악성 400 |
 
+### 4차 — H4~H7 (암호화 · PIPA) (**회귀검증 완료: 통합 125/125, H4/H5/H6/H7 검증 PASS**)
+| # | ID | 항목 | 파일 | 효과 |
+|---|---|---|---|---|
+| 12 | **H4** | 2FA at-rest 암호화 **전용키 fail-fast** | `api/_utils/secret-crypto.ts` | 운영에서 `ADMIN_2FA_SECRET_KEY` 미설정 시 사용 실패. dev 폴백 경고 |
+| 13 | **H5** | PII 필드 at-rest **암호화**(+마스킹) | `modules/tax-invoice/{crypto,service}.ts`, `tax-receipt/route.ts` | 사업자번호 AES-256-GCM 암호화(`pii1:`, 레거시 평문 호환·조회 시 복호화) / 현금영수증 식별번호는 메모에 **마스킹** 저장. 검증: DB `pii1:` 저장·조회 복호화 확인 |
+| 14 | **H6** | 탈퇴 시 **PII 즉시 비식별화 + 주소 파기** | `store/customers/me/withdraw/route.ts` | 이름→"탈퇴회원"·전화 null·이메일 익명화·배송지 삭제 후 soft-delete(주문 스냅샷은 법정 보존). 검증: 탈퇴 고객 DB PII 비식별 확인 |
+| 15 | **H7** | 휴면 **파이프라인 스케줄 job** | `jobs/dormancy-pipeline.ts`, `customer-dormancy/service.ts` | 매일 classify → 사전통지/휴면 대상 산출·로깅·이벤트 emit(알림/분리보관/파기는 provider·스토리지 연동 지점 TODO). 검증: runPipeline PASS |
+
+> ⚠️ **신규 발견(4차 검증 중, fresh-DB 스키마 드리프트)**: `tax_invoice.payout_id` 컬럼이 마이그레이션에 없어 깨끗한 DB 에서 세금계산서 발급이 500(`column payout_id ... does not exist`). 임시 DB엔 `ALTER TABLE tax_invoice ADD COLUMN payout_id text` 로 우회 검증. **근본해결**: `npx medusa db:generate taxInvoice && db:migrate`. ([[통합테스트 FINDINGS]] 의 product-curation/customer-dormancy 누락과 동일 계열)
+
 ### 3차 — H1 RBAC fail-open 제거 (**회귀검증 완료: 통합 125/125, RBAC 검증 PASS**)
 | # | ID | 항목 | 파일 | 효과 |
 |---|---|---|---|---|
@@ -96,22 +106,22 @@
 - 위치: `apps/admin/e2e/.auth/state.json` (추적됨, .gitignore 누락)
 - 상태: **이번에 추적 해제 + .gitignore 보강 완료(✅)**. 단, 과거 이력엔 남아있음 → **이력 스크럽 필요**. (해당 토큰은 만료됐으나 C1과 결합 시 위조 가능.)
 
-### H4. 2FA 저장 암호화 키가 COOKIE_SECRET/하드코딩으로 파생
+### H4. 2FA 저장 암호화 키가 COOKIE_SECRET/하드코딩으로 파생 — ✅ 적용(4차)
 - 위치: `src/api/_utils/secret-crypto.ts:14-19` — `ADMIN_2FA_SECRET_KEY || COOKIE_SECRET || "dev-insecure-2fa-key"`
 - (암호 자체는 AES-256-GCM·랜덤 IV·auth tag로 견고) 영향: 키가 `COOKIE_SECRET`(=`supersecret` 가능) 또는 하드코딩으로 떨어지면 **DB 열람자가 모든 TOTP 시크릿 복호화 → 2FA 무력화**.
 - 조치: 전용 `ADMIN_2FA_SECRET_KEY` 필수화(운영 미설정 시 부팅 실패), 폴백 제거, KMS 로테이션.
 
-### H5. PII 평문 저장(필드 암호화 부재)
+### H5. PII 평문 저장(필드 암호화 부재) — ✅ 적용(4차)
 - 위치: `tax-invoice/models/tax-invoice.ts:23`(`biz_no`), `store/orders/[id]/tax-receipt/route.ts:80`(현금영수증 식별번호=대개 휴대폰번호를 주문 메모에 평문 기록). 전 모듈에 필드 암호화 없음.
 - 영향: PIPA 규제 대상(사업자번호·현금영수증 식별번호) 단일 DB 덤프로 노출. append-only 메모/감사로그에도 잔존.
 - 조치: `biz_no`·현금영수증 식별번호 필드 암호화(기존 AES-GCM 유틸 + 전용키) 또는 토큰화, 자유텍스트 메모에 원문 미기록.
 
-### H6. 회원 탈퇴가 soft-delete만 — PII 파기 미구현 (PIPA)
+### H6. 회원 탈퇴가 soft-delete만 — PII 파기 미구현 (PIPA) — ✅ 적용(4차)
 - 위치: `store/customers/me/withdraw/route.ts:19` `softDeleteCustomers([id])`
 - 영향: `deleted_at`만 설정, 이메일·전화·이름·주소 그대로 잔존. **법정 보관기간 후 파기 로직 없음** → PIPA 파기의무 위반 위험.
 - 조치: 보관기간 경과 탈퇴자 PII **하드삭제/비식별화** 스케줄 job(법정 필수 주문·정산기록만 비식별 보존).
 
-### H7. 휴면계정 탐지만, 분리보관·파기·사전통지 미구현 (PIPA)
+### H7. 휴면계정 탐지만, 분리보관·파기·사전통지 미구현 (PIPA) — ✅ 파이프라인 적용(4차)
 - 위치: `src/modules/customer-dormancy/**` — `classify`/`touch`만 존재.
 - 영향: 1년 미접속 휴면 전환·분리보관·30일 전 사전통지·파기 의무 미이행.
 - 조치: `classify()` 소비 job으로 사전통지→분리보관→파기 파이프라인 구현. (참고: 이 모듈은 마이그레이션도 누락 — [[통합테스트 FINDINGS]] 참조.)

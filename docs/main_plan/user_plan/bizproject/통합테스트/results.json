@@ -1,5 +1,5 @@
 {
-  "stamp": "2026-07-27 12:41:24",
+  "stamp": "2026-07-27 13:06:44",
   "base": "http://localhost:9009",
   "total": 125,
   "passed": 125,
@@ -38,7 +38,7 @@
       "expect": "200+token",
       "status": 200,
       "pass": true,
-      "evidence": "itest_1785123685679@kr-itest.local",
+      "evidence": "itest_1785125205958@kr-itest.local",
       "err": null
     },
     {
@@ -50,7 +50,7 @@
       "expect": "200/201",
       "status": 200,
       "pass": true,
-      "evidence": "cus_01KYGTKHEXMV5FE7ASVT8AXXRZ",
+      "evidence": "cus_01KYGW1Y2EPCSFJNMP2Z91VA41",
       "err": null
     },
     {
@@ -338,7 +338,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "Medusa Sweatpants",
+      "evidence": "Medusa Shorts",
       "err": null
     },
     {
@@ -530,7 +530,7 @@
       "expect": "KRW",
       "status": 200,
       "pass": true,
-      "evidence": "reg_01KYGTH3SNDZSYZVR8DW4V1PNP",
+      "evidence": "reg_01KYGVVEHZA8PW4TGZWVDDSG71",
       "err": null
     },
     {
@@ -542,7 +542,7 @@
       "expect": "200+cart",
       "status": 200,
       "pass": true,
-      "evidence": "cart_01KYGTKMBSPDFS3Q9BQBN5YKBC",
+      "evidence": "cart_01KYGW207HG7T06A4BPZHF27D9",
       "err": null
     },
     {
@@ -614,7 +614,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "pay_col_01KYGTKP760SERDX1MX33WCR4R",
+      "evidence": "pay_col_01KYGW21ZT7EEKD314042NQCHK",
       "err": null
     },
     {
@@ -638,7 +638,7 @@
       "expect": "200+order",
       "status": 200,
       "pass": true,
-      "evidence": "order_01KYGTKPEHB72RD7QV4S604560",
+      "evidence": "order_01KYGW22AY2MMR101CG4ZH21GJ",
       "err": null
     },
     {
@@ -806,7 +806,7 @@
       "expect": "pending 노출",
       "status": 200,
       "pass": true,
-      "evidence": "rev_01KYGTKQBHA3NDTMY5KD86Q70R",
+      "evidence": "rev_01KYGW2353873NH8FZDXNRWP4Q",
       "err": null
     },
     {
@@ -854,7 +854,7 @@
       "expect": "WELCOME10",
       "status": 200,
       "pass": true,
-      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-3Q9BQBN5YKBC\"]",
+      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-6A4BPZHF27D9\"]",
       "err": null
     },
     {

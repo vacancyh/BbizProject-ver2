@@ -1,6 +1,6 @@
 # BbizProject 통합테스트 리포트 (분할·다중방법)
 
-- 실행: 2026-07-27 12:41:24
+- 실행: 2026-07-27 13:06:44
 - 대상: `http://localhost:9009` (API 계층, shop_test DB)
 - 결과: **125/125 PASS** · 실패 0
 
@@ -29,8 +29,8 @@
 |---|---|---|---|---|---|---|---|
 | A1 | 관리자 로그인 | POST | `/auth/user/emailpass` | 200+token | 200 | ✅ | token |
 | A2 | 관리자 로그인 실패(오비번) | POST | `/auth/user/emailpass` | 401 | 401 | ✅ | status=401 |
-| A3 | 고객 회원가입(register) | POST | `/auth/customer/emailpass/register` | 200+token | 200 | ✅ | itest_1785123685679@kr-itest.local |
-| A4 | 고객 프로필 생성 | POST | `/store/customers` | 200/201 | 200 | ✅ | cus_01KYGTKHEXMV5FE7ASVT8AXXRZ |
+| A3 | 고객 회원가입(register) | POST | `/auth/customer/emailpass/register` | 200+token | 200 | ✅ | itest_1785125205958@kr-itest.local |
+| A4 | 고객 프로필 생성 | POST | `/store/customers` | 200/201 | 200 | ✅ | cus_01KYGW1Y2EPCSFJNMP2Z91VA41 |
 | A5 | 중복 회원가입 차단 | POST | `/auth/customer/emailpass/register` | 4xx | 401 | ✅ | status=401 |
 | A6 | 신규 고객 로그인 | POST | `/auth/customer/emailpass` | 200+token | 200 | ✅ | token |
 | A7 | 고객 로그인 실패(오비번) | POST | `/auth/customer/emailpass` | 401 | 401 | ✅ | status=401 |
@@ -64,7 +64,7 @@
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
 | C1 | 상품 목록 | GET | `/store/products` | 200+상품 | 200 | ✅ | n=5 |
-| C2 | 상품 상세 | GET | `/store/products/:id` | 200 | 200 | ✅ | Medusa Sweatpants |
+| C2 | 상품 상세 | GET | `/store/products/:id` | 200 | 200 | ✅ | Medusa Shorts |
 | C3 | 상품 리뷰 목록 | GET | `/store/products/:id/reviews` | 200 | 200 | ✅ | n=0 |
 | C4 | 상품 문의 목록 | GET | `/store/products/:id/inquiries` | 200 | 200 | ✅ | status=200 |
 | C5 | 상품정보고시 | GET | `/store/products/:id/disclosure` | 200/404 | 200 | ✅ | status=200 |
@@ -85,16 +85,16 @@
 
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
-| D0 | 리전(KRW) 확보 | GET | `/store/regions` | KRW | 200 | ✅ | reg_01KYGTH3SNDZSYZVR8DW4V1PNP |
-| D1 | 카트 생성 | POST | `/store/carts` | 200+cart | 200 | ✅ | cart_01KYGTKMBSPDFS3Q9BQBN5YKBC |
+| D0 | 리전(KRW) 확보 | GET | `/store/regions` | KRW | 200 | ✅ | reg_01KYGVVEHZA8PW4TGZWVDDSG71 |
+| D1 | 카트 생성 | POST | `/store/carts` | 200+cart | 200 | ✅ | cart_01KYGW207HG7T06A4BPZHF27D9 |
 | D2 | 카트 배송지 | POST | `/store/carts/:id` | 200 | 200 | ✅ | status=200 |
 | D3a | 배송옵션 조회 | GET | `/store/shipping-options` | 200+옵션 | 200 | ✅ | n=1 |
 | D3b | 배송방법 설정 | POST | `/store/carts/:id/shipping-methods` | 200 | 200 | ✅ | status=200 |
 | D4 | 쿠폰(WELCOME10) 적용 | POST | `/store/carts/:id/promotions` | 200+할인 | 200 | ✅ | discount=1650 |
 | D5 | 적립금 적용 | POST | `/store/carts/:id/points` | 200/400 | 200 | ✅ | status=200 |
-| D6a | 결제 컬렉션 | POST | `/store/payment-collections` | 200 | 200 | ✅ | pay_col_01KYGTKP760SERDX1MX33WCR4R |
+| D6a | 결제 컬렉션 | POST | `/store/payment-collections` | 200 | 200 | ✅ | pay_col_01KYGW21ZT7EEKD314042NQCHK |
 | D6b | 결제 세션 | POST | `/store/payment-collections/:id/payment-sessions` | 200 | 200 | ✅ | status=200 |
-| D7 | 주문 완료(checkout) | POST | `/store/carts/:id/complete` | 200+order | 200 | ✅ | order_01KYGTKPEHB72RD7QV4S604560 |
+| D7 | 주문 완료(checkout) | POST | `/store/carts/:id/complete` | 200+order | 200 | ✅ | order_01KYGW22AY2MMR101CG4ZH21GJ |
 | D7b | DB: 주문 레코드 존재 | - | `-` | =1 | 200 | ✅ | rows=1 |
 
 ### E. 관리자 기능  (11/11)
@@ -118,11 +118,11 @@
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
 | F1a | 리뷰 작성(pending) | POST | `/store/products/:id/reviews` | 200/201 | 201 | ✅ | status=201 |
-| F1b | 관리자 큐 노출 | GET | `/admin/reviews` | pending 노출 | 200 | ✅ | rev_01KYGTKQBHA3NDTMY5KD86Q70R |
+| F1b | 관리자 큐 노출 | GET | `/admin/reviews` | pending 노출 | 200 | ✅ | rev_01KYGW2353873NH8FZDXNRWP4Q |
 | F1c | 관리자 리뷰 승인 | POST | `/admin/reviews/:id` | 200 | 200 | ✅ | status=200 |
 | F1d | 승인 리뷰 스토어 노출 | GET | `/store/products/:id/reviews` | published 노출 | 200 | ✅ | 노출 |
 | F2 | 주문→관리자검색 노출 | GET | `/admin/orders-kr/search` | ≥1 | 200 | ✅ | n=4 |
-| F3 | 쿠폰 admin→store 노출 | GET | `/store/coupons` | WELCOME10 | 200 | ✅ | ["WELCOME10","KRW5000","POINTS-3Q9BQBN5YKBC"] |
+| F3 | 쿠폰 admin→store 노출 | GET | `/store/coupons` | WELCOME10 | 200 | ✅ | ["WELCOME10","KRW5000","POINTS-6A4BPZHF27D9"] |
 | F4 | 관리자 적립→고객 잔액 | POST | `/admin/points/customers/:id/earn` | +500 | 200 | ✅ | 1300→1800 |
 | F4b | DB: 원장 합계=잔액 | - | `-` | 일치 | 200 | ✅ | db_sum=1800 api=1800 |
 | F5a | 상품 문의 작성 | POST | `/store/products/:id/inquiries` | 200/201 | 201 | ✅ | status=201 |
