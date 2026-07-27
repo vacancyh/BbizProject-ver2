@@ -23,12 +23,18 @@
 | 4 | MEDIUM | restock 이메일 **길이 상한**(ReDoS 방지, 정규식 전 254 컷) | `store/restock-notifications/route.ts` | 타입체크 |
 | 5 | LOW | 상품문의 **작성자명 서버 마스킹**(리뷰와 동일 `홍**`) | `store/products/[id]/inquiries/route.ts` | 타입체크 |
 
+## ✅ 후속 수정 A1/A3 (회귀검증: 통합 125/125, 역적립 in-process PASS)
+
+| # | 심각도 | 항목 | 파일 | 검증 |
+|---|---|---|---|---|
+| A1 | **HIGH** | 환불/취소 시 **적립금·멤버십 역적립** — 전액/취소=전량·부분환불=비례, 이미 쓴 적립금은 잔액 0 바닥, reasonKey 멱등 | `_utils/reward-reversal.ts`(신규), `customer-point/service.ts`(`reverseAccrualForOrder`), `admin/orders-kr/[id]/cancel`·`admin/orders/[id]/refund` 훅 | in-process: 잔액0바닥·멤버십 누적감소·멱등 PASS |
+| A3 | LOW | 환불 취소기록 **원장 필드 오매핑**(points↔coupon) 수정 | `admin/orders/[id]/refund/route.ts` | 타입체크 |
+
 ## 📋 문서화(보류 — 위험/기능/정책)
 
 | 심각도 | 항목 | 사유·권장 |
 |---|---|---|
-| **HIGH** | 환불/취소 시 **적립금·멤버십 등급 미복원**(place→earn→refund→keep) | `order.canceled`/refund 경로에 **멱등 역적립 subscriber** 필요(주문 id 키). 정확·멱등 설계 필요 → 별도 구현 권장 |
-| **HIGH** | 적립금 DELETE **이중복원 레이스**(동시 요청 → 포인트 인플레) | 소유권 검증으로 교차사용자 위험은 제거됨. 완전 해결은 per-cart 락/멱등 키 필요 |
+| **HIGH** | 적립금 DELETE **이중복원 레이스**(동시 요청 → 포인트 인플레) | 소유권 검증으로 교차사용자 위험은 제거됨. 완전 해결은 per-cart 락(`Modules.LOCKING`)/멱등 키 필요 → 별도 |
 | MEDIUM | **환불 금액 상한** 미구현(클라 amount 신뢰) | Medusa 코어가 잔여초과는 백스톱하나, 라우트에 `captured − 기환불` 명시 상한 추가 권장(defense-in-depth) |
 | MEDIUM | 수동결제(`pp_system_default`)에서 **place→적립→미결제** | 운영 PG 연동 + 적립을 `payment.captured` 기준으로 게이트 권장 |
 | MEDIUM | best-products 익명 풀스캔 | 레이트리밋(적용됨) + **캐시**(Redis TTL) 추가 권장 |

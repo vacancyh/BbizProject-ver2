@@ -29,6 +29,7 @@ import {
 import { ORDER_OPS_KR_MODULE } from "../../../../../modules/order-ops-kr"
 import OrderOpsKrModuleService from "../../../../../modules/order-ops-kr/service"
 import { validateCancelReason, buildCancelIdempotencyKey } from "./cancel-logic"
+import { reverseOrderRewards } from "../../../../_utils/reward-reversal"
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = (req.body ?? {}) as {
@@ -145,6 +146,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     })
     return
   }
+
+  // ── ⑤-1 적립금·멤버십 역적립(A1) — 전량 회수. 실패해도 취소 흐름 불방해 ──
+  await reverseOrderRewards(req.scope, {
+    orderId,
+    refundAmount: null, // 취소 = 전액 역적립
+    reasonKey: "cancel-reversal",
+  }).catch(() => {})
 
   // ── ⑥ order_cancellation append-only 적재 ───────────────────────────────
   await svc.recordCancellation({

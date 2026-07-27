@@ -190,6 +190,53 @@ class CustomerPointModuleService extends MedusaService({
     const rows = await this.listPointAccrualLogs({ order_id: orderId, reason })
     return rows.length > 0
   }
+
+  /** 주문의 특정 사유 적립 포인트(기본 purchase). 없으면 0. */
+  async getAccrualPointsEarned(orderId: string, reason: string = "purchase"): Promise<number> {
+    const rows = await this.listPointAccrualLogs({ order_id: orderId, reason })
+    return rows.length ? Number(rows[0].points_earned) || 0 : 0
+  }
+
+  /**
+   * 환불/취소 역적립(보안점검 2026-07-27 A1) — 적립 포인트를 회수한다.
+   *  - reverseReasonKey 기준 멱등(point_accrual_log UNIQUE(order_id, reason)): 이미 처리 시 skip.
+   *  - 이미 사용한 적립금은 잔액 0에서 바닥(음수 미허용) — 회수액 = min(요청, 현재잔액).
+   * @returns { skipped, reversed(실제 회수 포인트) }
+   */
+  async reverseAccrualForOrder(
+    customerId: string,
+    orderId: string,
+    reverseReasonKey: string,
+    pointsToReverse: number
+  ): Promise<{ skipped: boolean; reversed: number }> {
+    const existing = await this.listPointAccrualLogs({ order_id: orderId, reason: reverseReasonKey })
+    if (existing.length > 0) return { skipped: true, reversed: 0 }
+
+    const balance = await this.getBalance(customerId)
+    const deduct = Math.max(0, Math.min(Math.floor(pointsToReverse), balance)) // 잔액 0 바닥
+    if (deduct > 0) {
+      await this.createPointLedgers([
+        {
+          customer_id: customerId,
+          entry_type: "redeem",
+          amount: -deduct,
+          reason: "환불 적립금 회수",
+          expires_at: null,
+        },
+      ])
+    }
+    // 멱등 마커(회수액 음수로 기록)
+    await this.createPointAccrualLogs([
+      {
+        order_id: orderId,
+        customer_id: customerId,
+        reason: reverseReasonKey,
+        points_earned: -deduct,
+        ledger_id: null,
+      },
+    ])
+    return { skipped: false, reversed: deduct }
+  }
 }
 
 export default CustomerPointModuleService

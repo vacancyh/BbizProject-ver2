@@ -27,6 +27,7 @@ import {
   calcReshippingFee,
 } from "./refund-logic"
 import { buildIdempotencyKey } from "./idempotency-logic"
+import { reverseOrderRewards } from "../../../../_utils/reward-reversal"
 
 /** POST /admin/orders/:id/refund 요청 바디 */
 interface RefundRequestBody {
@@ -202,10 +203,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     refund_amount: refundAmount,
     refund_method: refund_method,
     account_info: account_info ?? null,
-    restored_points: coupon_discount > 0 ? coupon_discount : 0,
-    restored_coupon: point_discount > 0 ? point_discount : 0,
+    // 보안점검 2026-07-27(A3): points↔coupon 필드 오매핑 수정
+    restored_points: point_discount > 0 ? point_discount : 0,
+    restored_coupon: coupon_discount > 0 ? coupon_discount : 0,
     reason,
   })
+
+  // ─── ⑤-1 적립금·멤버십 역적립(A1) — 환불액 비례 회수. 실패해도 환불 흐름 불방해 ──
+  await reverseOrderRewards(req.scope, {
+    orderId,
+    refundAmount, // 부분/전액 환불액 → 비례 역적립
+    reasonKey: `refund-reversal:${rawNonce}`,
+  }).catch(() => {})
 
   // ─── ⑥ 멱등키 캐시 저장 (24h) ────────────────────────────────────────────
   const responsePayload: Record<string, unknown> = {
