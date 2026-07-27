@@ -101,7 +101,7 @@ export default async function orderPlacedRewardsHandler({
         try { return container.resolve("logger") } catch { return console }
       })()
       logger.info?.(
-        `[order-placed-rewards] 이미 처리된 주문 — 포인트 적립 skip(order=${orderId}, customer=${customerId})`
+        `[order-placed-rewards] 이미 처리된 주문 — 포인트 적립 skip(order=${orderId})`
       )
     }
   } catch (e: any) {

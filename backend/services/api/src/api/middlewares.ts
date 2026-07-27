@@ -75,6 +75,21 @@ const PATH_MENU_MAP: { prefix: string; menu: string }[] = [
   { prefix: "/admin/faqs", menu: "settings" }, // 고객센터 FAQ(설정>고객센터 콘텐츠)
   { prefix: "/admin/banners", menu: "settings" }, // 메인 배너/팝업(설정>배너·팝업)
   { prefix: "/admin/home-curations", menu: "products" }, // 홈 큐레이션(MD추천) — 상품 메뉴 권한
+  // ── 보안점검 2026-07-27: 미매핑이던 커스텀 admin 라우트 RBAC 매핑(기능수준 인가 파괴/BFLA 방지) ──
+  { prefix: "/admin/points", menu: "members" }, // 적립금 발행/차감
+  { prefix: "/admin/membership", menu: "members" }, // 등급 조정
+  { prefix: "/admin/consents", menu: "members" }, // 동의 이력
+  { prefix: "/admin/sanctions", menu: "members" }, // 제재/블랙리스트
+  { prefix: "/admin/withdrawal", menu: "orders" }, // 청약철회(7일)
+  { prefix: "/admin/rma", menu: "orders" }, // 반품 정책/검수/환불
+  { prefix: "/admin/exchanges", menu: "orders" }, // 교환 그룹
+  { prefix: "/admin/settlement", menu: "settlement" }, // 정산 스냅샷/마감/지급
+  { prefix: "/admin/tax-invoices", menu: "settings" }, // 세금계산서 발급/정정/취소
+  { prefix: "/admin/time-sales", menu: "coupons" }, // 타임세일
+  { prefix: "/admin/product-curation", menu: "products" }, // 조회수/위시/인기검색/금칙어
+  { prefix: "/admin/product-disclosure", menu: "products" }, // 상품정보고시
+  { prefix: "/admin/category-option-map", menu: "categories" }, // 카테고리-옵션 매핑
+  { prefix: "/admin/legal-docs", menu: "policies" }, // 약관 관리
 ]
 
 function menuFromPath(path: string): string | null {

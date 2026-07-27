@@ -110,7 +110,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         input: { cart_id: cartId, promo_codes: [code], action: PromotionActions.REMOVE },
       })
       .catch(() => {})
-    res.status(400).json({ message: `적립금 사용 실패: ${(e as Error).message}` })
+    // 보안점검 2026-07-27: 내부 에러 메시지(제약/모듈명) 미노출 — 서버 로그로만 남기고 고정 메시지 반환
+    console.warn(`[points] redeem 실패(cart=${cartId}): ${(e as Error)?.message}`)
+    res.status(400).json({ message: "적립금 사용에 실패했습니다. 잔액과 입력값을 확인해 주세요." })
     return
   }
 

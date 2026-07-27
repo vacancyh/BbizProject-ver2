@@ -60,7 +60,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         amount: Number(order.total) || 0,
       })
     } catch (e) {
-      res.status(400).json({ message: (e as Error).message })
+      // 보안점검 2026-07-27: 내부 에러 메시지 미노출 — 서버 로그로만 남기고 고정 메시지 반환
+      console.warn(`[tax-receipt] createInvoice 실패(order=${orderId}): ${(e as Error)?.message}`)
+      res.status(400).json({ message: "세금계산서 신청을 처리할 수 없습니다. 입력값(사업자번호 등)을 확인해 주세요." })
       return
     }
     res.status(201).json({ requested: true, type: "tax_invoice" })

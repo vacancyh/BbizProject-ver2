@@ -18,22 +18,35 @@
 
 ---
 
-## ✅ 이번에 적용한 저위험 수정 (커밋 포함)
+## ✅ 적용한 수정 (커밋 포함)
 
+### 1차 — 저위험 (시크릿 유출 차단 + 배너 검증)
 | # | 항목 | 파일 | 효과 |
 |---|---|---|---|
 | 1 | 커밋된 admin JWT 추적 해제 + .gitignore 보강 | `.gitignore`, `apps/admin/e2e/.auth/state.json`(untrack) | 향후 인증상태/토큰 커밋 차단(`**/.auth/`,`**/state.json`,`test-results/`) |
 | 2 | 시크릿 템플릿 placeholder 화 | `backend/.../.env.template` | `supersecret`·`supersecret-revalidate` → `CHANGE_ME_*` |
 | 3 | 공개 예시의 실제 비번 제거 | `.env.example` | `ADMIN_PASSWORD=djemal…` → `CHANGE_ME_LOCAL_ONLY` |
-| 4 | 배너 URL 스킴 검증 | `admin/banners/route.ts` | `javascript:`/`data:` 차단(http(s)·상대경로만). 동적검증: 정상 201 / 악성 400 |
+| 4 | 배너 URL 스킴 검증(POST) | `admin/banners/route.ts` | `javascript:`/`data:` 차단. 동적검증: 정상 201 / 악성 400 |
 
-> ⚠️ 위 1~3은 **향후 유출을 막는 조치**입니다. 이미 공개 이력에 남은 시크릿은 **반드시 로테이션 + git 이력 스크럽(BFG/filter-repo)** 이 필요합니다(아래 C1·C2·H3).
+### 2차 — CRITICAL/HIGH + 하드닝 (**회귀검증 완료: 통합테스트 125/125, 프로브 방어 유지**)
+| # | ID | 항목 | 파일 | 효과 |
+|---|---|---|---|---|
+| 5 | **C1** | JWT/쿠키 시크릿 **fail-fast** | `medusa-config.ts` | 운영에서 미설정/약함/`supersecret` 이면 부팅 실패. dev 는 경고 후 폴백(로컬 유지) |
+| 6 | **H2** | 미매핑 admin 라우트 RBAC 매핑(BFLA) | `middlewares.ts` PATH_MENU_MAP | points·settlement·sanctions·tax-invoices·membership·consents·rma·time-sales 등 14개 prefix 추가 → RBAC 평가 대상화 |
+| 7 | **M4** | 리뷰 작성자명 서버 마스킹 | `store/products/[id]/reviews/route.ts` | 클라 입력 무관 `홍**` 마스킹. 동적검증: 노출 author 마스킹 확인 |
+| 8 | **M9** | 배너 URL 검증(수정 라우트도) | `admin/banners/[id]/route.ts` | POST/수정 모두 `javascript:`/`data:` 차단 |
+| 9 | **L3** | store 에러 메시지 일반화 | `carts/[id]/points`, `orders/[id]/tax-receipt` | 내부 에러(제약/모듈명) 미노출 — 서버 로그만, 고정 메시지 반환 |
+| 10 | **L4** | 로그에서 customer_id 제거 | `subscribers/order-placed-rewards.ts` | 로그 PII(내부 id) 축소 |
+
+> ⚠️ 위 1~3은 **향후 유출 차단**입니다. 이미 공개 이력에 남은 시크릿(admin 비번·JWT·revalidate)은 **반드시 로테이션 + git 이력 스크럽(BFG/filter-repo)** 필요(C2·H3).
+> C1 은 dev 동작을 바꾸지 않고(로컬 시크릿 그대로) 운영만 강제 → 안전. H2 는 역할 미지정 관리자 fail-open(H1) 이 남아있어 기존 seed 관리자 접근 불변(회귀 없음), 역할 배정 시부터 실효.
 
 ---
 
 ## 🔴 CRITICAL
 
-### C1. JWT/쿠키 서명 시크릿이 `"supersecret"` 로 폴백
+### C1. JWT/쿠키 서명 시크릿이 `"supersecret"` 로 폴백 — ✅ **코드 fail-fast 적용(2차)**
+> 상태: `medusa-config.ts` 에 `requireSecret()` 추가 — 운영에서 미설정/약함/`supersecret` 이면 부팅 실패. 단, **공개 이력에 노출된 값 로테이션은 별도 필수**.
 - 위치: `backend/services/api/medusa-config.ts:12,15`
   ```ts
   jwtSecret: process.env.JWT_SECRET || "supersecret",
@@ -65,7 +78,8 @@
 - 영향: Medusa `user`는 기본 역할 없음 → **역할 미지정 관리자 = 전 메뉴 CRUD 허용**. 실질적으로 RBAC off.
 - 조치: 미지정 사용자를 **최소권한 기본 역할**로(또는 쓰기 deny), 부트스트랩용 break-glass는 별도.
 
-### H2. 다수 민감 `/admin` 라우트 그룹이 RBAC 미커버(BFLA)
+### H2. 다수 민감 `/admin` 라우트 그룹이 RBAC 미커버(BFLA) — ✅ **매핑 적용(2차)**
+> 상태: `PATH_MENU_MAP` 에 14개 prefix 추가 완료. 단 **H1(역할 미지정=fail-open) 해소 시** 실효 — H1 은 seed 관리자 잠금 위험 때문에 SUPER 부트스트랩 설계 후 적용 권장(문서화).
 - 위치: `src/api/middlewares.ts` `PATH_MENU_MAP` 누락 — `points`·`settlement`·`sanctions`·`rma`·`exchanges`·`tax-invoices`·`membership`·`consents`·`withdrawal`·`product-curation`·`product-disclosure`·`time-sales`·`legal-docs`·`category-option-map`. `menuFromPath`가 null → `next()`로 통과.
 - 영향: 인증된 저권한 운영자도 **적립금 발행·정산 지급확정·고객 제재·환불정책·세금계산서** 등 고위험 실행 가능(기능수준 인가 파괴).
 - 조치: 모든 커스텀 admin prefix를 `PATH_MENU_MAP`에 추가 + 미매핑 `/admin/*` 쓰기는 **default-deny**.

@@ -12,11 +12,19 @@ import { checkText } from "../../../../_utils/text"
 
 type ReviewRatingKey = 1 | 2 | 3 | 4 | 5
 
+// 작성자명 서버측 마스킹(보안점검 2026-07-27): 클라이언트 입력과 무관하게 노출 시 개인정보 보호.
+function maskName(name?: string | null): string {
+  if (!name) return "익명"
+  const n = String(name).trim()
+  if (!n) return "익명"
+  return n.length <= 1 ? n + "*" : n[0] + "**"
+}
+
 function toStoreReview(r: any) {
   return {
     id: r.id,
     product_id: r.product_id,
-    author: r.author_name ?? "익명",
+    author: maskName(r.author_name),
     rating: r.rating ?? 0,
     title: r.title ?? undefined,
     content: r.content,

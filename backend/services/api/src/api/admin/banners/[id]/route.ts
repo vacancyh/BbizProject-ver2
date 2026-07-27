@@ -22,10 +22,25 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
     update.kind = String(b.kind)
   }
+  // URL 스킴 검증(보안점검 2026-07-27): http(s)/상대경로만 허용(javascript:/data: 차단)
+  const isSafeUrl = (u: string) => /^https?:\/\//i.test(u) || u.startsWith("/")
   if (b.title !== undefined) update.title = String(b.title).trim()
-  if (b.image_url !== undefined) update.image_url = String(b.image_url).trim()
-  if (b.link_url !== undefined)
-    update.link_url = b.link_url ? String(b.link_url).trim() : null
+  if (b.image_url !== undefined) {
+    const iu = String(b.image_url).trim()
+    if (iu && !isSafeUrl(iu)) {
+      res.status(400).json({ message: "이미지 URL 형식이 올바르지 않습니다(http(s):// 또는 /)." })
+      return
+    }
+    update.image_url = iu
+  }
+  if (b.link_url !== undefined) {
+    const lu = b.link_url ? String(b.link_url).trim() : null
+    if (lu && !isSafeUrl(lu)) {
+      res.status(400).json({ message: "링크 URL 형식이 올바르지 않습니다(http(s):// 또는 /)." })
+      return
+    }
+    update.link_url = lu
+  }
   if (b.sort_order !== undefined) update.sort_order = Number(b.sort_order) || 0
   if (b.status !== undefined)
     update.status = b.status === "draft" ? "draft" : "published"

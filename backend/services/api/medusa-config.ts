@@ -2,6 +2,24 @@ import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
+const IS_PROD = process.env.NODE_ENV === "production"
+
+// 보안(보안점검 2026-07-27): 서명 시크릿은 운영에서 강력한 무작위 값 필수.
+// 미설정/약함/"supersecret" 이면 운영 부팅 실패(fail-fast). dev 는 경고 후 폴백(로컬 개발 유지).
+function requireSecret(name: string): string {
+  const v = process.env[name]
+  const weak = !v || v === "supersecret" || v.length < 16
+  if (IS_PROD && weak) {
+    throw new Error(`[security] ${name} must be set to a strong random value (>=16 chars) in production`)
+  }
+  if (weak) {
+    // eslint-disable-next-line no-console
+    console.warn(`[security] ${name} 미설정/약함 — INSECURE dev 폴백 사용. 운영 배포 금지.`)
+    return v || `dev-insecure-${name.toLowerCase()}`
+  }
+  return v
+}
+
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
@@ -9,10 +27,10 @@ module.exports = defineConfig({
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
       authCors: process.env.AUTH_CORS!,
-      jwtSecret: process.env.JWT_SECRET || "supersecret",
+      jwtSecret: requireSecret("JWT_SECRET"),
       // 인증 토큰 수명(기본 1d). 운영은 짧게(예: 관리자망 8h) + 재로그인/리프레시 권장.
       jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
-      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      cookieSecret: requireSecret("COOKIE_SECRET"),
     },
     // 로컬 http 환경에서는 secure 쿠키를 끕니다.
     // NODE_ENV=production + secure 쿠키(기본 true)이면 express-session 이
