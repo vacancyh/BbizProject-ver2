@@ -69,11 +69,11 @@ const FALLBACK_DOCS: Record<string, LegalDoc> = {
 }
 
 export async function getLegalDoc(slug: string): Promise<LegalDoc | null> {
-  const next = { ...(await getCacheOptions(`legal-${slug}`)) }
+  const next = { ...(await getCacheOptions(`legal-${slug}`)), revalidate: 60 }
   try {
     const res = await sdk.client.fetch<{ doc: LegalDoc }>(
       `/store/legal-docs/${slug}`,
-      { method: "GET", next, cache: "force-cache" }
+      { method: "GET", next }
     )
     if (res?.doc?.body) return res.doc
   } catch {

@@ -5,11 +5,11 @@ import { sdk } from "@lib/config"
 import { getCacheOptions } from "./cookies"
 
 export async function getPopularSearchTerms(limit = 8): Promise<string[]> {
-  const next = { ...(await getCacheOptions("popular-search-terms")) }
+  const next = { ...(await getCacheOptions("popular-search-terms")), revalidate: 60 }
   try {
     const res = await sdk.client.fetch<{ terms: string[] }>(
       `/store/popular-search-terms?limit=${limit}`,
-      { method: "GET", next, cache: "force-cache" }
+      { method: "GET", next }
     )
     return Array.isArray(res?.terms) ? res.terms : []
   } catch {

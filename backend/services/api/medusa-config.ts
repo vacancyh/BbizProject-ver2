@@ -10,6 +10,8 @@ module.exports = defineConfig({
       adminCors: process.env.ADMIN_CORS!,
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || "supersecret",
+      // 인증 토큰 수명(기본 1d). 운영은 짧게(예: 관리자망 8h) + 재로그인/리프레시 권장.
+      jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     },
     // 로컬 http 환경에서는 secure 쿠키를 끕니다.
@@ -129,6 +131,10 @@ module.exports = defineConfig({
     {
       // 관리자 2FA(TOTP) — 백오피스 2단계 인증(무비용, 옵트인).
       resolve: "./src/modules/admin-2fa",
+    },
+    {
+      // 휴면계정(개인정보보호법) — 고객 활동시각 추적 + 휴면/임박 판정.
+      resolve: "./src/modules/customer-dormancy",
     },
   ],
 })

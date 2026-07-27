@@ -16,11 +16,11 @@ export type Banner = {
 export async function listBanners(
   kind: "hero" | "popup"
 ): Promise<Banner[]> {
-  const next = { ...(await getCacheOptions("banners")) }
+  const next = { ...(await getCacheOptions("banners")), revalidate: 60 }
   try {
     const res = await sdk.client.fetch<{ banners: Banner[] }>(
       `/store/banners?kind=${kind}`,
-      { method: "GET", next, cache: "force-cache" }
+      { method: "GET", next }
     )
     return res?.banners ?? []
   } catch {

@@ -31,6 +31,24 @@ export function clearToken(): void {
   window.localStorage.removeItem(TOKEN_KEY);
 }
 
+/** 관리자 로그아웃 — 서버측 토큰 무효화(denylist) 후 로컬 토큰 삭제·/login 이동. */
+export async function logout(): Promise<void> {
+  const token = getToken();
+  if (token) {
+    try {
+      await fetch(`${BACKEND_URL}/admin/auth-logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: "{}",
+      });
+    } catch {
+      // 서버 무효화 실패해도 로컬 삭제로 로그아웃 진행
+    }
+  }
+  clearToken();
+  if (typeof window !== "undefined") window.location.replace("/login");
+}
+
 /** 관리자 로그인 — emailpass. 성공 시 토큰 저장. */
 export async function login(email: string, password: string): Promise<void> {
   const res = await fetch(`${BACKEND_URL}/auth/user/emailpass`, {

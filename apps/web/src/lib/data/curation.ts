@@ -9,12 +9,12 @@ import { listProducts } from "./products"
 export async function getCuratedProducts(
   region: HttpTypes.StoreRegion
 ): Promise<HttpTypes.StoreProduct[]> {
-  const next = { ...(await getCacheOptions("curated-products")) }
+  const next = { ...(await getCacheOptions("curated-products")), revalidate: 60 }
   let ids: string[] = []
   try {
     const res = await sdk.client.fetch<{ product_ids: string[] }>(
       `/store/curated-products`,
-      { method: "GET", next, cache: "force-cache" }
+      { method: "GET", next }
     )
     ids = res?.product_ids ?? []
   } catch {

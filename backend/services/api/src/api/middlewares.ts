@@ -22,7 +22,10 @@ import { AUDIT_MODULE } from "../modules/audit"
 import type AuditModuleService from "../modules/audit/service"
 import { ADMIN_2FA_MODULE } from "../modules/admin-2fa"
 import type Admin2faModuleService from "../modules/admin-2fa/service"
+import { CUSTOMER_DORMANCY_MODULE } from "../modules/customer-dormancy"
+import type CustomerDormancyModuleService from "../modules/customer-dormancy/service"
 import { rlGet, rlIncr, rlReset } from "./_utils/rate-limit"
+import { isTokenDenylisted } from "./_utils/token-denylist"
 
 const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
 
@@ -125,6 +128,28 @@ async function rbacGuard(
     console.warn("[rbac] 권한검사 오류, 통과 처리:", (e as Error)?.message)
     return next()
   }
+}
+
+/**
+ * 토큰 denylist 가드 — 로그아웃된 토큰의 /admin/* 재사용 차단(서버측 무효화).
+ * stateless JWT 를 로그아웃 시 무효화하기 위한 방어. 오류 시 통과(가용성).
+ */
+async function tokenDenylistGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    const h = req.headers.authorization ?? ""
+    const tok = h.startsWith("Bearer ") ? h.slice(7) : null
+    if (tok && (await isTokenDenylisted(req.scope, tok))) {
+      res.status(401).json({ message: "로그아웃된 세션입니다. 다시 로그인해 주세요.", code: "TOKEN_REVOKED" })
+      return
+    }
+  } catch {
+    // fail-open
+  }
+  return next()
 }
 
 /**
@@ -266,16 +291,24 @@ async function storeOrderOwnershipGuard(
 }
 
 /**
- * 인증 rate limit — 로그인 무차별 대입(brute-force) 방어.
+ * 인증 rate limit + 계정 잠금 — 로그인 무차별 대입(brute-force) 방어.
  * 실패(401/400)만 카운트 → 정상 로그인/테스트는 영향 없음, 실패 폭주만 차단.
+ *  - IP 단위: 5분 내 실패 10회 초과 시 차단(분산 계정 스캐닝 방어)
+ *  - 계정(이메일) 단위: 15분 내 실패 5회 초과 시 잠금(분산 IP로 한 계정 노리는 공격 방어)
  * 저장소: 캐시 서비스(운영 Redis 구성 시 다중 인스턴스 공유) → 미가용 시 인메모리 폴백.
  *   (운영에선 WAF/API 게이트웨이 rate limit 을 1차 방어로 병행 권장.)
  */
-const FAIL_WINDOW_MS = 5 * 60_000 // 5분 창
-const FAIL_MAX = 10 // 창 내 실패 10회 초과 시 차단
+const FAIL_WINDOW_MS = 5 * 60_000 // IP 5분 창
+const FAIL_MAX = 10 // IP: 창 내 실패 10회 초과 시 차단
+const ACCT_WINDOW_MS = 15 * 60_000 // 계정 15분 창
+const ACCT_FAIL_MAX = 5 // 계정: 창 내 실패 5회 초과 시 잠금
 function clientIp(req: MedusaRequest): string {
   const xf = (req.headers["x-forwarded-for"] as string) || ""
   return (xf.split(",")[0].trim() || req.ip || "unknown").toString()
+}
+function loginEmail(req: MedusaRequest): string | null {
+  const e = (req.body as any)?.email
+  return typeof e === "string" && e.includes("@") ? e.trim().toLowerCase() : null
 }
 async function authRateLimit(
   req: MedusaRequest,
@@ -283,13 +316,25 @@ async function authRateLimit(
   next: MedusaNextFunction
 ) {
   if (req.method !== "POST") return next()
-  const key = `authfail:${clientIp(req)}`
+  const ipKey = `authfail:ip:${clientIp(req)}`
+  const email = loginEmail(req)
+  const acctKey = email ? `authfail:acct:${email}` : null
   try {
-    if ((await rlGet(req.scope, key)) >= FAIL_MAX) {
-      res.setHeader("Retry-After", String(Math.ceil(FAIL_WINDOW_MS / 1000)))
+    const [ipFails, acctFails] = await Promise.all([
+      rlGet(req.scope, ipKey),
+      acctKey ? rlGet(req.scope, acctKey) : Promise.resolve(0),
+    ])
+    if (ipFails >= FAIL_MAX || acctFails >= ACCT_FAIL_MAX) {
+      const locked = acctFails >= ACCT_FAIL_MAX
+      res.setHeader(
+        "Retry-After",
+        String(Math.ceil((locked ? ACCT_WINDOW_MS : FAIL_WINDOW_MS) / 1000))
+      )
       res.status(429).json({
-        message: "인증 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
-        code: "RATE_LIMITED",
+        message: locked
+          ? "로그인 실패가 많아 계정이 일시적으로 잠겼습니다. 잠시 후 다시 시도해 주세요."
+          : "인증 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+        code: locked ? "ACCOUNT_LOCKED" : "RATE_LIMITED",
       })
       return
     }
@@ -298,9 +343,42 @@ async function authRateLimit(
   }
   res.on("finish", () => {
     const sc = res.statusCode
-    if (sc === 401 || sc === 400) void rlIncr(req.scope, key, FAIL_WINDOW_MS)
-    else if (sc >= 200 && sc < 300) void rlReset(req.scope, key)
+    if (sc === 401 || sc === 400) {
+      void rlIncr(req.scope, ipKey, FAIL_WINDOW_MS)
+      if (acctKey) void rlIncr(req.scope, acctKey, ACCT_WINDOW_MS)
+    } else if (sc >= 200 && sc < 300) {
+      void rlReset(req.scope, ipKey)
+      if (acctKey) void rlReset(req.scope, acctKey)
+    }
   })
+  return next()
+}
+
+/**
+ * 고객 활동시각 갱신 — 인증 고객의 마이페이지 접근 시 last_active_at 갱신(휴면계정 판정용).
+ * 2xx 응답에서만, 실패해도 응답에 영향 없도록 격리.
+ */
+function customerActivityTap(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const uid = actorIdOf(req)
+  if (uid) {
+    res.on("finish", () => {
+      if (res.statusCode < 200 || res.statusCode >= 300) return
+      void (async () => {
+        try {
+          const svc = req.scope.resolve(
+            CUSTOMER_DORMANCY_MODULE
+          ) as unknown as CustomerDormancyModuleService
+          await svc.touch(uid)
+        } catch {
+          // ignore
+        }
+      })()
+    })
+  }
   return next()
 }
 
@@ -349,13 +427,19 @@ export default defineMiddlewares({
       // GET 포함 — rbacGuard 가 보안메뉴 조회(read) 권한도 검사. auditTap 은 write 만 기록.
       matcher: "/admin/*",
       method: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      middlewares: [twoFactorGuard, rbacGuard, auditTap],
+      middlewares: [tokenDenylistGuard, twoFactorGuard, rbacGuard, auditTap],
     },
     {
       // 스토어 주문 단건 조회 IDOR 방지(인증 고객은 본인 주문만).
       matcher: "/store/orders/:id",
       method: ["GET"],
       middlewares: [storeOrderOwnershipGuard],
+    },
+    {
+      // 인증 고객 마이페이지 접근 시 활동시각 갱신(휴면계정 판정).
+      matcher: "/store/customers/me*",
+      method: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      middlewares: [customerActivityTap],
     },
   ],
 })

@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 // 관리자(백오피스) 보안 헤더 — 프레이밍 전면 차단(DENY) 등 스토어보다 엄격.
+// 'unsafe-eval' 은 개발(HMR)에서만 허용, 운영 빌드에선 제거.
+const isDev = process.env.NODE_ENV !== "production"
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://cdn.jsdelivr.net https://fonts.gstatic.com",

@@ -10,12 +10,12 @@ export async function getBestProducts(
   region: HttpTypes.StoreRegion,
   limit = 8
 ): Promise<HttpTypes.StoreProduct[]> {
-  const next = { ...(await getCacheOptions("best-products")) }
+  const next = { ...(await getCacheOptions("best-products")), revalidate: 60 }
   let ids: string[] = []
   try {
     const res = await sdk.client.fetch<{ product_ids: string[] }>(
       `/store/best-products?limit=${limit}`,
-      { method: "GET", next, cache: "force-cache" }
+      { method: "GET", next }
     )
     ids = res?.product_ids ?? []
   } catch {

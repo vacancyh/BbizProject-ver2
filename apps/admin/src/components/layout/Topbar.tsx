@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, LogOut } from "lucide-react";
+import { logout } from "@/lib/api/client";
 
-/** Topbar — prototype 상단바 이식. 검색/알림/관리자 프로필. (인터랙션은 도메인 루프에서) */
+/** Topbar — 상단바. 검색/알림/관리자 프로필/로그아웃. */
 export function Topbar() {
   return (
     <header className="flex h-[60px] flex-shrink-0 items-center gap-4 border-b border-border bg-surface px-6">
@@ -25,6 +26,16 @@ export function Topbar() {
           <span className="block text-xs text-text-3">최고관리자</span>
         </span>
       </div>
+      <button
+        type="button"
+        onClick={() => void logout()}
+        className="flex h-9 items-center gap-1.5 rounded-sm px-3 text-sm text-text-2 hover:bg-surface-2"
+        aria-label="로그아웃"
+        data-testid="admin-logout"
+      >
+        <LogOut size={16} />
+        로그아웃
+      </button>
     </header>
   );
 }

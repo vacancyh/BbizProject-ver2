@@ -9,10 +9,11 @@ const S3_HOSTNAME = process.env.MEDUSA_CLOUD_S3_HOSTNAME
 const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
 
 // 보안 헤더 (전 경로 적용). CSP 는 다음 우편번호·데모 이미지·백엔드 API 를 허용.
-// ⚠️ 운영: connect-src/img-src 를 실제 도메인으로 좁히고 'unsafe-eval' 제거(nonce 도입) 권장.
+// 'unsafe-eval' 은 개발(HMR)에서만 허용, 운영 빌드에선 제거. ⚠️ 운영: connect-src/img-src 도메인 한정 + inline nonce 도입 권장.
+const isDev = process.env.NODE_ENV !== "production"
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.daumcdn.net https://t1.daumcdn.net",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.daumcdn.net https://t1.daumcdn.net`,
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://cdn.jsdelivr.net",

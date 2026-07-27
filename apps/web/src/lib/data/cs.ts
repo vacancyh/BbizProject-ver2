@@ -78,11 +78,12 @@ const MOCK_FAQS: Faq[] = [
 ]
 
 export async function listNotices(): Promise<Notice[]> {
-  const next = { ...(await getCacheOptions("notices")) }
+  // ISR: 관리자 게시 콘텐츠가 최대 60초 내 스토어에 반영(태그 revalidate 도 지원).
+  const next = { ...(await getCacheOptions("notices")), revalidate: 60 }
   try {
     const res = await sdk.client.fetch<{ notices: Notice[] }>(
       `/store/notices`,
-      { method: "GET", next, cache: "force-cache" }
+      { method: "GET", next }
     )
     const notices = res?.notices ?? []
     // 백엔드가 비어있지 않으면 그대로, 비어있으면 mock 폴백(데모 화면 보장)
@@ -96,12 +97,11 @@ export async function listNotices(): Promise<Notice[]> {
 }
 
 export async function listFaqs(): Promise<Faq[]> {
-  const next = { ...(await getCacheOptions("faqs")) }
+  const next = { ...(await getCacheOptions("faqs")), revalidate: 60 }
   try {
     const res = await sdk.client.fetch<{ faqs: Faq[] }>(`/store/faqs`, {
       method: "GET",
       next,
-      cache: "force-cache",
     })
     const faqs = res?.faqs ?? []
     return faqs.length ? faqs : MOCK_FAQS
