@@ -68,3 +68,29 @@ jobs:
         run: npx tsc --noEmit
         continue-on-error: true
       # medusa build 는 medusa-config env 로딩 필요 → 별도(배포 파이프라인) 실행.
+
+  security:
+    name: 보안 (시크릿 스캔·의존성 audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 } # 전체 이력 스캔(과거 시크릿은 .gitleaks.toml allowlist)
+      # 신규 커밋에 시크릿(토큰/키/비번) 유입 시 CI 실패 — 재발 방지 게이트
+      - name: 시크릿 스캔 (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.3.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      # 의존성 CVE — 정보성(전이 의존성 high 존재, 게이트는 통과). 추이 관찰용.
+      - name: 의존성 audit (backend)
+        working-directory: backend/services/api
+        run: pnpm audit --audit-level=high || true
+      - name: 의존성 audit (web)
+        working-directory: apps/web
+        run: pnpm audit --audit-level=high || true
+      - name: 의존성 audit (admin)
+        working-directory: apps/admin
+        run: pnpm audit --audit-level=high || true

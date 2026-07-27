@@ -1,0 +1,27 @@
+# gitleaks 설정 (보안점검 2026-07-27) — CI 시크릿 스캔.
+# 기본 룰 사용 + 과거 알려진 테스트 인증상태/예시 placeholder/로컬 테스트 자격증명 allowlist.
+# ⚠️ allowlist 는 "이미 알려진/로컬 전용" 값만 — 신규 실제 시크릿은 계속 탐지된다.
+title = "BbizProject gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "known historical + local-only placeholders"
+# 과거 이력에 남은 테스트 인증상태(이미 추적 해제·gitignore, 로테이션 별도) / 예시 env 파일
+paths = [
+  '''apps/.*/e2e/\.auth/.*''',
+  '''.*\.env\.example$''',
+  '''.*\.env\.template$''',
+  '''docs/.*''',
+]
+# 로컬 전용/예시 placeholder 값(운영 시크릿 아님)
+regexes = [
+  '''CHANGE_ME[_A-Z0-9]*''',
+  '''please-change-this[-a-z]*''',
+  '''supersecret[-a-z]*''',
+  '''dev-insecure-[a-z0-9-]*''',
+  '''test1234!''',
+  '''admin1234!''',
+  '''shop_local_2026''',
+]
