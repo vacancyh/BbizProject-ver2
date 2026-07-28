@@ -1,5 +1,9 @@
 # 통합테스트 (분할·다중방법, API 계층)
 
+> **현재 상태: 127/127 PASS** (최근 실행 2026-07-28 · 상세는 [REPORT.md](./REPORT.md))
+> 이 스위트는 **API 계층**만 다룹니다. 화면·클릭 검증은 각 앱의 UI E2E 를 보세요:
+> `apps/web` → `pnpm test:e2e` · `apps/admin` → `pnpm test:sweep` / `pnpm test:qa`
+
 BbizProject 백엔드의 `/store` · `/admin` · `/auth` API를 직접 호출해 전 기능·연계·검색을 검증한다.
 **도메인별로 분할된 suite** + **여러 검증 방법**(happy-path · 부정/경계 · 동시성 · DB 교차검증 · 멱등성 · 권한 매트릭스)으로,
 한 영역이 실패해도 다른 영역에 영향 없이 독립 실행된다.
@@ -9,10 +13,10 @@ BbizProject 백엔드의 `/store` · `/admin` · `/auth` API를 직접 호출해
 ```
 통합테스트/
 ├─ run-all.mjs          # 러너: suite 들을 독립 실행·집계. 특정 도메인만도 실행 가능
-├─ setup-test-db.sh     # 임시 DB(shop_test) 생성→마이그레이션→시드→누락테이블 보강→키 출력
+├─ setup-test-db.sh     # 임시 DB(shop_test) 생성→마이그레이션→시드→키 출력
 ├─ lib/
 │  ├─ harness.mjs       # HTTP 클라이언트·기록기·로그인·리포트 생성
-│  └─ db.mjs            # DB 교차검증(docker psql)
+│  └─ db.mjs            # DB 교차검증(로컬=docker psql · CI=DB_HOST 지정 시 psql 직접 접속)
 ├─ suites/
 │  ├─ 01-auth.mjs           # A. 인증·계정
 │  ├─ 02-customer.mjs       # B. 사용자 기능
