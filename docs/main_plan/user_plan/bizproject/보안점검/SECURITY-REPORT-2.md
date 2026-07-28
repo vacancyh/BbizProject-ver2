@@ -42,8 +42,11 @@
 | 환불 상한 초과 → 400 `환불 가능액(16원)을 초과했습니다.` | ✅ |
 | 정상 범위(1원) 환불은 허용(200) | ✅ |
 
-> ⚠️ 락 provider: 현재 `medusa-config.ts` 에 locking 모듈 설정이 없어 **기본 in-memory provider** — 단일 프로세스에서만 유효.
-> 운영에서 API 인스턴스를 2대 이상 띄우면 **Redis locking provider 설정 필요**(`@medusajs/locking-redis`). 인프라 구성 시 체크리스트에 포함.
+> ✅ **락 provider 해결(2026-07-28)**: `@medusajs/locking-redis` 를 도입하고 `medusa-config.ts` 에서
+> `LOCKING_REDIS_URL`(없으면 `REDIS_URL`) 이 있으면 Redis provider 를 기본 락으로 등록하도록 했다.
+> env 가 없으면 기존 in-memory 로 폴백하므로 로컬/CI 는 무설정 동작 유지.
+> 검증: 부팅 로그 `Connection to Redis in "locking-redis" provider established` + A2 동시성 스모크 8/8 + 통합 127/127.
+> **운영 주의**: API 인스턴스를 2대 이상 띄우려면 `REDIS_URL`(또는 `LOCKING_REDIS_URL`)이 반드시 설정돼 있어야 한다.
 
 ## 📋 문서화(보류 — 위험/기능/정책)
 
