@@ -158,15 +158,28 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         "payment_collections.payments.id",
         "payment_collections.payments.captured_at",
         "payment_collections.payments.amount",
+        "payment_collections.payments.refunds.amount",
       ],
       filters: { id: orderId },
     })
     const order = orderData?.[0] as any
-    const payments: Array<{ id: string; captured_at: string | null; amount: number }> =
+    const payments: Array<{ id: string; captured_at: string | null; amount: number; refunds?: Array<{ amount: number }> }> =
       order?.payment_collections?.flatMap((pc: any) => pc.payments ?? []) ?? []
     const captured = payments.filter((p) => p.captured_at != null)
     if (captured.length === 0) {
       res.status(422).json({ message: "환불 가능한(captured) 결제건이 없습니다." })
+      return
+    }
+    // 보안점검 2026-07-28(P1-2): 환불 금액 상한 명시 — (결제액 − 기환불) 초과 거부(defense-in-depth).
+    const capturedAmount = Number(captured[0].amount) || 0
+    const alreadyRefunded = (captured[0].refunds ?? []).reduce((s, r) => s + (Number(r.amount) || 0), 0)
+    const remaining = capturedAmount - alreadyRefunded
+    if (refundAmount > remaining) {
+      res.status(400).json({
+        message: `환불 가능액(${remaining}원)을 초과했습니다.`,
+        refund_amount: refundAmount,
+        refundable_remaining: remaining,
+      })
       return
     }
     capturedPaymentId = captured[0].id

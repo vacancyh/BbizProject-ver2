@@ -1,6 +1,6 @@
 # BbizProject 통합테스트 리포트 (분할·다중방법)
 
-- 실행: 2026-07-27 16:17:22
+- 실행: 2026-07-28 09:05:24
 - 대상: `http://localhost:9009` (API 계층, shop_test DB)
 - 결과: **125/125 PASS** · 실패 0
 
@@ -29,8 +29,8 @@
 |---|---|---|---|---|---|---|---|
 | A1 | 관리자 로그인 | POST | `/auth/user/emailpass` | 200+token | 200 | ✅ | token |
 | A2 | 관리자 로그인 실패(오비번) | POST | `/auth/user/emailpass` | 401 | 401 | ✅ | status=401 |
-| A3 | 고객 회원가입(register) | POST | `/auth/customer/emailpass/register` | 200+token | 200 | ✅ | itest_1785136643817@kr-itest.local |
-| A4 | 고객 프로필 생성 | POST | `/store/customers` | 200/201 | 200 | ✅ | cus_01KYH6YZX4317HZFBR9GST4MGC |
+| A3 | 고객 회원가입(register) | POST | `/auth/customer/emailpass/register` | 200+token | 200 | ✅ | itest_1785197126136@kr-itest.local |
+| A4 | 고객 프로필 생성 | POST | `/store/customers` | 200/201 | 200 | ✅ | cus_01KYK0MRM9XC1WKRSJ9AACVT3E |
 | A5 | 중복 회원가입 차단 | POST | `/auth/customer/emailpass/register` | 4xx | 401 | ✅ | status=401 |
 | A6 | 신규 고객 로그인 | POST | `/auth/customer/emailpass` | 200+token | 200 | ✅ | token |
 | A7 | 고객 로그인 실패(오비번) | POST | `/auth/customer/emailpass` | 401 | 401 | ✅ | status=401 |
@@ -70,7 +70,7 @@
 | C5 | 상품정보고시 | GET | `/store/products/:id/disclosure` | 200/404 | 200 | ✅ | status=200 |
 | C6 | 상품 조회수 기록 | POST | `/store/products/:id/view` | 202 | 202 | ✅ | status=202 |
 | C6b | DB: 조회수 누적 기록 | - | `-` | ≥1 | 200 | ✅ | count=1 |
-| C7 | 쿠폰 | GET | `/store/coupons` | 200 | 200 | ✅ | n=2 |
+| C7 | 쿠폰 | GET | `/store/coupons` | 200 | 200 | ✅ | n=3 |
 | C8 | 타임세일 | GET | `/store/time-sales` | 200 | 200 | ✅ | n=2 |
 | C9 | 배너(hero) | GET | `/store/banners` | 200 | 200 | ✅ | n=3 |
 | C10 | 공지 | GET | `/store/notices` | 200 | 200 | ✅ | n=3 |
@@ -85,16 +85,16 @@
 
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
-| D0 | 리전(KRW) 확보 | GET | `/store/regions` | KRW | 200 | ✅ | reg_01KYH61TVXNABRGBGM36VHFTST |
-| D1 | 카트 생성 | POST | `/store/carts` | 200+cart | 200 | ✅ | cart_01KYH6Z2VQMZNMY27V345N6SBB |
+| D0 | 리전(KRW) 확보 | GET | `/store/regions` | KRW | 200 | ✅ | reg_01KYK0JG0R4M04K66BK3RSCC3F |
+| D1 | 카트 생성 | POST | `/store/carts` | 200+cart | 200 | ✅ | cart_01KYK0MVQAYE69P5ATQB985HTD |
 | D2 | 카트 배송지 | POST | `/store/carts/:id` | 200 | 200 | ✅ | status=200 |
 | D3a | 배송옵션 조회 | GET | `/store/shipping-options` | 200+옵션 | 200 | ✅ | n=1 |
 | D3b | 배송방법 설정 | POST | `/store/carts/:id/shipping-methods` | 200 | 200 | ✅ | status=200 |
 | D4 | 쿠폰(WELCOME10) 적용 | POST | `/store/carts/:id/promotions` | 200+할인 | 200 | ✅ | discount=1650 |
 | D5 | 적립금 적용 | POST | `/store/carts/:id/points` | 200/400 | 200 | ✅ | status=200 |
-| D6a | 결제 컬렉션 | POST | `/store/payment-collections` | 200 | 200 | ✅ | pay_col_01KYH6Z4S7FR9TY1465B7FQJ3C |
+| D6a | 결제 컬렉션 | POST | `/store/payment-collections` | 200 | 200 | ✅ | pay_col_01KYK0MXH0M8S9EC91RYFD99DD |
 | D6b | 결제 세션 | POST | `/store/payment-collections/:id/payment-sessions` | 200 | 200 | ✅ | status=200 |
-| D7 | 주문 완료(checkout) | POST | `/store/carts/:id/complete` | 200+order | 200 | ✅ | order_01KYH6Z513KA7JEHE076MV7EB7 |
+| D7 | 주문 완료(checkout) | POST | `/store/carts/:id/complete` | 200+order | 200 | ✅ | order_01KYK0MXQJFHKFHJEVRQY500M5 |
 | D7b | DB: 주문 레코드 존재 | - | `-` | =1 | 200 | ✅ | rows=1 |
 
 ### E. 관리자 기능  (11/11)
@@ -105,7 +105,7 @@
 | E2 | 주문 목록 | GET | `/admin/orders` | 200 | 200 | ✅ | n=5 |
 | E3 | 회원 목록 | GET | `/admin/customers` | 200 | 200 | ✅ | n=5 |
 | E4 | 리뷰 목록 | GET | `/admin/reviews` | 200 | 200 | ✅ | n=10 |
-| E5 | 프로모션 목록 | GET | `/admin/promotions` | 200 | 200 | ✅ | n=3 |
+| E5 | 프로모션 목록 | GET | `/admin/promotions` | 200 | 200 | ✅ | n=4 |
 | E6a | 배너 목록 | GET | `/admin/banners` | 200 | 200 | ✅ | status=200 |
 | E6b | 배너 생성 | POST | `/admin/banners` | 200/201 | 201 | ✅ | status=201 |
 | E7 | 대시보드 통계 | GET | `/admin/dashboard/stats` | 200 | 200 | ✅ | status=200 |
@@ -118,11 +118,11 @@
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
 | F1a | 리뷰 작성(pending) | POST | `/store/products/:id/reviews` | 200/201 | 201 | ✅ | status=201 |
-| F1b | 관리자 큐 노출 | GET | `/admin/reviews` | pending 노출 | 200 | ✅ | rev_01KYH6Z63RXJY1T1YFGRC56WTR |
+| F1b | 관리자 큐 노출 | GET | `/admin/reviews` | pending 노출 | 200 | ✅ | rev_01KYK0MZ2EMQK9V6VYG5QMSKG5 |
 | F1c | 관리자 리뷰 승인 | POST | `/admin/reviews/:id` | 200 | 200 | ✅ | status=200 |
 | F1d | 승인 리뷰 스토어 노출 | GET | `/store/products/:id/reviews` | published 노출 | 200 | ✅ | 노출 |
 | F2 | 주문→관리자검색 노출 | GET | `/admin/orders-kr/search` | ≥1 | 200 | ✅ | n=4 |
-| F3 | 쿠폰 admin→store 노출 | GET | `/store/coupons` | WELCOME10 | 200 | ✅ | ["KRW5000","WELCOME10","POINTS-Y27V345N6SBB"] |
+| F3 | 쿠폰 admin→store 노출 | GET | `/store/coupons` | WELCOME10 | 200 | ✅ | ["WELCOME10","KRW5000","POINTS-XW80KBBMDSEW","POINTS-P5ATQB9 |
 | F4 | 관리자 적립→고객 잔액 | POST | `/admin/points/customers/:id/earn` | +500 | 200 | ✅ | 1300→1800 |
 | F4b | DB: 원장 합계=잔액 | - | `-` | 일치 | 200 | ✅ | db_sum=1800 api=1800 |
 | F5a | 상품 문의 작성 | POST | `/store/products/:id/inquiries` | 200/201 | 201 | ✅ | status=201 |

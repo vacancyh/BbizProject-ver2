@@ -29,13 +29,26 @@
 |---|---|---|---|---|
 | A1 | **HIGH** | 환불/취소 시 **적립금·멤버십 역적립** — 전액/취소=전량·부분환불=비례, 이미 쓴 적립금은 잔액 0 바닥, reasonKey 멱등 | `_utils/reward-reversal.ts`(신규), `customer-point/service.ts`(`reverseAccrualForOrder`), `admin/orders-kr/[id]/cancel`·`admin/orders/[id]/refund` 훅 | in-process: 잔액0바닥·멤버십 누적감소·멱등 PASS |
 | A3 | LOW | 환불 취소기록 **원장 필드 오매핑**(points↔coupon) 수정 | `admin/orders/[id]/refund/route.ts` | 타입체크 |
+| A2 | **HIGH** | 적립금 **per-cart 락**(`Modules.LOCKING`) — POST/DELETE 임계구역 직렬화 + 락 내부 상태 재확인 → 동시 POST 이중차감 / 동시 DELETE 이중복원(포인트 인플레) 차단 | `store/carts/[id]/points/route.ts` | 동시요청 스모크 PASS(아래) |
+| P1-2 | MEDIUM | **환불 금액 상한 명시** — `captured − 기환불` 초과 요청 400 거부(+`refundable_remaining` 응답), 코어 백스톱에 더한 defense-in-depth | `admin/orders/[id]/refund/route.ts` | 동일 스모크 PASS |
+
+### 검증 스모크 (2026-07-28, dev DB `:9000`) — 8/8 PASS
+| 케이스 | 결과 |
+|---|---|
+| 동시 POST×5 → 200 1건 / 409 4건 | ✅ |
+| 잔액 1회만 차감(5000→4000) | ✅ |
+| 동시 DELETE×5 → `removed:true` 1건만 | ✅ |
+| 잔액 1회만 복원(4000→5000, 인플레 없음) | ✅ |
+| 환불 상한 초과 → 400 `환불 가능액(16원)을 초과했습니다.` | ✅ |
+| 정상 범위(1원) 환불은 허용(200) | ✅ |
+
+> ⚠️ 락 provider: 현재 `medusa-config.ts` 에 locking 모듈 설정이 없어 **기본 in-memory provider** — 단일 프로세스에서만 유효.
+> 운영에서 API 인스턴스를 2대 이상 띄우면 **Redis locking provider 설정 필요**(`@medusajs/locking-redis`). 인프라 구성 시 체크리스트에 포함.
 
 ## 📋 문서화(보류 — 위험/기능/정책)
 
 | 심각도 | 항목 | 사유·권장 |
 |---|---|---|
-| **HIGH** | 적립금 DELETE **이중복원 레이스**(동시 요청 → 포인트 인플레) | 소유권 검증으로 교차사용자 위험은 제거됨. 완전 해결은 per-cart 락(`Modules.LOCKING`)/멱등 키 필요 → 별도 |
-| MEDIUM | **환불 금액 상한** 미구현(클라 amount 신뢰) | Medusa 코어가 잔여초과는 백스톱하나, 라우트에 `captured − 기환불` 명시 상한 추가 권장(defense-in-depth) |
 | MEDIUM | 수동결제(`pp_system_default`)에서 **place→적립→미결제** | 운영 PG 연동 + 적립을 `payment.captured` 기준으로 게이트 권장 |
 | MEDIUM | best-products 익명 풀스캔 | 레이트리밋(적용됨) + **캐시**(Redis TTL) 추가 권장 |
 | LOW | 환불 취소기록 **원장 필드 오매핑**(points↔coupon 전치) | `refund/route.ts` 데이터정합 수정(실환불엔 영향 없음) |
@@ -50,7 +63,7 @@
 - 리스트 limit 은 서비스층 `Math.min(≤200)` 클램프, bulk-ship items≤100·wishlist≤200 캡.
 
 ## 우선순위(권장)
-1. (HIGH) 환불/취소 **역적립 subscriber** 구현 → place→earn→refund 악용 차단.
-2. (HIGH) 적립금 DELETE 레이스 per-cart 락/멱등.
-3. (MEDIUM) 운영 PG 연동 + 적립 capture 게이트, best-products 캐시, 환불 금액상한.
+1. ~~(HIGH) 환불/취소 **역적립 subscriber** 구현 → place→earn→refund 악용 차단.~~ ✅ A1 적용
+2. ~~(HIGH) 적립금 DELETE 레이스 per-cart 락/멱등.~~ ✅ A2 적용(2026-07-28, 단일 프로세스 한정 — 다중 인스턴스는 Redis locking 필요)
+3. (MEDIUM) 운영 PG 연동 + **적립 capture 게이트**, best-products 캐시. ~~환불 금액상한~~ ✅ 적용(2026-07-28)
 4. (의존성) `pnpm.overrides` 로 high CVE 전이 의존성 상향.
