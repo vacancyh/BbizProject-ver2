@@ -1,9 +1,8 @@
 /**
- * 일괄발송 순수 로직 단위 테스트 (vitest)
+ * 일괄발송 순수 로직 단위 테스트 (jest — 백엔드 표준)
  *
  * spec: d6 배송관리 — bulk-ship
  */
-import { describe, it, expect } from "vitest"
 import {
   validateBulkShipItem,
   validateBulkShipRequest,

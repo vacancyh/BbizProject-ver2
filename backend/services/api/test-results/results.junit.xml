@@ -1,105 +1,415 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="134" failures="0" errors="0" time="0.354">
-  <testsuite name="time-sale logic — isSaleActive" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:26" time="0.141" tests="29">
-    <testcase classname="time-sale logic — isSaleActive" name="진행 구간(startsAt &lt;= now &lt; endsAt)이면 true" time="0.001">
+<testsuites name="jest tests" tests="408" failures="0" errors="0" time="9.908">
+  <testsuite name="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:40" time="3.369" tests="18">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="미할당(roleKey=null) 관리자는 모든 메뉴 모든 액션이 허용된다 — C1 부트스트랩 정책" time="0.006">
     </testcase>
-    <testcase classname="time-sale logic — isSaleActive" name="시작 시각 경계는 포함(&gt;=)" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="super 등급은 모든 메뉴 모든 액션이 허용된다" time="0.002">
     </testcase>
-    <testcase classname="time-sale logic — isSaleActive" name="종료 시각 경계는 미포함(&lt;)" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="operation 등급은 orders 메뉴 FULL CRUD가 허용된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — isSaleActive" name="시작 전이면 false" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="cs 등급은 orders 메뉴에서 read/update는 허용, create/delete는 차단된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — isSaleActive" name="종료 후면 false" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="cs 등급은 permissions 메뉴가 read 포함 전면 차단된다 — SUPER_ONLY_MENUS" time="0">
     </testcase>
-    <testcase classname="time-sale logic — isSaleActive" name="잘못된 ISO 는 false(안전 측)" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="보안/시스템 메뉴(permissions·policies·audit-logs)는 비super 전 등급에서 전면 차단된다" time="0.001">
     </testcase>
-    <testcase classname="time-sale logic — resolveSaleStatus" name="시작 전 → scheduled" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="marketer 등급은 coupons/marketing/stats FULL, 그 외(orders 등)는 read-only" time="0">
     </testcase>
-    <testcase classname="time-sale logic — resolveSaleStatus" name="진행 중 → active" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="C2: 매핑 없는 메뉴(미시드) 비SUPER 접근은 차단(false)된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — resolveSaleStatus" name="시작 경계 → active" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="cs 등급은 reviews 메뉴에서 FULL CRUD 허용된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — resolveSaleStatus" name="종료 경계/이후 → ended" time="0">
+    <testcase classname="UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)" name="operation 등급도 permissions 메뉴는 read 포함 전면 차단된다" time="0.001">
     </testcase>
-    <testcase classname="time-sale logic — resolveSaleStatus" name="잘못된 ISO 는 scheduled(안전 측)" time="0.001">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="역할 변경: 미할당(null) → operation 부여 후 permissions 메뉴 create 가 차단된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (percent)" name="10000 의 30% 할인 → 7000" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="역할 재부여(operation→cs) 후 권한이 즉시 cs 기준으로 변경된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (percent)" name="내림 적용: 9999 의 10% → 8999(floor)" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="C3: 마지막 super(superCount=1) 를 다른 등급으로 변경하면 에러가 던져진다" time="0.002">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (percent)" name="할인율 100 초과는 100 으로 클램프 → 0" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="C3: super가 2명이면 1명을 다른 등급으로 변경 허용된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (percent)" name="할인율 0 → 원가 유지" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="C3: 목표 등급이 super 이면 차단하지 않는다(super→super 또는 신규 super 부여)" time="0">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (fixed)" name="10000 - 3000 → 7000" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="C3: 현재 등급이 super 가 아니면 superCount 에 무관하게 통과된다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (fixed)" name="0 바닥: 10000 - 99999 → 0" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="유효하지 않은 등급 키는 isValidRole 에서 false 를 반환한다" time="0">
     </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (경계/0바닥)" name="원가 0 이하 → 0" time="0">
-    </testcase>
-    <testcase classname="time-sale logic — calcSalePrice (경계/0바닥)" name="음수 할인값 → 원가 유지(percent)" time="0">
-    </testcase>
-    <testcase classname="time-sale logic — validateSale" name="정상 percent 입력 → valid" time="0.001">
-    </testcase>
-    <testcase classname="time-sale logic — validateSale" name="정상 fixed 입력 → valid" time="0">
-    </testcase>
-    <testcase classname="time-sale logic — validateSale" name="percent 범위 위반(&gt;100) → invalid" time="0.006">
-    </testcase>
-    <testcase classname="time-sale logic — validateSale" name="fixed 0 이하 → invalid" time="0">
-    </testcase>
-    <testcase classname="time-sale logic — validateSale" name="기간 역전(starts &gt;= ends) → invalid" time="0">
-    </testcase>
-    <testcase classname="time-sale logic — validateSale" name="잘못된 ISO → invalid" time="0.001">
-    </testcase>
-    <testcase classname="time-sale service — 소스 구조 검증" name="MedusaService({ TimeSale }) 로 정의" time="0">
-    </testcase>
-    <testcase classname="time-sale service — 소스 구조 검증" name="numeric 필드 Number() 정규화(toView)" time="0.001">
-    </testcase>
-    <testcase classname="time-sale service — 소스 구조 검증" name="상태 판정은 logic 에 위임(resolveSaleStatus/isSaleActive import)" time="0">
-    </testcase>
-    <testcase classname="time-sale service — 소스 구조 검증" name="필수 메서드 노출(createSale/listSales/getSale/endSale/listActiveSales)" time="0">
+    <testcase classname="UT-002: 역할 부여(d5 t003) 즉시 반영 + C3 가드레일" name="유효한 등급 키는 isValidRole 에서 true 를 반환한다" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="getLatestConsent / isConsented: 최신 기록 우선" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:26" time="0.032" tests="11">
-    <testcase classname="getLatestConsent / isConsented: 최신 기록 우선" name="marketing 최신은 철회(agreed=false)" time="0.001">
+  <testsuite name="UT-001: write 액션 → 감사 append + 불변성" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:43" time="1.663" tests="44">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="POST 메서드는 감사 대상 write 액션이다(true)" time="0.001">
     </testcase>
-    <testcase classname="getLatestConsent / isConsented: 최신 기록 우선" name="terms 는 동의 상태" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="PUT 메서드는 감사 대상 write 액션이다(true)" time="0">
     </testcase>
-    <testcase classname="getLatestConsent / isConsented: 최신 기록 우선" name="기록 없는 채널은 false" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="PATCH 메서드는 감사 대상 write 액션이다(true)" time="0">
     </testcase>
-    <testcase classname="isReconsentDue: 2년 재확인" name="RECONSENT_YEARS=2" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="DELETE 메서드는 감사 대상 write 액션이다(true)" time="0">
     </testcase>
-    <testcase classname="isReconsentDue: 2년 재확인" name="2년 경과 시 due=true" time="0.001">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="GET 메서드는 감사 대상 write 액션이 아니다(false)" time="0">
     </testcase>
-    <testcase classname="isReconsentDue: 2년 재확인" name="2년 미경과 시 due=false" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="HEAD 메서드는 감사 대상 write 액션이 아니다(false)" time="0">
     </testcase>
-    <testcase classname="isReconsentDue: 2년 재확인" name="정확히 2년 경계는 due=true" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="소문자 post 메서드도 write 액션으로 판정된다(대소문자 무감)" time="0">
     </testcase>
-    <testcase classname="channelsNeedingReconsent: 동의 중 2년 경과 채널" name="terms(2023 동의)는 2026 기준 재확인 필요, marketing(철회)은 제외" time="0.001">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="&apos;update&apos; 오퍼레이션은 append-only 위반으로 차단된다(true)" time="0.001">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(isConsented/channelsNeedingReconsent)" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="&apos;delete&apos; 오퍼레이션은 append-only 위반으로 차단된다(true)" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="recordConsent/getStatus 메서드 존재" time="0">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="&apos;insert&apos; 오퍼레이션은 append-only 허용된다(false)" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="route 가 channel 검증(400) + GET/POST export" time="0.001">
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="&apos;read&apos; 오퍼레이션은 append-only 허용된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: write 액션 → 감사 append + 불변성" name="대소문자 &apos;UPDATE&apos;도 차단된다(대소문자 무감)" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="전화번호 가운데 자리가 마스킹된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="주민등록번호 뒷자리가 마스킹된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="이메일 로컬파트 일부가 마스킹된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="마스킹 대상이 없는 일반 문자열은 변경되지 않는다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="객체의 password 키 값은 전체 마스킹되고 name 은 PII 키 마스킹된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="객체의 token, secret, api_key, authorization 키도 전체 마스킹된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="중첩 객체의 PII 필드가 재귀적으로 마스킹된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="배열 요소의 PII 도 재귀적으로 마스킹된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="null/undefined 값은 그대로 반환된다(에러 없음)" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="원본 객체는 변경되지 않는다(불변 사본 반환)" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="null(미할당) 사용자는 audit-logs 조회가 허용된다(C1 부트스트랩)" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="super 등급은 audit-logs 조회가 허용된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="operation 등급은 audit-logs 조회가 차단된다(SUPER_ONLY_MENUS)" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="cs 등급은 audit-logs 조회가 차단된다(SUPER_ONLY_MENUS)" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="권한 행이 비어있는 비SUPER 등급은 audit-logs 조회가 차단된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="권한 행에서 audit-logs can_read=false 이면 차단된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: PII 마스킹 + 권한 조회" name="권한 행에서 audit-logs can_read=true 이면 허용된다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="route.ts 가 canReadAuditLogs 를 audit/logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="route.ts 가 RBAC_MODULE 을 import 하여 rbac 서비스를 resolve 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="route.ts 가 403 응답을 반환하는 분기를 포함한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="route.ts 에서 canReadAuditLogs 가 false 일 때 403 반환 로직이 연결된다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="service.ts 가 canWriteAudit / isAppendOnlyBlocked 를 audit/logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="service.ts 에 recordIfWriteAction 메서드가 존재하고 canWriteAudit 를 호출한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="service.ts 에 guardAppendOnly 메서드가 존재하고 isAppendOnlyBlocked 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="guardAppendOnly 역할: update 는 isAppendOnlyBlocked=true → 차단해야 한다" time="0.002">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="guardAppendOnly 역할: delete 는 isAppendOnlyBlocked=true → 차단해야 한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="guardAppendOnly 역할: insert 는 isAppendOnlyBlocked=false → 통과해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="비권한 등급(빈 permRows): canReadAuditLogs=false → route 가 403 반환해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="can_read=false 인 등급: canReadAuditLogs=false → route 가 403 반환해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="super 등급: canReadAuditLogs=true → route 가 200 경로로 진행해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="null(미할당) 등급: canReadAuditLogs=true → route 가 200 경로로 진행해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-003: route 권한 게이트 구조 검증" name="operation 등급(실제 권한 매트릭스): canReadAuditLogs=false → route 가 403 반환해야 한다" time="0.001">
     </testcase>
   </testsuite>
-  <testsuite name="calcPointsEarn: 구매금액×적립률(내림)" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:26" time="0.043" tests="19">
+  <testsuite name="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:45" time="1.453" tests="36">
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=true 이면 requireConfirm 이 에러를 던지지 않는다(이중확인 통과)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=false 이면 requireConfirm 이 에러를 던진다(이중확인 미수행 차단)" time="0.004">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=undefined 이면 requireConfirm 이 에러를 던진다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=null 이면 requireConfirm 이 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="confirm=&apos;true&apos;(문자열) 이면 requireConfirm 이 에러를 던진다(엄격 === 비교)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 숫자(유한값)는 통과한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 문자열은 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 Infinity 는 에러를 던진다(유한값 아님)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=number 일 때 NaN 은 에러를 던진다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=boolean 일 때 true/false 는 통과한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=boolean 일 때 숫자(1/0)는 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=string 일 때 문자열은 통과한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="value_type=string 일 때 숫자는 에러를 던진다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=null(미할당)은 isSuperRole=true 이다(C1 부트스트랩 정책 정합)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;super&apos; 는 isSuperRole=true 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;operation&apos; 은 isSuperRole=false 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;cs&apos; 는 isSuperRole=false 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="roleKey=&apos;marketer&apos; 는 isSuperRole=false 이다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts 가 requireConfirm 을 policy/logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts 가 validatePolicyValue 를 policy/logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts set 메서드가 requireConfirm(confirm) 을 실제 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts set 메서드가 validatePolicyValue(value, valueType) 를 실제 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정책 수정(SUPER) + 이중확인 + 이력" name="service.ts set 메서드가 createPolicyHistories 로 이력을 적재한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="operation 등급은 isSuperRole=false → 정책 write 권한 없음" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="cs 등급은 isSuperRole=false → 정책 write 권한 없음" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="marketer 등급은 isSuperRole=false → 정책 write 권한 없음" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="operation 등급은 policies 메뉴 update 가 차단된다(rbac 권한 매트릭스)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="operation 등급은 policies 메뉴 create 가 차단된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="super 등급은 policies 메뉴 update 가 허용된다(write 권한 있음)" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="null(미할당) 등급은 policies 메뉴 update 가 허용된다(C1 부트스트랩)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="middlewares.ts 가 /admin/policy 경로를 policies 메뉴로 매핑한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="middlewares.ts 가 rbacGuard 를 적용한다(403 차단 경로 존재)" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="middlewares.ts 가 write 메서드(POST/PUT/PATCH/DELETE)에만 rbac 검사를 적용한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="route.ts 가 confirm=true 가 아닐 때 409 를 반환하는 분기가 있다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="route.ts 가 policy.set() 을 호출하여 정책을 변경한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: OPERATION 이하 수정 시도 → 403 거부" name="route.ts 가 감사 로그(audit.record)를 기록한다" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="UT-001: 버전 작성/게시 + 동의이력(d5) 연동" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:46" time="1.426" tests="45">
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="정상 본문(1자 이상 문자열)은 유효하다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="긴 본문도 유효하다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="빈 문자열은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="공백만 있는 문자열은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="null 은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="undefined 는 유효하지 않다(false)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidBodyInput: 약관 본문 유효성 검증" name="숫자 타입은 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="오늘(2026-06-03)은 유효하다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="내일(2026-06-04)은 유효하다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="1개월 후는 유효하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="어제(2026-06-02)는 유효하지 않다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isValidEffectiveDate: 시행일 오늘 이후 검증" name="1년 전은 유효하지 않다(false)" time="0.01">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="draft 상태는 게시 가능하다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="published 상태는 게시할 수 없다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="archived 상태는 게시할 수 없다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isPublishable: draft 만 게시 가능 검증" name="모든 LEGAL_DOC_STATUSES 중 draft 만 isPublishable=true" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="published 상태는 직접 수정이 차단된다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="archived 상태는 직접 수정이 차단된다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="draft 상태는 직접 수정이 허용된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="C2 가드레일: published 차단 → 새 버전 강제 확인" time="0.002">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; isDirectEditBlocked: 게시본/아카이브 직접 수정 차단 검증" name="draft 수정 시도 → 차단 없이 통과" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="정상 입력으로 ConsentTriggerPayload 가 생성된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="triggered_at 은 현재 시각에 가깝다(1초 이내)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="모든 LEGAL_DOC_TYPES 에 대해 페이로드가 생성된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="requires_consent=true 게시 흐름: 트리거 페이로드가 non-null 이다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; buildConsentTriggerPayload: 동의 재요청 트리거 페이로드 생성" name="requires_consent=false 게시 흐름: 트리거 페이로드가 null 이다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isValidBodyInput 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isValidEffectiveDate 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isPublishable 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 isDirectEditBlocked 를 import 한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 가 logic.ts 에서 buildConsentTriggerPayload 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 createDraft 메서드가 있고 isValidBodyInput 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 publishDoc 메서드가 있고 isDirectEditBlocked 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 의 publishDoc 이 buildConsentTriggerPayload 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 getActiveDoc 메서드가 존재한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; service.ts 구조 검증: production 함수 호출 경로 확인" name="service.ts 에 listByType 메서드가 존재한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 LEGAL_DOC_MODULE 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 LegalDocModuleService 를 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 publishDoc 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 consent_trigger 를 응답에 포함한다 (d5 연동 증적)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="publish route.ts 가 400 에러 응답을 처리한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 LEGAL_DOC_MODULE 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 GET 핸들러에서 listByType 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 POST 핸들러에서 createDraft 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 버전 작성/게시 + 동의이력(d5) 연동 &gt; route.ts 구조 검증: production API 연결 확인" name="list route.ts 가 201 응답을 반환한다" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="UT-001: 전액 환불 (calcProratedRefund)" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.134" tests="15">
+    <testcase classname="UT-001: 전액 환불 (calcProratedRefund)" name="UT-001-a: shippingIncluded = true 이고 totalRefund = 27000 (배송비 없음, 쿠폰 3000 차감)" time="0.002">
+    </testcase>
+    <testcase classname="UT-001: 전액 환불 (calcProratedRefund)" name="UT-001-b: 라인별 환불액이 음수가 아니다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 전액 환불 (calcProratedRefund)" name="UT-001-c: 배송비 0 이어도 전액환불 정상 처리" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-a: 단일 라인 부분환불 — 기대값 8000원, shippingIncluded=false" time="0">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-b: 다중 라인 부분환불 — 라인별 합계 = totalRefund (1원 정합)" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-c: 절사 후 잔액보정 — 라인별 합계 = totalRefund, 음수 없음" time="0">
+    </testcase>
+    <testcase classname="UT-002: 부분환불 비례배분 (calcProratedRefund, 총액 1원 정합)" name="UT-002-d: 라인 없음 → 예외 발생" time="0.008">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-a: buildIdempotencyKey — 형식 정합 ({orderId}:refund:{nonce})" time="0">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-b: buildIdempotencyKey — orderId 비어있으면 예외" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-c: buildIdempotencyKey — nonce 비어있으면 예외" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-d: 동일 orderId+nonce 로 생성된 두 키는 같다 (재요청 동일 키 보장)" time="0">
+    </testcase>
+    <testcase classname="UT-003: 멱등키 (buildIdempotencyKey)" name="UT-003-e: 서로 다른 nonce 는 다른 키를 생성한다" time="0">
+    </testcase>
+    <testcase classname="calcReshippingFee (F7 — 재청구 배송비)" name="잔여 &lt; 50000 → 재청구 3000원" time="0">
+    </testcase>
+    <testcase classname="calcReshippingFee (F7 — 재청구 배송비)" name="잔여 = 50000 → 재청구 없음" time="0">
+    </testcase>
+    <testcase classname="calcReshippingFee (F7 — 재청구 배송비)" name="잔여 &gt; 50000 → 재청구 없음" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="UT-001: 정산 KPI 집계 표시" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.125" tests="20">
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="sales = captured + paid 주문 total 합산(300,000원)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="refund = refunded + partially_refunded 주문 total 합산(80,000원)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="pgFee = 0 (settlement_daily 미구현)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="net = sales - refund - pgFee(220,000원)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="held = 0 (settlement_daily 미구현)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="string total 도 숫자로 변환하여 집계된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="빈 배열이면 모든 KPI 가 0이다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="null 이 아닌 빈 배열 — held=0, pgFee=0 도 포함" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="payment_status 가 없는(undefined) 주문은 집계에서 제외된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 정산 KPI 집계 표시" name="total 이 비정상(NaN/undefined)이면 0 으로 처리된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="환불률이 임계(10%)를 초과하면 ALERT_REFUND_RATE code 가 alerts 에 포함된다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="ALERT_REFUND_RATE 경보의 severity 는 warn 이다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="ALERT_REFUND_RATE 경보의 message 에 임계값 퍼센트가 포함된다" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="환불률이 임계(10%) 이하이면 alerts 는 빈 배열이다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="sales=0 이면 환불률 계산을 건너뛰어 경보가 발생하지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="0건 KPI 에서는 경보가 발생하지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="커스텀 임계(20%) 설정 시 환불률 15% 는 경보를 발생시키지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="커스텀 임계(5%) 설정 시 환불률 10% 는 경보를 발생시킨다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="held=0 이면 ALERT_HELD_AMOUNT 경보가 발생하지 않는다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 임계 초과 경보" name="held 가 heldAmountThreshold 초과 시 ALERT_HELD_AMOUNT 경보 발생(미래 검증)" time="0.012">
+    </testcase>
+  </testsuite>
+  <testsuite name="calcNet / calcPgFee" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.129" tests="12">
+    <testcase classname="calcNet / calcPgFee" name="순정산 = 매출-환불-수수료" time="0.001">
+    </testcase>
+    <testcase classname="calcNet / calcPgFee" name="환불 초과 시 음수 허용" time="0">
+    </testcase>
+    <testcase classname="calcNet / calcPgFee" name="PG수수료 = 매출×율 내림" time="0.001">
+    </testcase>
+    <testcase classname="calcNet / calcPgFee" name="수수료율 범위 밖 에러" time="0.007">
+    </testcase>
+    <testcase classname="canTransitionPayout: 상태 전이" name="open→closed 허용" time="0">
+    </testcase>
+    <testcase classname="canTransitionPayout: 상태 전이" name="closed→paid 허용, closed→open(재집계) 허용" time="0">
+    </testcase>
+    <testcase classname="canTransitionPayout: 상태 전이" name="paid 는 종료 상태(전이 불가)" time="0">
+    </testcase>
+    <testcase classname="canTransitionPayout: 상태 전이" name="open→paid 직행 불가(마감 선행)" time="0">
+    </testcase>
+    <testcase classname="canTransitionPayout: 상태 전이" name="PAYOUT_STATUSES 3종" time="0">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(calcNet/canTransitionPayout)" time="0.001">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="upsertSnapshot/closePeriod/payPeriod 메서드 존재" time="0">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="upsert route 가 pgFee 폴백으로 settlement.pg_fee_rate 정책 조회" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="calcPointsEarn: 구매금액×적립률(내림)" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.123" tests="19">
     <testcase classname="calcPointsEarn: 구매금액×적립률(내림)" name="정상 내림" time="0.001">
     </testcase>
-    <testcase classname="calcPointsEarn: 구매금액×적립률(내림)" name="음수 금액은 에러" time="0.003">
+    <testcase classname="calcPointsEarn: 구매금액×적립률(내림)" name="음수 금액은 에러" time="0.007">
     </testcase>
     <testcase classname="calcPointsEarn: 구매금액×적립률(내림)" name="적립률 범위(0~100) 밖이면 에러" time="0.001">
     </testcase>
     <testcase classname="calcExpiryDate / isPointExpired" name="적립일 + validDays = 만료일" time="0">
     </testcase>
-    <testcase classname="calcExpiryDate / isPointExpired" name="validDays &lt;= 0 이면 에러" time="0">
+    <testcase classname="calcExpiryDate / isPointExpired" name="validDays &lt;= 0 이면 에러" time="0.001">
     </testcase>
     <testcase classname="calcExpiryDate / isPointExpired" name="만료 전/후 판정" time="0">
     </testcase>
     <testcase classname="isExpiringWithin: 소멸 임박 D-N" name="N일 이내면 true" time="0">
     </testcase>
-    <testcase classname="isExpiringWithin: 소멸 임박 D-N" name="N일 밖이면 false" time="0">
+    <testcase classname="isExpiringWithin: 소멸 임박 D-N" name="N일 밖이면 false" time="0.001">
     </testcase>
     <testcase classname="isExpiringWithin: 소멸 임박 D-N" name="이미 만료면 false" time="0">
     </testcase>
@@ -115,47 +425,17 @@
     </testcase>
     <testcase classname="service.ts 구조 검증" name="logic 룰 import(calcBalanceFromLedger/canRedeemPoints/calcExpiryDate)" time="0">
     </testcase>
-    <testcase classname="service.ts 구조 검증" name="earnPoints / redeemPoints / getBalance / earnFromPurchase 메서드 존재" time="0">
+    <testcase classname="service.ts 구조 검증" name="earnPoints / redeemPoints / getBalance / earnFromPurchase 메서드 존재" time="0.001">
     </testcase>
-    <testcase classname="service.ts 구조 검증" name="MedusaService 자동 메서드(createPointLedgers/listPointLedgers) 사용" time="0.001">
+    <testcase classname="service.ts 구조 검증" name="MedusaService 자동 메서드(createPointLedgers/listPointLedgers) 사용" time="0">
     </testcase>
-    <testcase classname="route.ts 구조 검증" name="earn route 가 validDays 폴백으로 point.expire_months 정책을 조회" time="0.007">
+    <testcase classname="route.ts 구조 검증" name="earn route 가 validDays 폴백으로 point.expire_months 정책을 조회" time="0">
     </testcase>
     <testcase classname="route.ts 구조 검증" name="redeem route 가 useAmount 검증(400)" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="단계/기간" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:27" time="0.015" tests="14">
-    <testcase classname="단계/기간" name="SANCTION_LEVELS 순서" time="0">
-    </testcase>
-    <testcase classname="단계/기간" name="단계별 기간(일)" time="0.001">
-    </testcase>
-    <testcase classname="getNextSanctionLevel: 단계 상승" name="warn→7→30→영구" time="0">
-    </testcase>
-    <testcase classname="getNextSanctionLevel: 단계 상승" name="영구에서 더 안 올라감" time="0">
-    </testcase>
-    <testcase classname="calcSanctionUntil: 만료일" name="7일 제재 만료" time="0">
-    </testcase>
-    <testcase classname="calcSanctionUntil: 만료일" name="영구는 null" time="0">
-    </testcase>
-    <testcase classname="calcSanctionUntil: 만료일" name="경고는 시작=종료(기록)" time="0">
-    </testcase>
-    <testcase classname="isSanctionActive / shouldBlockLogin" name="기간 내 활성, 차단" time="0">
-    </testcase>
-    <testcase classname="isSanctionActive / shouldBlockLogin" name="기간 후 비활성, 차단 해제" time="0">
-    </testcase>
-    <testcase classname="isSanctionActive / shouldBlockLogin" name="경고는 차단 아님" time="0">
-    </testcase>
-    <testcase classname="isSanctionActive / shouldBlockLogin" name="영구는 항상 활성·차단" time="0">
-    </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(getNextSanctionLevel/shouldBlockLogin)" time="0">
-    </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="applySanction/getCurrent/liftSanction 메서드 존재" time="0">
-    </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="route 가 GET/POST/DELETE 핸들러 export" time="0">
-    </testcase>
-  </testsuite>
-  <testsuite name="normalizeBizNo / validateBizNo: 사업자번호 체크섬" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:27" time="0.014" tests="14">
-    <testcase classname="normalizeBizNo / validateBizNo: 사업자번호 체크섬" name="하이픈/공백 제거" time="0">
+  <testsuite name="normalizeBizNo / validateBizNo: 사업자번호 체크섬" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.134" tests="14">
+    <testcase classname="normalizeBizNo / validateBizNo: 사업자번호 체크섬" name="하이픈/공백 제거" time="0.002">
     </testcase>
     <testcase classname="normalizeBizNo / validateBizNo: 사업자번호 체크섬" name="유효 사업자번호(체크디짓 일치) = valid" time="0.001">
     </testcase>
@@ -175,43 +455,227 @@
     </testcase>
     <testcase classname="canTransitionTaxInvoice: 상태 전이표" name="TAX_INVOICE_STATUSES 4종" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(validateBizNo/canTransitionTaxInvoice)" time="0">
+    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(validateBizNo/canTransitionTaxInvoice)" time="0.001">
     </testcase>
     <testcase classname="service.ts / route.ts 구조 검증" name="createInvoice/transition 메서드 존재" time="0">
     </testcase>
     <testcase classname="service.ts / route.ts 구조 검증" name="create route 가 201 발급" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="transition route 가 to 검증(400)" time="0.001">
+    <testcase classname="service.ts / route.ts 구조 검증" name="transition route 가 to 검증(400)" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:27" time="0.022" tests="35">
+  <testsuite name="UT-001-A: 점검모드 scope 전환 검증" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.139" tests="41">
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;all&apos; 은 허용된 점검 범위이다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;storefront&apos; 는 허용된 점검 범위이다(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;admin&apos; 은 허용된 점검 범위이다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;ALL&apos; (대문자) 은 허용되지 않는다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="scope &apos;shop&apos; 은 허용되지 않는 범위이다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="빈 문자열 scope 는 허용되지 않는다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="MAINTENANCE_SCOPES 에 정의된 모든 값이 isValidScope=true 이다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="undefined 메시지는 검증 통과(선택 입력)(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="빈 문자열 메시지는 검증 통과(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="200자 이내 메시지는 검증 통과(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="정확히 200자 메시지는 검증 통과(true)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="201자 메시지는 검증 실패(false) — 길이 초과" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="500자 메시지는 검증 실패(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="super 등급만 점검모드 전환이 허용된다(true)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="operation 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="cs 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="marketer 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="null(미할당) 등급은 점검모드 전환이 차단된다(false)" time="0">
+    </testcase>
+    <testcase classname="UT-001-A: 점검모드 scope 전환 검증" name="빈 문자열 roleKey 는 점검모드 전환이 차단된다(false)" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB·Redis 모두 up → overall &apos;up&apos; / httpCode 200" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB down / Redis up → overall &apos;down&apos; / httpCode 503" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB up / Redis down → overall &apos;down&apos; / httpCode 503" time="0">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="DB·Redis 모두 down → overall &apos;down&apos; / httpCode 503" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-B: 헬스 polling 상태 판정 검증" name="반환 객체는 db/redis/overall/httpCode 필드를 모두 포함한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 canToggleMaintenance 를 ops/logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 RBAC_MODULE 을 import 하여 getUserRole 을 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 403 응답을 반환하는 분기를 포함한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 에서 canToggleMaintenance=false 이면 403 반환 로직이 연결된다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="maintenance/route.ts 가 OPS_MODULE 을 import 하여 toggleMaintenance 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="health/route.ts 가 OPS_MODULE 을 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="health/route.ts 가 checkHealth 를 호출한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="health/route.ts 가 200/503 httpCode 기반 응답을 반환한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 canToggleMaintenance 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 isValidScope 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 isValidMaintenanceMessage 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 가 resolveHealthStatus 를 ./logic 에서 import 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 에 toggleMaintenance 메서드가 존재하고 canToggleMaintenance 를 호출한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="service.ts 에 checkHealth 메서드가 존재하고 resolveHealthStatus 를 호출한다" time="0.001">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="super 등급: canToggleMaintenance=true → route 가 200 경로로 진행해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="non-super 등급: canToggleMaintenance=false → route 가 403 반환해야 한다" time="0">
+    </testcase>
+    <testcase classname="UT-001-C: route/service 구조 검증 (production 연결 확인)" name="null 등급: canToggleMaintenance=false → route 가 403 반환해야 한다" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="getLatestConsent / isConsented: 최신 기록 우선" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.124" tests="11">
+    <testcase classname="getLatestConsent / isConsented: 최신 기록 우선" name="marketing 최신은 철회(agreed=false)" time="0.002">
+    </testcase>
+    <testcase classname="getLatestConsent / isConsented: 최신 기록 우선" name="terms 는 동의 상태" time="0">
+    </testcase>
+    <testcase classname="getLatestConsent / isConsented: 최신 기록 우선" name="기록 없는 채널은 false" time="0">
+    </testcase>
+    <testcase classname="isReconsentDue: 2년 재확인" name="RECONSENT_YEARS=2" time="0">
+    </testcase>
+    <testcase classname="isReconsentDue: 2년 재확인" name="2년 경과 시 due=true" time="0.001">
+    </testcase>
+    <testcase classname="isReconsentDue: 2년 재확인" name="2년 미경과 시 due=false" time="0">
+    </testcase>
+    <testcase classname="isReconsentDue: 2년 재확인" name="정확히 2년 경계는 due=true" time="0">
+    </testcase>
+    <testcase classname="channelsNeedingReconsent: 동의 중 2년 경과 채널" name="terms(2023 동의)는 2026 기준 재확인 필요, marketing(철회)은 제외" time="0">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(isConsented/channelsNeedingReconsent)" time="0.001">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="recordConsent/getStatus 메서드 존재" time="0">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="route 가 channel 검증(400) + GET/POST export" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="time-sale logic — isSaleActive" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:48" time="0.118" tests="29">
+    <testcase classname="time-sale logic — isSaleActive" name="진행 구간(startsAt &lt;= now &lt; endsAt)이면 true" time="0.001">
+    </testcase>
+    <testcase classname="time-sale logic — isSaleActive" name="시작 시각 경계는 포함(&gt;=)" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — isSaleActive" name="종료 시각 경계는 미포함(&lt;)" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — isSaleActive" name="시작 전이면 false" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — isSaleActive" name="종료 후면 false" time="0.001">
+    </testcase>
+    <testcase classname="time-sale logic — isSaleActive" name="잘못된 ISO 는 false(안전 측)" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — resolveSaleStatus" name="시작 전 → scheduled" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — resolveSaleStatus" name="진행 중 → active" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — resolveSaleStatus" name="시작 경계 → active" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — resolveSaleStatus" name="종료 경계/이후 → ended" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — resolveSaleStatus" name="잘못된 ISO 는 scheduled(안전 측)" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (percent)" name="10000 의 30% 할인 → 7000" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (percent)" name="내림 적용: 9999 의 10% → 8999(floor)" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (percent)" name="할인율 100 초과는 100 으로 클램프 → 0" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (percent)" name="할인율 0 → 원가 유지" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (fixed)" name="10000 - 3000 → 7000" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (fixed)" name="0 바닥: 10000 - 99999 → 0" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (경계/0바닥)" name="원가 0 이하 → 0" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — calcSalePrice (경계/0바닥)" name="음수 할인값 → 원가 유지(percent)" time="0.001">
+    </testcase>
+    <testcase classname="time-sale logic — validateSale" name="정상 percent 입력 → valid" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — validateSale" name="정상 fixed 입력 → valid" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — validateSale" name="percent 범위 위반(&gt;100) → invalid" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — validateSale" name="fixed 0 이하 → invalid" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — validateSale" name="기간 역전(starts &gt;= ends) → invalid" time="0">
+    </testcase>
+    <testcase classname="time-sale logic — validateSale" name="잘못된 ISO → invalid" time="0.001">
+    </testcase>
+    <testcase classname="time-sale service — 소스 구조 검증" name="MedusaService({ TimeSale }) 로 정의" time="0">
+    </testcase>
+    <testcase classname="time-sale service — 소스 구조 검증" name="numeric 필드 Number() 정규화(toView)" time="0">
+    </testcase>
+    <testcase classname="time-sale service — 소스 구조 검증" name="상태 판정은 logic 에 위임(resolveSaleStatus/isSaleActive import)" time="0">
+    </testcase>
+    <testcase classname="time-sale service — 소스 구조 검증" name="필수 메서드 노출(createSale/listSales/getSale/endSale/listActiveSales)" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="serializeStateHistory" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:49" time="0.131" tests="7">
+    <testcase classname="serializeStateHistory" name="TC-1: 빈 배열 입력 시 빈 배열을 반환한다" time="0.001">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-2: null 입력 시 빈 배열을 반환한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-3: undefined 입력 시 빈 배열을 반환한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-4: from_state / to_state 를 from / to 로 정규화한다" time="0.001">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-5: created_at 오름차순으로 정렬한다" time="0">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-6: 누락된 필드는 null 로 정규화한다" time="0.001">
+    </testcase>
+    <testcase classname="serializeStateHistory" name="TC-7: created_at 이 null 인 항목은 정렬 후 맨 뒤에 위치한다" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:49" time="0.142" tests="35">
     <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="정상 정책은 valid=true" time="0.001">
     </testcase>
     <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="빈 배열은 valid=false" time="0">
     </testcase>
     <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="minAmount 단조증가 위반 시 valid=false" time="0">
     </testcase>
-    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="적립률 100 초과 시 valid=false" time="0">
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="적립률 100 초과 시 valid=false" time="0.001">
     </testcase>
     <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="음수 minAmount 는 valid=false" time="0">
     </testcase>
     <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="DEFAULT_TIERS(예시 초기값)는 검증을 통과한다" time="0">
     </testcase>
-    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="TIER_NAMES 는 일반/실버/골드/VIP 4단계" time="0">
+    <testcase classname="validateTierPolicy: 등급 정책 검증(I1 단조증가 / I2 적립률 0~100)" name="TIER_NAMES 는 일반/실버/골드/VIP 4단계" time="0.001">
     </testcase>
-    <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="유효 배열은 그대로 반환" time="0.001">
+    <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="유효 배열은 그대로 반환" time="0">
     </testcase>
     <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="배열 아님(객체/null/문자열)은 DEFAULT_TIERS 폴백" time="0">
     </testcase>
     <testcase classname="parseTiersPolicy: 폴백 안전 파싱" name="검증 실패 배열(단조위반)은 DEFAULT_TIERS 폴백" time="0">
     </testcase>
-    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="0원 = 일반" time="0">
+    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="0원 = 일반" time="0.001">
     </testcase>
     <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="경계값(정확히 minAmount) = 해당 등급으로 승급" time="0">
     </testcase>
     <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="구간 중간값" time="0">
     </testcase>
-    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="정책 빈 배열이면 에러" time="0.003">
+    <testcase classname="calcMembershipTier: 누적금액 → 등급(UT-001)" name="정책 빈 배열이면 에러" time="0.009">
     </testcase>
     <testcase classname="tierEarnRate: 등급별 적립률(UT-002)" name="등급별 적립률 반환" time="0">
     </testcase>
@@ -223,21 +687,21 @@
     </testcase>
     <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="정상 차감" time="0">
     </testcase>
-    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="0 미만으로 내려가지 않음" time="0.001">
+    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="0 미만으로 내려가지 않음" time="0">
     </testcase>
     <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="음수 환불액은 0으로 보정(누적 불변)" time="0">
     </testcase>
-    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="차감 후 등급 하향 확인(골드 100만→환불 80만→일반)" time="0">
+    <testcase classname="recalcAccruedOnRefund: 환불 차감(C1, 하향 가능)" name="차감 후 등급 하향 확인(골드 100만→환불 80만→일반)" time="0.001">
     </testcase>
     <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="배열은 json 으로 통과" time="0">
     </testcase>
     <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="객체는 json 으로 통과" time="0">
     </testcase>
-    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="null 은 json 검증 실패(에러)" time="0">
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="null 은 json 검증 실패(에러)" time="0.001">
     </testcase>
-    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="문자열은 json 검증 실패(에러)" time="0.001">
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="문자열은 json 검증 실패(에러)" time="0">
     </testcase>
-    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="기존 number/boolean/string 검증은 불변" time="0">
+    <testcase classname="validatePolicyValue: value_type=json 분기(복합 정책 일반화)" name="기존 number/boolean/string 검증은 불변" time="0.001">
     </testcase>
     <testcase classname="service.ts 구조 검증: logic 룰 실제 호출" name="service 가 logic 에서 calcMembershipTier 를 import 한다" time="0">
     </testcase>
@@ -249,37 +713,143 @@
     </testcase>
     <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="POST 가 validateTierPolicy 로 룰 검증한다" time="0">
     </testcase>
-    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="confirm!==true 면 409 를 반환한다(이중확인)" time="0">
+    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="confirm!==true 면 409 를 반환한다(이중확인)" time="0.001">
     </testcase>
-    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="정책 저장은 policy.set 으로 위임한다(별도 테이블 미신설)" time="0.001">
+    <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="정책 저장은 policy.set 으로 위임한다(별도 테이블 미신설)" time="0">
     </testcase>
     <testcase classname="route.ts 구조 검증: membership.tiers 정책 변경" name="감사 로그(audit.record)를 기록한다" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="calcNet / calcPgFee" errors="0" failures="0" skipped="0" timestamp="2026-06-04T01:33:27" time="0.02" tests="12">
-    <testcase classname="calcNet / calcPgFee" name="순정산 = 매출-환불-수수료" time="0">
+  <testsuite name="단계/기간" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:49" time="0.123" tests="14">
+    <testcase classname="단계/기간" name="SANCTION_LEVELS 순서" time="0.002">
     </testcase>
-    <testcase classname="calcNet / calcPgFee" name="환불 초과 시 음수 허용" time="0">
+    <testcase classname="단계/기간" name="단계별 기간(일)" time="0">
     </testcase>
-    <testcase classname="calcNet / calcPgFee" name="PG수수료 = 매출×율 내림" time="0">
+    <testcase classname="getNextSanctionLevel: 단계 상승" name="warn→7→30→영구" time="0.001">
     </testcase>
-    <testcase classname="calcNet / calcPgFee" name="수수료율 범위 밖 에러" time="0.002">
+    <testcase classname="getNextSanctionLevel: 단계 상승" name="영구에서 더 안 올라감" time="0">
     </testcase>
-    <testcase classname="canTransitionPayout: 상태 전이" name="open→closed 허용" time="0">
+    <testcase classname="calcSanctionUntil: 만료일" name="7일 제재 만료" time="0">
     </testcase>
-    <testcase classname="canTransitionPayout: 상태 전이" name="closed→paid 허용, closed→open(재집계) 허용" time="0">
+    <testcase classname="calcSanctionUntil: 만료일" name="영구는 null" time="0">
     </testcase>
-    <testcase classname="canTransitionPayout: 상태 전이" name="paid 는 종료 상태(전이 불가)" time="0">
+    <testcase classname="calcSanctionUntil: 만료일" name="경고는 시작=종료(기록)" time="0">
     </testcase>
-    <testcase classname="canTransitionPayout: 상태 전이" name="open→paid 직행 불가(마감 선행)" time="0">
+    <testcase classname="isSanctionActive / shouldBlockLogin" name="기간 내 활성, 차단" time="0">
     </testcase>
-    <testcase classname="canTransitionPayout: 상태 전이" name="PAYOUT_STATUSES 3종" time="0">
+    <testcase classname="isSanctionActive / shouldBlockLogin" name="기간 후 비활성, 차단 해제" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(calcNet/canTransitionPayout)" time="0">
+    <testcase classname="isSanctionActive / shouldBlockLogin" name="경고는 차단 아님" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="upsertSnapshot/closePeriod/payPeriod 메서드 존재" time="0.001">
+    <testcase classname="isSanctionActive / shouldBlockLogin" name="영구는 항상 활성·차단" time="0">
     </testcase>
-    <testcase classname="service.ts / route.ts 구조 검증" name="upsert route 가 pgFee 폴백으로 settlement.pg_fee_rate 정책 조회" time="0">
+    <testcase classname="service.ts / route.ts 구조 검증" name="service 가 logic 룰 import(getNextSanctionLevel/shouldBlockLogin)" time="0.001">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="applySanction/getCurrent/liftSanction 메서드 존재" time="0">
+    </testcase>
+    <testcase classname="service.ts / route.ts 구조 검증" name="route 가 GET/POST/DELETE 핸들러 export" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:49" time="0.139" tests="15">
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-1: 회수 금액 = 신규 금액인 경우 차액 0" time="0.002">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-2: 신규 금액 &gt; 회수 금액이면 diff 양수(추가결제)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-3: 회수 금액 &gt; 신규 금액이면 diff 음수(환불)" time="0">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-4: 수량이 반영되어 합산된다" time="0">
+    </testcase>
+    <testcase classname="UT-001: 단건 교환 생성 — 차액 계산 기본 동작" name="TC-5: 빈 배열 입력 시 차액 0" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: 다건 그룹 + 1회 회수 — 차액 합산 검증" name="TC-1: 2개 교환 라인 합산 차액(추가결제)" time="0">
+    </testcase>
+    <testcase classname="UT-002: 다건 그룹 + 1회 회수 — 차액 합산 검증" name="TC-2: lines 배열이 모든 라인을 포함한다" time="0">
+    </testcase>
+    <testcase classname="UT-002: 다건 그룹 + 1회 회수 — 차액 합산 검증" name="TC-3: 다건 합산 후 차액이 0인 경우 diff=0" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-1: 정수 단위 차액(추가결제) — 절사 없음" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-2: 정수 단위 차액(환불) — diff 음수" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-3: floor 적용 — 정수 결과는 그대로 반환된다" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-4: lines 합산이 diff 와 항상 일치한다(잔액보정 정합)" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-5: 추가결제 케이스 — price_diff 응답 구조 확인" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-6: 환불 케이스 — diff 음수 + lines 구조" time="0">
+    </testcase>
+    <testcase classname="UT-003: 차액 추가결제/환불 — 끝전 절사 + 잔액보정" name="TC-7: unit_price 가 undefined 이면 0 으로 처리된다" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="UT-001: validateCancelReason — 정상 enum 값 허용" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:49" time="0.128" tests="19">
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용" name="UT-001-fraud: reason=%s → valid=true" time="0.001">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용" name="UT-001-staff: reason=%s → valid=true" time="0">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용" name="UT-001-inventory: reason=%s → valid=true" time="0">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용" name="UT-001-other: reason=%s → valid=true" time="0">
+    </testcase>
+    <testcase classname="UT-001: validateCancelReason — 정상 enum 값 허용" name="UT-001-trim: 앞뒤 공백이 있어도 정상 처리" time="0">
+    </testcase>
+    <testcase classname="UT-001: buildCancelIdempotencyKey — 정상 경로" name="UT-001-key: 형식 = {orderId}:cancel:{nonce}" time="0">
+    </testcase>
+    <testcase classname="UT-001: buildCancelIdempotencyKey — 정상 경로" name="UT-001-key-idempotent: 동일 orderId+nonce 는 항상 같은 키" time="0">
+    </testcase>
+    <testcase classname="UT-001: buildCancelIdempotencyKey — 정상 경로" name="UT-001-key-diff: 서로 다른 nonce 는 다른 키" time="0">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외" name="UT-002-orderId-empty: orderId 비어있으면 예외" time="0.007">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외" name="UT-002-nonce-empty: nonce 비어있으면 예외" time="0.001">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외" name="UT-002-orderId-whitespace: orderId 공백만이면 예외" time="0">
+    </testcase>
+    <testcase classname="UT-002: buildCancelIdempotencyKey — 잘못된 입력 예외" name="UT-002-nonce-whitespace: nonce 공백만이면 예외" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-empty: 빈 문자열 → valid=false, 필수 메시지" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-undefined: undefined → valid=false" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-null: null → valid=false" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-invalid-enum: &apos;관리자 강제취소&apos;(하드코딩값) → valid=false, enum 메시지" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-invalid-enum-2: &apos;cancel&apos; → valid=false (enum 목록에 없음)" time="0">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-invalid-enum-3: &apos;400 bad reason&apos; → valid=false" time="0.001">
+    </testcase>
+    <testcase classname="UT-003: validateCancelReason — 사유 미입력/비enum 차단 (spec I1 검증 규칙)" name="UT-003-invalid-type: number 타입 → valid=false" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="normalizeTrackingNumber" errors="0" failures="0" skipped="0" timestamp="2026-07-28T02:19:49" time="0.125" tests="14">
+    <testcase classname="normalizeTrackingNumber" name="하이픈·공백 제거 후 숫자만 반환한다" time="0.001">
+    </testcase>
+    <testcase classname="normalizeTrackingNumber" name="빈 문자열 → 빈 문자열" time="0">
+    </testcase>
+    <testcase classname="validateBulkShipItem" name="정상 항목 → valid + carrier_code + normalized_tracking 반환" time="0">
+    </testcase>
+    <testcase classname="validateBulkShipItem" name="하이픈 운송장번호도 정규화 후 통과" time="0.001">
+    </testcase>
+    <testcase classname="validateBulkShipItem" name="carrier_code 대문자도 소문자 정규화 후 통과" time="0">
+    </testcase>
+    <testcase classname="validateBulkShipItem" name="order_id 비어 있음 → invalid" time="0.001">
+    </testcase>
+    <testcase classname="validateBulkShipItem" name="허용 외 carrier_code → invalid" time="0">
+    </testcase>
+    <testcase classname="validateBulkShipItem" name="tracking_number 빈 문자열 → invalid" time="0">
+    </testcase>
+    <testcase classname="validateBulkShipRequest" name="정상 배열 → valid" time="0.001">
+    </testcase>
+    <testcase classname="validateBulkShipRequest" name="빈 배열 → invalid" time="0.001">
+    </testcase>
+    <testcase classname="validateBulkShipRequest" name="최대 건수 초과 → invalid" time="0">
+    </testcase>
+    <testcase classname="validateBulkShipRequest" name="order_id 중복 → invalid" time="0">
+    </testcase>
+    <testcase classname="buildBulkShipLabel" name="CJ대한통운 + 운송장번호 → 표준 Medusa labels 형식 반환" time="0.001">
+    </testcase>
+    <testcase classname="buildBulkShipLabel" name="epost → 우체국택배 표시명" time="0">
     </testcase>
   </testsuite>
 </testsuites>

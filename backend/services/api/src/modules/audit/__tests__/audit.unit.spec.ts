@@ -148,11 +148,12 @@ describe("UT-002: PII 마스킹 + 권한 조회", () => {
 
   // --- maskPii: 객체/배열 재귀 마스킹 ---
 
-  test("객체의 password 키 값은 전체 마스킹된다", () => {
+  test("객체의 password 키 값은 전체 마스킹되고 name 은 PII 키 마스킹된다", () => {
     const input = { password: "secret123", name: "홍길동" }
     const result = maskPii(input) as Record<string, unknown>
     expect(result.password).toBe("********")
-    expect(result.name).toBe("홍길동")
+    // 보안점검 M5: name/address/phone 등은 값 패턴이 없어도 키 기준 마스킹(첫 글자만 유지)
+    expect(result.name).toBe("홍***")
   })
 
   test("객체의 token, secret, api_key, authorization 키도 전체 마스킹된다", () => {
@@ -183,8 +184,8 @@ describe("UT-002: PII 마스킹 + 권한 조회", () => {
     // email = 로컬파트 마스킹
     expect(result.user.email).toContain("**")
     expect(result.user.email).toContain("@example.com")
-    // phone = 가운데 마스킹
-    expect(result.user.phone).toContain("****")
+    // phone = PII 키 마스킹(첫 글자만 유지) — M5 이후 값 패턴 마스킹보다 강함
+    expect(result.user.phone).toBe("0***")
   })
 
   test("배열 요소의 PII 도 재귀적으로 마스킹된다", () => {
@@ -195,8 +196,8 @@ describe("UT-002: PII 마스킹 + 권한 조회", () => {
     const result = maskPii(input) as Array<Record<string, string>>
     expect(result[0].email).toContain("**")
     expect(result[1].email).toContain("**")
-    // name 은 PII 아님 — 그대로
-    expect(result[0].name).toBe("A")
+    // name 은 M5 이후 PII 키 마스킹 대상
+    expect(result[0].name).toBe("A***")
   })
 
   test("null/undefined 값은 그대로 반환된다(에러 없음)", () => {
@@ -223,14 +224,14 @@ describe("UT-002: PII 마스킹 + 권한 조회", () => {
     expect(canReadAuditLogs("super", superPerms)).toBe(true)
   })
 
-  test("operation 등급은 audit-logs 메뉴 read가 허용된다(READ-only 매트릭스)", () => {
+  test("operation 등급은 audit-logs 조회가 차단된다(SUPER_ONLY_MENUS)", () => {
     const opPerms = permsFor("operation")
-    expect(canReadAuditLogs("operation", opPerms)).toBe(true)
+    expect(canReadAuditLogs("operation", opPerms)).toBe(false)
   })
 
-  test("cs 등급은 audit-logs 메뉴 read가 허용된다(READ-only 매트릭스)", () => {
+  test("cs 등급은 audit-logs 조회가 차단된다(SUPER_ONLY_MENUS)", () => {
     const csPerms = permsFor("cs")
-    expect(canReadAuditLogs("cs", csPerms)).toBe(true)
+    expect(canReadAuditLogs("cs", csPerms)).toBe(false)
   })
 
   test("권한 행이 비어있는 비SUPER 등급은 audit-logs 조회가 차단된다", () => {
@@ -395,9 +396,9 @@ describe("UT-003: route 권한 게이트 구조 검증", () => {
     expect(allowed).toBe(true)
   })
 
-  test("operation 등급(실제 권한 매트릭스): canReadAuditLogs=true → 조회 허용", () => {
+  test("operation 등급(실제 권한 매트릭스): canReadAuditLogs=false → route 가 403 반환해야 한다", () => {
     const opPerms = ALL_PERMS.filter((r) => r.role_key === "operation")
     const allowed = canReadAuditLogs("operation", opPerms)
-    expect(allowed).toBe(true)
+    expect(allowed).toBe(false)
   })
 })

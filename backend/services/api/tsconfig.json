@@ -30,6 +30,9 @@
     "node_modules",
     ".medusa/server",
     ".medusa/admin",
-    ".cache"
+    ".cache",
+    // 독립 npm 프로젝트(자체 package.json·의존성) — 백엔드 타입체크 대상 아님.
+    // 해당 스위트는 integration-tests/playwright 안에서 install 후 자체 실행한다.
+    "integration-tests/playwright"
   ]
 }

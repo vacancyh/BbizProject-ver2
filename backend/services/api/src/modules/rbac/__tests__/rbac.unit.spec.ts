@@ -81,13 +81,23 @@ describe("UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)", () => {
     expect(evaluatePermission("cs", "orders", "delete", csPerms)).toBe(false)
   })
 
-  test("cs 등급은 permissions 메뉴에서 create/update/delete가 차단된다 — C1/C2", () => {
+  test("cs 등급은 permissions 메뉴가 read 포함 전면 차단된다 — SUPER_ONLY_MENUS", () => {
     const csPerms = permsFor("cs")
-    // permissions 메뉴는 ROLE_FULL/EDIT_MENUS 에 없으므로 READ-only
-    expect(evaluatePermission("cs", "permissions", "read",   csPerms)).toBe(true)
-    expect(evaluatePermission("cs", "permissions", "create", csPerms)).toBe(false)
-    expect(evaluatePermission("cs", "permissions", "update", csPerms)).toBe(false)
-    expect(evaluatePermission("cs", "permissions", "delete", csPerms)).toBe(false)
+    // 보안 강화(옵션 A): permissions/policies/audit-logs 는 super 외 조회조차 불가
+    for (const action of ACTIONS) {
+      expect(evaluatePermission("cs", "permissions", action, csPerms)).toBe(false)
+    }
+  })
+
+  test("보안/시스템 메뉴(permissions·policies·audit-logs)는 비super 전 등급에서 전면 차단된다", () => {
+    for (const role of ROLE_KEYS.filter((r) => r !== "super")) {
+      const perms = permsFor(role)
+      for (const menu of ["permissions", "policies", "audit-logs"] as const) {
+        for (const action of ACTIONS) {
+          expect(evaluatePermission(role, menu, action, perms)).toBe(false)
+        }
+      }
+    }
   })
 
   test("marketer 등급은 coupons/marketing/stats FULL, 그 외(orders 등)는 read-only", () => {
@@ -116,12 +126,11 @@ describe("UT-001: 역할별 메뉴·CRUD 게이트(허용/차단)", () => {
     }
   })
 
-  test("operation 등급은 permissions 메뉴에서 read-only이다", () => {
+  test("operation 등급도 permissions 메뉴는 read 포함 전면 차단된다", () => {
     const opPerms = permsFor("operation")
-    expect(evaluatePermission("operation", "permissions", "read",   opPerms)).toBe(true)
-    expect(evaluatePermission("operation", "permissions", "create", opPerms)).toBe(false)
-    expect(evaluatePermission("operation", "permissions", "update", opPerms)).toBe(false)
-    expect(evaluatePermission("operation", "permissions", "delete", opPerms)).toBe(false)
+    for (const action of ACTIONS) {
+      expect(evaluatePermission("operation", "permissions", action, opPerms)).toBe(false)
+    }
   })
 })
 
