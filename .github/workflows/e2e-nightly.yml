@@ -1,0 +1,161 @@
+name: E2E·통합 (야간)
+
+# PR 게이트(ci.yml)에서 못 도는 것들 — DB·Redis·백엔드·브라우저가 필요한 검증.
+#  1) 백엔드 API 통합테스트(125케이스)
+#  2) 스토어프론트 UI E2E(화면 스윕 + 상호작용)
+#  3) 어드민 UI E2E(전 화면 스윕 + 상호작용)
+# 수동 실행(workflow_dispatch) 또는 매일 03:00 KST(=18:00 UTC).
+#
+# NOTE: 이 워크플로는 GitHub Actions 러너에서 첫 실행 시 타이밍/의존성 조정이 필요할 수 있다
+#       (로컬에서는 동일 절차로 전부 통과 확인됨). 실패 시 로그의 단계명을 기준으로 조정할 것.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 18 * * *" # 18:00 UTC = 03:00 KST
+
+env:
+  DATABASE_URL: postgres://shop:shop_local_2026@127.0.0.1:5432/shop_test
+  REDIS_URL: redis://127.0.0.1:6379
+  NODE_ENV: development
+
+jobs:
+  e2e:
+    name: 통합 + UI E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: shop
+          POSTGRES_PASSWORD: shop_local_2026
+          POSTGRES_DB: shop_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U shop"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.3.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      # ── 백엔드 준비 ────────────────────────────────────────────────────────
+      - name: 백엔드 설치
+        working-directory: backend/services/api
+        run: pnpm install --frozen-lockfile
+
+      - name: 마이그레이션
+        working-directory: backend/services/api
+        run: npx medusa db:migrate
+
+      - name: 시드(seed-all — 멱등)
+        working-directory: backend/services/api
+        run: npx medusa exec ./src/scripts/seed-all.ts
+
+      - name: 백엔드 기동(:9000) + 헬스 대기
+        working-directory: backend/services/api
+        run: |
+          npx medusa develop > /tmp/backend.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:9000/health > /dev/null; then echo "backend ready"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::백엔드 기동 실패"; tail -50 /tmp/backend.log; exit 1
+
+      - name: publishable key 추출
+        run: |
+          KEY=$(PGPASSWORD=shop_local_2026 psql -h 127.0.0.1 -U shop -d shop_test -t -A \
+            -c "select token from api_key where type='publishable' limit 1;")
+          echo "PUBKEY=$KEY" >> $GITHUB_ENV
+          echo "추출된 키 접두: ${KEY:0:8}..."
+
+      # ── 1) 백엔드 API 통합테스트 ───────────────────────────────────────────
+      - name: API 통합테스트(125케이스)
+        working-directory: docs/main_plan/user_plan/bizproject/통합테스트
+        env:
+          BASE: http://localhost:9000
+          # DB 교차검증: 러너에는 docker exec 대상 컨테이너가 없으므로 psql 직접 접속 모드
+          DB_HOST: 127.0.0.1
+          DB_PORT: "5432"
+          DB_NAME: shop_test
+          DB_USER: shop
+          DB_PASSWORD: shop_local_2026
+        run: PUBKEY=$PUBKEY node run-all.mjs
+
+      # ── 2) 스토어프론트 UI E2E ─────────────────────────────────────────────
+      - name: 스토어프론트 설치 + 브라우저
+        working-directory: apps/web
+        run: |
+          pnpm install --frozen-lockfile
+          npx playwright install --with-deps chromium
+
+      - name: 스토어프론트 기동(:8000) + 대기
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
+          NEXT_PUBLIC_DEFAULT_REGION: kr
+        run: |
+          echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=$PUBKEY" >> .env.local
+          echo "NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000" >> .env.local
+          echo "NEXT_PUBLIC_DEFAULT_REGION=kr" >> .env.local
+          pnpm dev > /tmp/web.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8000/kr > /dev/null; then echo "storefront ready"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::스토어프론트 기동 실패"; tail -50 /tmp/web.log; exit 1
+
+      - name: 스토어프론트 E2E
+        working-directory: apps/web
+        run: pnpm test:e2e
+
+      # ── 3) 어드민 UI E2E ───────────────────────────────────────────────────
+      - name: 어드민 설치 + 기동(:7002)
+        working-directory: apps/admin
+        env:
+          NEXT_PUBLIC_BACKEND_URL: http://localhost:9000
+        run: |
+          pnpm install --frozen-lockfile
+          npx playwright install --with-deps chromium
+          pnpm dev > /tmp/admin.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:7002/login > /dev/null; then echo "admin ready"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::어드민 기동 실패"; tail -50 /tmp/admin.log; exit 1
+
+      - name: 어드민 E2E(전 화면 스윕 + 상호작용)
+        working-directory: apps/admin
+        env:
+          E2E_ADMIN_EMAIL: admin@shop.local
+          E2E_ADMIN_PASSWORD: admin1234!
+        run: pnpm test:sweep
+
+      # ── 실패 산출물 ────────────────────────────────────────────────────────
+      - name: 실패 산출물 업로드
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          retention-days: 7
+          path: |
+            /tmp/backend.log
+            /tmp/web.log
+            /tmp/admin.log
+            apps/web/test-results/**
+            apps/admin/test-results/**
