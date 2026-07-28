@@ -17,10 +17,10 @@ import PostcodeSearch, {
 
 const AddAddress = ({
   region,
-  addresses,
 }: {
   region: HttpTypes.StoreRegion
-  addresses: HttpTypes.StoreCustomerAddress[]
+  /** 호출부 호환용(현재 컴포넌트에서 미사용) */
+  addresses?: HttpTypes.StoreCustomerAddress[]
 }) => {
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)

@@ -21,9 +21,11 @@ export async function submitSupportInquiry(input: {
       body: input,
     })
     return { ok: true }
-  } catch (e: any) {
+  } catch (e) {
     const msg =
-      e?.message ?? "문의 접수에 실패했습니다. 잠시 후 다시 시도해 주세요."
+      e instanceof Error
+        ? e.message
+        : "문의 접수에 실패했습니다. 잠시 후 다시 시도해 주세요."
     return { ok: false, error: msg }
   }
 }

@@ -46,11 +46,13 @@ const nextConfig = {
       fullUrl: true,
     },
   },
+  // 2026-07-28: lint 에러 21건·타입 에러 0 정리 후 빌드 게이트를 다시 켬.
+  // (타입/lint 오류가 조용히 배포되던 리스크 제거 — 남은 건 exhaustive-deps 경고 4건뿐)
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,

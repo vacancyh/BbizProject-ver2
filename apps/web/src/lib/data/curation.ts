@@ -30,7 +30,7 @@ export async function getCuratedProducts(
       queryParams: {
         id: ids,
         fields: "*variants.calculated_price",
-      } as any,
+      },
     })
     // 큐레이션 순서 유지
     const byId = new Map(products.map((p) => [p.id, p]))

@@ -20,8 +20,8 @@ export async function applyPoints(
     })
     revalidateTag(await getCacheTag("carts"))
     return { ok: true }
-  } catch (e: any) {
-    const msg = e?.message || "적립금 사용에 실패했습니다."
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "적립금 사용에 실패했습니다."
     return { ok: false, error: msg }
   }
 }

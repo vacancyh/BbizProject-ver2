@@ -17,10 +17,10 @@ const PointsApply = async ({
 
   // 적용된 적립금 프로모션 금액
   const code = `POINTS-${cart.id.slice(-12)}`
-  const pointsPromo = (cart.promotions ?? []).find((p: any) => p.code === code)
-  const applied = Number(
-    (pointsPromo as any)?.application_method?.value ?? 0
-  )
+  const pointsPromo = (cart.promotions ?? []).find((p) => p.code === code) as
+    | { application_method?: { value?: number } }
+    | undefined
+  const applied = Number(pointsPromo?.application_method?.value ?? 0)
 
   if (balance <= 0 && applied <= 0) {
     return null

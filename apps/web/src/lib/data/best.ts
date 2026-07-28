@@ -31,7 +31,7 @@ export async function getBestProducts(
       queryParams: {
         id: ids,
         fields: "*variants.calculated_price",
-      } as any,
+      },
     })
     // 랭킹 순서 유지
     const byId = new Map(products.map((p) => [p.id, p]))

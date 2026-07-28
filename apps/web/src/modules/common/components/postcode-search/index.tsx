@@ -36,6 +36,29 @@ export function setFormInputValue(
   el.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
+/** 다음 Postcode 콜백이 넘겨주는 필드 중 실제로 쓰는 것만 선언(외부 스크립트라 타입 미제공) */
+export type DaumPostcodeResult = {
+  zonecode?: string
+  roadAddress?: string
+  address?: string
+  jibunAddress?: string
+  sido?: string
+  sigungu?: string
+}
+
+type DaumPostcodeGlobal = {
+  Postcode: new (options: {
+    oncomplete: (data: DaumPostcodeResult) => void
+    onclose?: () => void
+  }) => { open: () => void; embed: (el: HTMLElement) => void }
+}
+
+/** window.daum 접근(외부 스크립트 주입 전역) */
+function getDaum(): DaumPostcodeGlobal | undefined {
+  if (typeof window === "undefined") return undefined
+  return (window as unknown as { daum?: DaumPostcodeGlobal }).daum
+}
+
 const SCRIPT_SRC =
   "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
 
@@ -43,7 +66,7 @@ let scriptPromise: Promise<void> | null = null
 
 function loadPostcodeScript(): Promise<void> {
   if (typeof window === "undefined") return Promise.reject()
-  if ((window as any).daum?.Postcode) return Promise.resolve()
+  if (getDaum()?.Postcode) return Promise.resolve()
   if (scriptPromise) return scriptPromise
   scriptPromise = new Promise<void>((resolve, reject) => {
     const s = document.createElement("script")
@@ -75,9 +98,10 @@ const PostcodeSearch = ({
     setLoading(true)
     try {
       await loadPostcodeScript()
-      const daum = (window as any).daum
+      const daum = getDaum()
+      if (!daum) throw new Error("Postcode script unavailable")
       new daum.Postcode({
-        oncomplete: (data: any) => {
+        oncomplete: (data: DaumPostcodeResult) => {
           onComplete({
             zonecode: data.zonecode ?? "",
             address: data.roadAddress || data.address || data.jibunAddress || "",

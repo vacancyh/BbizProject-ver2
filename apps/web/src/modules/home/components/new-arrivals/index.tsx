@@ -16,7 +16,7 @@ export default async function NewArrivals({
     page: 1,
     sortBy: "created_at",
     countryCode: region.countries?.[0]?.iso_2 ?? "kr",
-    queryParams: { limit: 8, fields: "*variants.calculated_price" } as any,
+    queryParams: { limit: 8, fields: "*variants.calculated_price" },
   })
 
   if (!products?.length) return null
