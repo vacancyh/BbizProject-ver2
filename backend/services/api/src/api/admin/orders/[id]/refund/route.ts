@@ -96,21 +96,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ORDER_OPS_KR_MODULE) as unknown as OrderOpsKrModuleService
 
   // ─── ① 멱등키 중복 확인 (spec C1 / UT-003) ────────────────────────────────
+  //
+  // 2026-07-28 수정(중요): 이전에는 expires_at 이 지난 키를 "새 요청"으로 통과시켰다.
+  // 그 경로에서는 ④ 환불이 **한 번 더 실제 집행**된 뒤 ⑥ 저장이 유니크 제약으로 실패해
+  // 호출자에게는 400 이 반환됐다(= 돈은 나갔는데 실패로 보이는 이중환불 경로).
+  // 금전 처리이므로 fail-closed 로 바꾼다: 키가 존재하면 만료 여부와 무관하게 재집행하지 않는다.
+  // (expires_at 은 이후 정리(cleanup) 용도로만 의미를 가진다)
   const existingIdem = await svc.findIdempotency(idempotencyKey)
   if (existingIdem) {
-    // 만료 여부 확인
-    const now = new Date()
-    const expiresAt = new Date(existingIdem.expires_at)
-    if (now < expiresAt) {
-      // 캐시 응답 그대로 409 반환
-      res.status(409).json({
-        message: "중복 환불 요청입니다. 캐시 응답을 반환합니다.",
-        cached: true,
-        ...existingIdem.cached_response,
-      })
-      return
-    }
-    // 만료된 키는 새 요청으로 처리 (통과)
+    const expired = new Date() >= new Date(existingIdem.expires_at)
+    res.status(409).json({
+      message: expired
+        ? "이미 처리된 환불 요청입니다(멱등키 재사용). 새 환불은 새 nonce 로 요청하세요."
+        : "중복 환불 요청입니다. 캐시 응답을 반환합니다.",
+      cached: true,
+      expired,
+      ...existingIdem.cached_response,
+    })
+    return
   }
 
   // ─── ② 환불액 계산 ────────────────────────────────────────────────────────
@@ -239,7 +242,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     reshipping_required: reshippingResult.required,
   }
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
-  await svc.saveIdempotency(idempotencyKey, responsePayload, expiresAt)
+  // 이 시점엔 이미 환불이 집행됐다. 캐시 저장 실패로 호출자에게 실패를 반환하면
+  // "돈은 나갔는데 실패" 로 보이므로, 저장 실패는 로그만 남기고 응답은 성공으로 유지한다.
+  try {
+    await svc.saveIdempotency(idempotencyKey, responsePayload, expiresAt)
+  } catch (e) {
+    console.warn(
+      `[refund] 멱등키 저장 실패(key=${idempotencyKey}): ${(e as Error)?.message} — 환불 자체는 완료됨`
+    )
+  }
 
   // ─── 최종 응답 ────────────────────────────────────────────────────────────
   res.json(responsePayload)
