@@ -22,7 +22,6 @@ import {
   type ActiveReturnLine,
 } from "../return-logic";
 import type { OrderLineItem } from "@/lib/api/orders";
-import type { RmaReturnReason } from "@/lib/api/orders";
 
 // ─── 공용 픽스처 ─────────────────────────────────────────────────────────────
 
@@ -40,7 +39,7 @@ function makeLineItem(overrides: Partial<OrderLineItem> = {}): OrderLineItem {
   };
 }
 
-function makeActiveReturnLine(overrides: Partial<ActiveReturnLine> = {}): ActiveReturnLine {
+function _makeActiveReturnLine(overrides: Partial<ActiveReturnLine> = {}): ActiveReturnLine {
   return {
     item_id: "item_01",
     quantity: 1,

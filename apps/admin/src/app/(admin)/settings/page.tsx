@@ -120,6 +120,9 @@ function ResultModal({
 
 // ─── 기본 정보 탭 ─────────────────────────────────────────────────────────
 
+// 현재 미사용 — 저장 트리거가 page header 패턴으로 이관되며 대체됨.
+// (복원 계획이 없으면 삭제 대상. 훅 규칙상 이름은 대문자로 유지해야 함)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function BasicTab() {
   const toast = useToast();
 
@@ -130,13 +133,13 @@ function BasicTab() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
-  const [dirty, setDirty] = useState(false);
+  const [_dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // confirm/result 상태
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [_saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -877,7 +880,7 @@ function RolesTab() {
             ) : (
               users.map((user) => {
                 const isSuper = user.role_key === "super";
-                const currentLabel = user.role_key ? ROLE_LABELS[user.role_key] : "미지정";
+                const _currentLabel = user.role_key ? ROLE_LABELS[user.role_key] : "미지정";
                 const ini = getInitial(user);
                 return (
                   <div className="dline role-row" key={user.id} data-who={user.name ?? user.email}>

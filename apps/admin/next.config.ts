@@ -29,8 +29,9 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   reactStrictMode: true,
-  // prototype 정적 산출물은 빌드 대상에서 제외 (디자인 사양 전용, 읽기 전용)
-  eslint: { ignoreDuringBuilds: true },
+  // 2026-07-28: ESLint 설정(.eslintrc.json)을 추가하고 에러 28건을 정리해 게이트를 켬.
+  // prototype 정적 산출물은 .eslintrc.json 의 ignorePatterns 로 제외한다.
+  eslint: { ignoreDuringBuilds: false },
 };
 
 export default nextConfig;

@@ -15,7 +15,6 @@ import {
   calcWidgetCounts,
   calcPeriodRevenue,
   type OrderForLogic,
-  type Period,
 } from "../dashboard-logic";
 
 // ─── 공용 픽스처 ─────────────────────────────────────────────────────────────

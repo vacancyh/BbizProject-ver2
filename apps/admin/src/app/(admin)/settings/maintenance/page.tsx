@@ -9,7 +9,7 @@
  * - backend API: /admin/ops/maintenance (GET 상태, POST 토글), /admin/ops/health
  */
 import { useCallback, useEffect, useState } from "react";
-import { Activity, AlertTriangle, Check, RefreshCw } from "lucide-react";
+import { Activity, AlertTriangle, RefreshCw } from "lucide-react";
 import { ConfirmModal, useToast } from "@/components/ui";
 import {
   getHealth,

@@ -98,8 +98,6 @@ import {
   canShip as calcCanShip,
   canDeliver as calcCanDeliver,
   isPartiallyDelivered,
-  isDuplicateTracking,
-  isValidTrackingNumber,
 } from "@/lib/orders/fulfillment-logic";
 import {
   calcReturnableItems,
@@ -287,7 +285,7 @@ export default function OrdersPage() {
   const [withdrawReason, setWithdrawReason] = useState<WithdrawalReasonCode>("simple_change");
   const [returnsPolicy, setReturnsPolicy] = useState<ReturnsPolicyRecord | null>(null);
   // 반품 접수 상태 (t004)
-  const [returnReasons, setReturnReasons] = useState<ReturnReason[]>([]);
+  const [_returnReasons, setReturnReasons] = useState<ReturnReason[]>([]);
   const [returnReason, setReturnReason] = useState<RmaReturnReason>("CUSTOMER_CHANGE_OF_MIND");
   const [returnItems, setReturnItems] = useState<{ id: string; quantity: number }[]>([]);
   const [returnModalOpen, setReturnModalOpen] = useState(false);

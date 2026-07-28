@@ -16,7 +16,6 @@ import {
   buildOrderListQuery,
   ordersToCsv,
   ALLOWED_ORDER_STATUSES,
-  type OrderListFilters,
 } from "../order-list-logic";
 import {
   orderStatusLabel,

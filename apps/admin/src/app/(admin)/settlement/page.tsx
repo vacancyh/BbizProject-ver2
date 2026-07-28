@@ -10,7 +10,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Wallet,
-  CheckCircle2,
   RotateCcw,
   Banknote,
   Percent,

@@ -907,7 +907,7 @@ function CategoryOptionMapTab() {
   }
 
   // 옵션템플릿 평면 목록 추출 (분야 → 분류 → 옵션)
-  const allOptions: { id: string; label: string }[] = [];
+  const _allOptions: { id: string; label: string }[] = [];
   for (const field of typeTree) {
     for (const cat of field.children ?? []) {
       for (const opt of cat.options) {
@@ -954,7 +954,7 @@ function CategoryOptionMapTab() {
       {selectedCat ? (
         <div className="rounded bg-surface p-4 shadow-xs space-y-3">
           <h3 className="font-bold text-text text-sm">
-            '{selectedCatName}' 매핑된 옵션템플릿 {maps.length}개
+            &apos;{selectedCatName}&apos; 매핑된 옵션템플릿 {maps.length}개
           </h3>
 
           {maps.length === 0 ? (
@@ -1017,7 +1017,7 @@ function CategoryOptionMapTab() {
               </button>
             </div>
             <p className="text-[11px] text-text-3">
-              옵션템플릿 ID는 '상품 분류 체계' 페이지에서 확인할 수 있습니다 (예: ptopt_xxxxxx).
+              옵션템플릿 ID는 &apos;상품 분류 체계&apos; 페이지에서 확인할 수 있습니다 (예: ptopt_xxxxxx).
             </p>
           </div>
         </div>

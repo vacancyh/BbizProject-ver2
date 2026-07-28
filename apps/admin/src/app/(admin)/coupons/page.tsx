@@ -51,7 +51,7 @@ function targetLabel(p: Promotion): string {
   return "—";
 }
 
-function fmtDate(iso?: string | null): string {
+function _fmtDate(iso?: string | null): string {
   if (!iso) return "—";
   try { return new Date(iso).toLocaleDateString("ko-KR"); } catch { return iso; }
 }

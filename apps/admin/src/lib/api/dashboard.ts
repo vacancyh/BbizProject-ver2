@@ -142,7 +142,7 @@ function fmtWon(v: number): string {
 
 /** 대시보드 집계 데이터 1회 로드. period 기본값 = 'today' (기존 동작 보존). */
 export async function getDashboardSummary(period: Period = "today"): Promise<DashboardSummary> {
-  const [ordersRes, productsRes, customersRes, productCatRes, inquiryRes, reviewFeedRes, invRes] =
+  const [ordersRes, _productsRes, customersRes, productCatRes, inquiryRes, reviewFeedRes, invRes] =
     await Promise.all([
       apiFetch<{ orders: DashOrder[]; count: number }>(
         `/admin/orders?limit=100&order=-display_id&fields=${ORDER_FIELDS}`

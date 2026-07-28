@@ -103,21 +103,41 @@ async function getFixture(request: any) {
   );
 }
 
-/** 환불 멱등 검증용 — captured(또는 partially_refunded) 주문 id 동적 해석(캐시). */
+/**
+ * 환불 멱등 검증용 — captured 결제가 있고 **잔여 환불가능액이 남은** 주문 id 동적 해석(캐시).
+ *
+ * 2026-07-28: refund route 에 "결제액 − 기환불 초과 거부(400)" 상한이 추가되면서,
+ * 잔여액이 0 인 주문을 고르면 1회 호출부터 400 이 나 멱등 불변식을 검증할 수 없다.
+ * → 잔여액 > 0 인 주문만 고르도록 강화(데이터 상태에 흔들리지 않게).
+ */
 let _capturedOrderId: string | null = null;
 async function getCapturedOrderId(request: any, token: string): Promise<string> {
   if (_capturedOrderId) return _capturedOrderId;
   const res = await request.get(
-    `${API}/admin/orders?limit=100&fields=id,payment_status`,
+    `${API}/admin/orders?limit=100&fields=id,payment_status,*payment_collections.payments,*payment_collections.payments.refunds`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   expect(res.status()).toBe(200);
   const orders = (await res.json()).orders ?? [];
-  const cap =
-    orders.find((o: any) => o.payment_status === "captured") ??
-    orders.find((o: any) => o.payment_status === "partially_refunded");
+
+  const remainingOf = (o: any): number => {
+    const payments = (o.payment_collections ?? []).flatMap((pc: any) => pc.payments ?? []);
+    const captured = payments.filter((p: any) => p.captured_at != null);
+    if (!captured.length) return 0;
+    const amount = Number(captured[0].amount) || 0;
+    const refunded = (captured[0].refunds ?? []).reduce(
+      (s: number, r: any) => s + (Number(r.amount) || 0),
+      0
+    );
+    return amount - refunded;
+  };
+
+  const cap = orders.find((o: any) => remainingOf(o) > 1);
   if (!cap) {
-    throw new Error("[qa-002] 환불 검증용 captured 주문을 찾지 못했습니다.");
+    throw new Error(
+      "[qa-002] 잔여 환불가능액이 남은 captured 주문을 찾지 못했습니다(전부 환불 소진). " +
+        "데모 데이터 재시드 후 재실행하세요."
+    );
   }
   _capturedOrderId = cap.id as string;
   return _capturedOrderId;

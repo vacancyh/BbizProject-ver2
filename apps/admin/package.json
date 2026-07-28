@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:junit": "vitest run --reporter=junit --outputFile=test-results/t001_store.junit.xml",
     "test:sweep": "playwright test --config playwright.sweep.config.ts",
+    "test:qa": "playwright test --config playwright.qa.config.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {

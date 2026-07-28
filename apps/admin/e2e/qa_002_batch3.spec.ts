@@ -15,12 +15,10 @@
  *  - 거짓 PASS 금지: 모든 케이스 실제 API 응답(status + body 단언). mock·skip 금지.
  *  - 비가역 부작용(order-edit·draft·memo)은 테스트 말미에 정리(DELETE)하여 재실행 안전성 확보.
  *
- * 실 DB 픽스처(진단 완료 2026-06-03):
- *  - QA-007 대상: order_01KSJB8BRF9VEPA9PQAZH4YTYH (display_id=6, pending, not_fulfilled, authorized)
- *               item: ordli_01KSJB8BRGM8Z4TC40P9S9T9SW
- *  - QA-008 대상: region reg_01KSJ66KGVQNZWR4WJRQ0MC3B4(한국,krw) + variant variant_01KSJ6ECVQF00DP7RZFHBARGDM
- *  - QA-009 대상: order_01KSJ6HM7HWT6137SEXQ4FWQ1G (display_id=1, delivered, not_paid)
- *  - QA-010 대상: order_01KSJ6HM7HWT6137SEXQ4FWQ1G (display_id=1)
+ * 픽스처(2026-07-28 자기발견형 전환):
+ *  - 과거에는 시드 ID 를 하드코딩해 두어 DB 재시드 후 QA-007/008/009 가 404/400 으로 깨져 있었다.
+ *  - 이제 런타임에 조회한다: findEditableOrder(수정 가능 주문+아이템) /
+ *    findRegionAndVariant(KRW 리전+변형) / findAnyOrder(비취소 주문).
  */
 import { test, expect } from "@playwright/test";
 
@@ -29,13 +27,65 @@ const API = process.env.MEDUSA_API ?? "http://127.0.0.1:9000";
 /** Bearer 토큰 획득 헬퍼 */
 async function getAdminToken(request: any): Promise<string> {
   const res = await request.post(`${API}/auth/user/emailpass`, {
-    data: { email: "admin@local.test", password: "djemalsdlqslek12!@" },
+    data: {
+      email: process.env.E2E_ADMIN_EMAIL ?? "admin@shop.local",
+      password: process.env.E2E_ADMIN_PASSWORD ?? "admin1234!",
+    },
   });
   expect(res.status()).toBe(200); // 토큰 실패 시 전체 중단
   const body = await res.json();
   const token = body.token as string;
   expect(typeof token).toBe("string");
   return token;
+}
+
+/**
+ * 자기발견형 픽스처(2026-07-28) — 기존에는 시드 ID 를 하드코딩해 두어
+ * DB 재시드 후 404/400 으로 3개 스펙이 통째로 깨져 있었다. 런타임에 조회해서 쓴다.
+ */
+async function findEditableOrder(request: any, token: string) {
+  const res = await request.get(
+    `${API}/admin/orders?limit=50&fields=id,status,fulfillment_status,*items`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  expect(res.status()).toBe(200);
+  const orders = (await res.json()).orders ?? [];
+  const target = orders.find(
+    (o: any) =>
+      o.status !== "canceled" &&
+      o.fulfillment_status === "not_fulfilled" &&
+      (o.items ?? []).length > 0
+  ) ?? orders.find((o: any) => (o.items ?? []).length > 0);
+  if (!target) throw new Error("[qa-002-batch3] 수정 가능한 주문을 찾지 못했습니다.");
+  return { orderId: target.id as string, itemId: target.items[0].id as string };
+}
+
+async function findRegionAndVariant(request: any, token: string) {
+  const authH = { Authorization: `Bearer ${token}` };
+  const rRes = await request.get(`${API}/admin/regions?limit=20`, { headers: authH });
+  expect(rRes.status()).toBe(200);
+  const regions = (await rRes.json()).regions ?? [];
+  const region = regions.find((r: any) => r.currency_code === "krw") ?? regions[0];
+
+  const pRes = await request.get(`${API}/admin/products?limit=20&fields=id,*variants`, { headers: authH });
+  expect(pRes.status()).toBe(200);
+  const variants = ((await pRes.json()).products ?? []).flatMap((p: any) => p.variants ?? []);
+  if (!region || !variants.length) {
+    throw new Error("[qa-002-batch3] 리전/변형 픽스처를 찾지 못했습니다.");
+  }
+  return { regionId: region.id as string, variantId: variants[0].id as string };
+}
+
+/** 취소/환불 연계 검증용 — 어떤 주문이든(취소되지 않은) 하나 */
+async function findAnyOrder(request: any, token: string): Promise<string> {
+  const res = await request.get(`${API}/admin/orders?limit=50&fields=id,status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  expect(res.status()).toBe(200);
+  const orders = (await res.json()).orders ?? [];
+  const target = orders.find((o: any) => o.status !== "canceled") ?? orders[0];
+  if (!target) throw new Error("[qa-002-batch3] 주문을 찾지 못했습니다.");
+  return target.id as string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,8 +107,7 @@ test.describe("QA-007 d2_주문관리 주문수정 → 차액 → 발송", () =>
    */
   test("QA-007 order-edit 생성(2xx) + 항목변경 + confirm 실왕복", async ({ request }) => {
     const token = await getAdminToken(request);
-    const orderId = "order_01KSJB8BRF9VEPA9PQAZH4YTYH";
-    const itemId = "ordli_01KSJB8BRGM8Z4TC40P9S9T9SW";
+    const { orderId, itemId } = await findEditableOrder(request, token);
     const authH = { Authorization: `Bearer ${token}` };
     const jsonH = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -134,8 +183,7 @@ test.describe("QA-008 d2_주문관리 수기주문 → 결제 → 배송", () =>
     const token = await getAdminToken(request);
     const authH = { Authorization: `Bearer ${token}` };
     const jsonH = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-    const regionId = "reg_01KSJ66KGVQNZWR4WJRQ0MC3B4";
-    const variantId = "variant_01KSJ6ECVQF00DP7RZFHBARGDM";
+    const { regionId, variantId } = await findRegionAndVariant(request, token);
 
     // ── 1. draft 생성 — §V0-6 성공경로 2xx 엄격 단언 ──────────────────────────
     const createRes = await request.post(`${API}/admin/draft-orders`, {
@@ -210,7 +258,7 @@ test.describe("QA-009 d2_주문관리 강제취소 → 환불", () => {
     const token = await getAdminToken(request);
     const authH = { Authorization: `Bearer ${token}` };
     const jsonH = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-    const orderId = "order_01KSJ6HM7HWT6137SEXQ4FWQ1G";
+    const orderId = await findAnyOrder(request, token);
 
     // ── 1. 강제취소(멱등 nonce — 재실행 시 409) ──────────────────────────────
     const cancelRes = await request.post(`${API}/admin/orders-kr/${orderId}/cancel`, {
@@ -260,7 +308,7 @@ test.describe("QA-010 d2_주문관리 주문메모 ↔ CS 통합이력", () => {
     const token = await getAdminToken(request);
     const authH = { Authorization: `Bearer ${token}` };
     const jsonH = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-    const orderId = "order_01KSJ6HM7HWT6137SEXQ4FWQ1G";
+    const orderId = await findAnyOrder(request, token);
     const content = `QA-010 통합이력 메모 ${Date.now()}`;
 
     // ── 1. 메모 추가 — 성공 2xx 단언 ─────────────────────────────────────────

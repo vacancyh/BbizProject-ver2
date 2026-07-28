@@ -392,7 +392,7 @@ function MembersScreen() {
   }
 
   /* ── KPI 집계(실데이터 기반) ── */
-  const totalCount = count;
+  const _totalCount = count;
   const thisMonthCount = rows.filter((r) => {
     const d = new Date(r.created_at);
     const now = new Date();

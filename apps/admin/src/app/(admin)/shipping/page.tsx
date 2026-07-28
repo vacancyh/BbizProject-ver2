@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { DetailDrawer } from "@/components/ui/DetailDrawer";
 import { useToast } from "@/components/ui/Toast";
-import { formatCurrency } from "@/lib/utils";
 import {
   listOrders,
   searchOrders,
@@ -185,7 +184,7 @@ export default function ShippingPage() {
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [qInput, setQInput] = useState("");
-  const [carrierFilter, setCarrierFilter] = useState("전체");
+  const [carrierFilter, _setCarrierFilter] = useState("전체");
   const [activeTab, setActiveTab] = useState<TabKey>("준비");
 
   // KPI 집계 (탭별 카운트)
@@ -204,7 +203,7 @@ export default function ShippingPage() {
     (async () => {
       try {
         // 각 탭의 fulfillment_status 기준으로 count 집계
-        const groups = await Promise.all(
+        const _groups = await Promise.all(
           TABS.map(async (tab) => {
             // Medusa REST는 fulfillment_status 필터를 지원하지 않으므로
             // 전체 목록을 가져와 클라이언트 측 집계
@@ -313,7 +312,7 @@ export default function ShippingPage() {
   }
 
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
-  const tabObj = TABS.find((t) => t.key === activeTab)!;
+  const _tabObj = TABS.find((t) => t.key === activeTab)!;
 
   // 현재 드로어 대상 row
   const drawerRow = detail

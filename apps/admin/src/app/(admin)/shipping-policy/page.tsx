@@ -56,7 +56,7 @@ function formatKrw(amount: number): string {
   return amount.toLocaleString("ko-KR") + "원";
 }
 
-function formatKst(iso?: string): string {
+function _formatKst(iso?: string): string {
   if (!iso) return "—";
   try {
     return new Date(iso).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" });

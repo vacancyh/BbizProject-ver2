@@ -25,7 +25,13 @@ test("사이드바 모든 메뉴 클릭 이동 + 에러 0", async ({ page }) => 
       await page.waitForURL((u) => u.pathname.startsWith(href.split("?")[0]), { timeout: 12000 })
     } catch { fail.push(`이동실패:${href}->${new URL(page.url()).pathname}`); continue }
     await page.waitForLoadState("networkidle").catch(() => {})
-    const bodyLen = (await page.locator("main, .scr").first().innerText().catch(() => "")).length
+    // 데이터 로딩이 늦은 화면(예: /categories)이 순간 측정에서 빈 화면으로 오판되지 않도록 폴링
+    let bodyLen = 0
+    for (let i = 0; i < 20; i++) {
+      bodyLen = (await page.locator("main, .scr").first().innerText().catch(() => "")).length
+      if (bodyLen >= 20) break
+      await page.waitForTimeout(500)
+    }
     if (bodyLen < 20) fail.push(`빈화면:${href}`)
     if (await page.getByText("Unhandled Runtime Error").count()) fail.push(`오버레이:${href}`)
     if (errors.length > before) fail.push(`에러@${href}:${errors.slice(before)[0]}`)
