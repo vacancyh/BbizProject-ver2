@@ -35,7 +35,7 @@ BbizProject 백엔드의 `/store` · `/admin` · `/auth` API를 직접 호출해
 |---|---|---|
 | happy-path | 정상 요청→기대 응답 | 로그인, 주문, 검색 |
 | 부정·경계(H) | 잘못된 입력·경계값이 안전 거부/정제되는지 | 빈 비번, 별점 범위초과, 위조토큰 |
-| 동시성·레이스(I) | 동시 요청에 중복/오버셀/유실 없는지 | 중복가입 1건만, 동시적립 lost-update 없음 |
+| 동시성·레이스(I) | 동시 요청에 중복/오버셀/유실 없는지 | 중복가입 1건만, 동시적립 lost-update 없음, **재고 1개 동시주문 3건 → 1건만 성공(I5)** |
 | DB 교차검증 | API 응답 말고 실제 DB 행을 확인 | 위시리스트 행, 원장 합계=잔액, 주문 레코드 |
 | 멱등성(J) | 같은 요청 반복해도 안전 | 반복 찜 dedup, 반복 동의 |
 | 권한 매트릭스(J) | (미인증/고객/관리자) × 엔드포인트 접근표 | admin=401/401/200, me=401/200/401 |
@@ -66,6 +66,14 @@ docker exec shop-postgres psql -U shop -d shop -c "DROP DATABASE shop_test;"
 
 - 데이터는 임시 `shop_test`에만 쓰므로 dev `shop` DB는 오염되지 않는다.
 - 종료코드: 실패 케이스가 있으면 1, 전부 통과면 0.
+- CI(야간 워크플로)에서는 러너의 서비스 컨테이너에 `docker exec` 가 불가하므로
+  DB 교차검증이 `DB_HOST`(+`DB_PORT`/`DB_USER`/`DB_PASSWORD`) 지정 시 **psql 직접 접속** 모드로 동작한다.
+
+### ⚠️ 재고는 반드시 Admin API 로 조작할 것 (2026-07-28)
+`inventory_level` 을 **SQL 로 직접 수정하면 Medusa 의 재고 캐시가 갱신되지 않아**
+DB 상 재고가 충분해도 카트 담기가 `insufficient_inventory` 로 계속 실패한다.
+반드시 `POST /admin/inventory-items/:id/location-levels/:location_id { stocked_quantity }` 를 사용한다.
+(I5 오버셀 테스트도 이 경로로 재고를 세팅/원복한다.)
 
 ## ✅ 마이그레이션 누락 근본 해결(2026-07-27)
 `product-curation`(위시리스트/조회수)·`customer-dormancy`(휴면)·`tax-invoice`(payout_id) 누락/드리프트는

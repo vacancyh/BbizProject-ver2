@@ -33,5 +33,10 @@ export default defineConfig({
       testMatch: "e2e/storefront-interactions.spec.ts",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "checkout",
+      testMatch: "e2e/storefront-checkout.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
   ],
 })

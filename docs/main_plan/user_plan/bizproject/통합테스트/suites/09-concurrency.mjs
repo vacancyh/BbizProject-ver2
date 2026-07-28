@@ -55,4 +55,115 @@ export default async function run(ctx) {
     const dbSum = ctx.db.count(`select coalesce(sum(amount),0) from point_ledger where customer_id='${cid}';`)
     assert("I4", "동시 적립 lost-update 없음", after === before + 500 && dbSum === after, `${before}→${after} (db=${dbSum})`, "+500 일치")
   }
+
+  // I5 재고 오버셀 방지: 재고를 1로 고정한 변형을 3개 카트에서 동시 결제 → 성공 주문 ≤ 1
+  //   (지금까지 검증 공백이던 영역 — 재고 차감 경합)
+  await testOversell(ctx)
+}
+
+/** 재고 1개 변형에 동시 주문 3건 → 오버셀(성공 2건 이상) 이 발생하지 않아야 한다. */
+async function testOversell(ctx) {
+  const { http, assert, state, pick } = ctx
+  if (!state.adminToken || !state.regionId) {
+    assert("I5", "재고 오버셀 방지", false, "사전자원(admin/region) 없음 — 스킵", "≤1")
+    return
+  }
+
+  // 1) 재고 추적 중이고 location-level 이 있는 변형 1개 확보
+  //    (다른 suite 가 쓰는 대표 변형 state.variantId 는 제외 — 재고 조작이 서로 간섭하지 않도록)
+  const pl = await http("GET", "/store/products?limit=20&fields=*variants", {})
+  const variants = (pl.json?.products ?? [])
+    .flatMap((p) => p.variants ?? [])
+    .filter((v) => v.id !== state.variantId)
+  let target = null
+  for (const v of variants) {
+    const r = await http("GET", `/admin/inventory-items?limit=1&sku=${encodeURIComponent(v.sku ?? "")}`, {
+      token: state.adminToken, pub: false,
+    })
+    const item = r.json?.inventory_items?.[0]
+    if (!item) continue
+    const lv = await http("GET", `/admin/inventory-items/${item.id}/location-levels`, {
+      token: state.adminToken, pub: false,
+    })
+    const level = lv.json?.inventory_levels?.[0]
+    if (level) { target = { variant: v, itemId: item.id, level }; break }
+  }
+  if (!target) {
+    assert("I5", "재고 오버셀 방지", false, "재고 추적 변형을 찾지 못함 — 스킵", "≤1")
+    return
+  }
+
+  const originalQty = Number(target.level.stocked_quantity ?? 0)
+  const reserved = Number(target.level.reserved_quantity ?? 0)
+  const setStock = (qty) =>
+    http("POST", `/admin/inventory-items/${target.itemId}/location-levels/${target.level.location_id}`, {
+      token: state.adminToken, pub: false, body: { stocked_quantity: qty },
+    })
+
+  let consumed = 0 // 테스트가 실제로 소비(예약)한 수량 — 원복 시 보정용
+  try {
+    // 2) 가용재고(stocked − reserved)를 정확히 1로 맞춘다
+    await setStock(reserved + 1)
+
+    // 3) 결제 직전까지 준비된 카트 3개 생성
+    const carts = []
+    for (let i = 0; i < 3; i++) {
+      const c = await http("POST", "/store/carts", {
+        body: {
+          region_id: state.regionId,
+          email: `oversell_${i}_${Date.now()}@kr-itest.local`,
+          items: [{ variant_id: target.variant.id, quantity: 1 }],
+        },
+      })
+      const cartId = pick(c.json?.cart || {}, "id")
+      if (!cartId) continue
+      await http("POST", `/store/carts/${cartId}`, {
+        body: {
+          shipping_address: {
+            first_name: "동시", last_name: `주문${i}`, address_1: "서울 강남구 1",
+            city: "서울", province: "서울", postal_code: "06234", country_code: "kr", phone: "010-0000-0000",
+          },
+        },
+      })
+      const so = await http("GET", `/store/shipping-options?cart_id=${cartId}`, {})
+      const opt = so.json?.shipping_options?.[0]
+      if (opt) await http("POST", `/store/carts/${cartId}/shipping-methods`, { body: { option_id: opt.id } })
+      const pc = await http("POST", "/store/payment-collections", { body: { cart_id: cartId } })
+      const pcId = pick(pc.json?.payment_collection || {}, "id")
+      if (pcId) {
+        await http("POST", `/store/payment-collections/${pcId}/payment-sessions`, {
+          body: { provider_id: "pp_system_default" },
+        })
+      }
+      carts.push(cartId)
+    }
+
+    if (carts.length < 2) {
+      assert("I5", "재고 오버셀 방지", false, `카트 준비 실패(n=${carts.length}) — 검증 불가`, "≤1")
+      return
+    }
+
+    // 4) 동시 결제
+    const res = await Promise.all(carts.map((id) => http("POST", `/store/carts/${id}/complete`, {})))
+    const orders = res.map((r) => r.json?.order?.id).filter(Boolean)
+    consumed = orders.length
+
+    assert(
+      "I5",
+      `재고 1개 동시주문 ${carts.length}건 → 오버셀 없음`,
+      orders.length <= 1,
+      `주문성공=${orders.length}/${carts.length} (statuses=${res.map((r) => r.status).join(",")})`,
+      "≤1"
+    )
+
+    // 5) DB 교차검증: 재고가 음수로 내려가지 않았는가
+    const remaining = ctx.db.count(
+      `select stocked_quantity - reserved_quantity from inventory_level where inventory_item_id='${target.itemId}';`
+    )
+    assert("I5b", "DB: 가용재고 음수 아님", remaining === null || Number(remaining) >= 0, `available=${remaining}`, "≥0")
+  } finally {
+    // 6) 재고 원복 — 테스트 주문이 예약(reserved)한 만큼 더해 줘야 가용재고가 원래대로 돌아온다.
+    //    (단순히 originalQty 로 되돌리면 실행할수록 가용재고가 음수로 드리프트한다)
+    await setStock(originalQty + consumed)
+  }
 }

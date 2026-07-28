@@ -22,6 +22,7 @@ pnpm test:e2e:interactions    # 상호작용만
 |---|---|
 | `storefront-sweep.spec.ts` | 10개 화면 진입 → 콘솔 에러/런타임 예외/4xx·5xx/빈 화면 수집. 하드 실패: 런타임 예외·5xx·렌더 실패 |
 | `storefront-interactions.spec.ts` | 홈 캐러셀·베스트 하이드레이션 / 목록→상세 클라이언트 라우팅 / 옵션 선택→장바구니 담기→카트 반영 / 최근 본 상품(localStorage) / 로그인 실패 에러 렌더 |
+| `storefront-checkout.spec.ts` | **체크아웃 전 구간** — ①비회원: 장바구니→주소→배송→결제(무통장입금)→주문완료 ②회원: 로그인→적립금 사용(총액 감소 확인)→주문완료. 회원 계정은 `E2E_MEMBER_EMAIL/PASSWORD`(기본 `gold@kr-demo.local`) |
 
 ## 참고
 - 어드민 쪽 동일 성격 스위트: `apps/admin` → `pnpm test:sweep`(전 화면 32개 + 상호작용).
