@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { ProductJsonLd } from "@modules/common/components/structured-data"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
@@ -122,11 +123,19 @@ export default async function ProductPage(props: Props) {
   const images = getImagesForVariant(pricedProduct, selectedVariantId)
 
   return (
-    <ProductTemplate
-      product={pricedProduct}
-      region={region}
-      countryCode={params.countryCode}
-      images={images ?? []}
-    />
+    <>
+      {/* SEO(2026-07-28): 구조화 데이터 — 검색 리치 결과(가격·재고·브레드크럼) */}
+      <ProductJsonLd
+        product={pricedProduct}
+        countryCode={params.countryCode}
+        currencyCode={region.currency_code}
+      />
+      <ProductTemplate
+        product={pricedProduct}
+        region={region}
+        countryCode={params.countryCode}
+        images={images ?? []}
+      />
+    </>
   )
 }

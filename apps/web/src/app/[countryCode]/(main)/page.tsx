@@ -10,6 +10,7 @@ import TimeSaleSection from "@modules/home/components/time-sale"
 import { listCollections } from "@lib/data/collections"
 import { listBanners } from "@lib/data/banners"
 import { getRegion } from "@lib/data/regions"
+import { SiteJsonLd } from "@modules/common/components/structured-data"
 
 export const metadata: Metadata = {
   title: "쇼핑몰 — 오늘의 발견",
@@ -44,6 +45,8 @@ export default async function Home(props: {
 
   return (
     <>
+      {/* SEO(2026-07-28): Organization·WebSite 구조화 데이터 */}
+      <SiteJsonLd countryCode={countryCode} />
       <HomePopup banners={popupBanners} />
       <Hero />
       <HomeCuration region={region} />
