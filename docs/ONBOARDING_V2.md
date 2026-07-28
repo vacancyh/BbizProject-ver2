@@ -3,7 +3,10 @@ Shop 프로젝트 — 초보 개발자 상세 온보딩 (버전 2)
 요약
 - 목적: 이 문서는 새로 투입되는 초보 개발자가 빠르게 로컬 개발환경을 구성하고 코드 구조와 개발 흐름을 이해해 바로 기여할 수 있도록 실전 중심으로 정리합니다.
 - 위치: C:\study\BbizProject-ver2 (로컬 복제 경로)
-- 현행: 국내(한국/KRW) 설정 완료(기본 통화 KRW·리전 kr·부가세 10%·국내 배송·국내 물류창고), 스토어프런트 기본 진입 `/kr`. 보조: `scripts/healthcheck.ps1`, 관리자 `pnpm test:sweep`, CI `.github/workflows/ci.yml`(타입체크·린트). 셋업 상세는 `docs/main_plan/user_plan/bizproject/프런트개발_셋업_가이드.md`.
+- 현행(2026-07-28): 국내(한국/KRW) 설정 완료(기본 통화 KRW·리전 kr·부가세 10%·국내 배송·국내 물류창고), 스토어프런트 기본 진입 `/kr`.
+- 보조 도구: `scripts/healthcheck.ps1`(서비스·포트 점검), `scripts/db-backup.sh`·`db-restore.sh`(DB 백업/복구).
+- CI: `.github/workflows/ci.yml`(타입체크·린트·**유닛 테스트** 게이트) + `e2e-nightly.yml`(통합·UI E2E 야간).
+- 셋업 상세는 `docs/main_plan/user_plan/bizproject/02_개발환경_구축.md`, 문서 목차는 같은 폴더의 `README.md`.
 
 1. 전체 구조(빠른 개요)
 - apps/
@@ -66,16 +69,30 @@ Shop 프로젝트 — 초보 개발자 상세 온보딩 (버전 2)
    pnpm dev
    - 기본 포트: 7002
 
-7. 테스트 명령
-- 백엔드 유닛 테스트
+7. 테스트 명령 (2026-07-28 현행)
+
+서버가 없어도 되는 것부터 순서대로 돌리면 된다.
+
+- 백엔드 유닛 (jest, 408개 / 약 10초) — 서버 불필요
   cd backend\services\api
   pnpm test:unit
-- 통합 테스트
-  pnpm test:integration:http
-- 관리자 앱
+- 관리자 유닛 (vitest, 530개 / 약 3초) — 서버 불필요
   cd apps\admin
   pnpm test
-- Playwright나 Vitest 설정은 각 package.json 참고
+- 스토어프런트 UI E2E (28개) — 백엔드 :9000 + 스토어프런트 :8000 필요
+  npx playwright install chromium   # 최초 1회
+  cd apps\web
+  pnpm test:e2e
+- 관리자 UI E2E — 백엔드 :9000 + 관리자 :7002 필요
+  cd apps\admin
+  pnpm test:sweep     # 전 화면 스윕 + 상호작용 (36개)
+  pnpm test:qa        # 도메인 QA 시나리오 (42개)
+- API 통합테스트 (127개) — 별도 test DB 사용, 절차는
+  docs\main_plan\user_plan\bizproject\통합테스트\README.md 참고
+
+주의
+- Windows 에서 `pnpm test:unit` 은 cross-env 로 동작한다(예전엔 POSIX 문법이라 실행 불가였음).
+- dev 서버를 켠 채 `pnpm build` 하지 말 것(.next 를 덮어써서 dev 가 500).
 
 8. 코드 읽기 우선순위(추천)
 1) backend/services/api/README.md (백엔드 전체 개요)

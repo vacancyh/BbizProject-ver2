@@ -26,9 +26,11 @@ project/
 │   └── evaluations/                 #   AI 답이 맞는지 채점할 정답지
 │
 ├── apps/                            # 사용자가 보는 화면
-│   ├── web/                         #   웹사이트
+│   ├── web/                         #   웹사이트(스토어프론트)
+│   │   └── e2e/                     #     실제 브라우저 검증(화면·상호작용·체크아웃·접근성·모바일)
 │   ├── mobile/                      #   휴대폰 앱
 │   └── admin/                       #   운영자가 쓰는 관리 페이지
+│       └── e2e/                     #     전 화면 스윕 + 도메인 QA 시나리오
 │
 ├── backend/                         # 화면 뒤에서 일하는 서버
 │   ├── services/                    #   돌아가는 서버 프로그램들
@@ -52,6 +54,15 @@ project/
 │
 ├── infra/                           # 배포·운영 자동화
 │   └── docker/                      #   Docker 설정
+│
+├── scripts/                         # 운영 보조 스크립트
+│   ├── healthcheck.ps1              #   서비스·포트 상태 한 번에 점검
+│   ├── db-backup.sh                 #   DB 스냅샷(pg_dump) + 무결성 확인 + 보존기간 정리
+│   └── db-restore.sh                #   백업 복구(기본은 새 DB 로 복구해 원본 보호)
+│
+├── .github/workflows/               # CI
+│   ├── ci.yml                       #   PR 게이트: 타입체크·린트·유닛 테스트·빌드·시크릿 스캔
+│   └── e2e-nightly.yml              #   야간/수동: DB 띄우고 통합테스트 + UI E2E 전부 실행
 │
 └── docs/                            # 사람이 읽는 문서
     ├── architecture/                #   설계 도면
@@ -151,3 +162,30 @@ AI 챗봇이나 자동 추천 같은 기능을 쓰는 경우에, AI에게 보여
   - `<new-*>/` (16개 sub-agent 산출물 — handback / machine_summary / spec_match)
   - `_pipeline/schemas/` (machine_summary.schema.json)
 - dag 구조 상세 = 글로벌 룰 `~/.claude/CLAUDE.md §도메인 DAG 룰` 참조. shop 프로젝트는 영구 제외.
+
+
+---
+
+## `scripts/` — 운영 보조 스크립트 (2026-07-28 추가)
+
+배포 자동화(`infra/`)와 달리, **사람이 필요할 때 직접 돌리는** 스크립트입니다.
+
+| 파일 | 언제 쓰나 |
+|---|---|
+| `healthcheck.ps1` | 로컬에서 뭔가 안 될 때 — 3개 서비스와 DB/Redis 포트가 살아있는지 한 번에 확인 |
+| `db-backup.sh` | **마이그레이션·위험한 작업 직전** 스냅샷. 생성 직후 무결성까지 확인하고, 보존기간 지난 백업은 정리 |
+| `db-restore.sh` | 백업 되돌리기. 기본은 **새 DB 로 복구**(원본 보호), 덮어쓰려면 `FORCE_DROP=1` 명시 |
+
+> Medusa v2 는 마이그레이션 자동 롤백이 없습니다. **직전 백업이 사실상 유일한 롤백 수단**이므로
+> 절차는 `docs/main_plan/user_plan/bizproject/운영_백업복구_런북.md` 를 따르세요.
+
+## 테스트 코드는 어디에 있나
+
+| 종류 | 위치 | 서버 필요 |
+|---|---|---|
+| 백엔드 유닛(jest) | `backend/services/api/src/**/__tests__/*.unit.spec.ts` | ✗ |
+| 관리자 유닛(vitest) | `apps/admin/src/lib/**/*.test.ts` | ✗ |
+| API 통합테스트 | `docs/main_plan/user_plan/bizproject/통합테스트/` | ✓ (별도 test DB) |
+| UI E2E | `apps/web/e2e/`, `apps/admin/e2e/` | ✓ (백엔드 + 각 앱) |
+
+> 통합테스트가 `docs/` 아래 있는 이유: 실행 스크립트와 **결과 리포트·발견사항 문서가 한 묶음**이기 때문입니다.

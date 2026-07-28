@@ -20,7 +20,8 @@
 현행 로컬 환경(중요)
 - 하이브리드 구동: Docker(Postgres :5434 · Redis :6381) + 호스트 네이티브 실행(백엔드 :9000 · 관리자 :7002 · 스토어프런트 :8000).
 - 국내(한국/KRW) 설정 완료: 기본 통화 KRW, 리전 한국(kr), 부가세 10%, 국내 배송옵션, 국내 물류창고. 스토어프런트 기본 진입 `/kr`.
-- 보조 도구: `scripts/healthcheck.ps1`(전 서비스/포트 상태 점검), 관리자 `pnpm test:sweep`(전 화면 헬스 스윕). CI: `.github/workflows/ci.yml`(타입체크·린트 게이트).
+- 보조 도구: `scripts/healthcheck.ps1`(전 서비스/포트 상태 점검), 관리자 `pnpm test:sweep`(전 화면 헬스 스윕), `scripts/db-backup.sh`·`db-restore.sh`(DB 백업/복구).
+- CI: `.github/workflows/ci.yml`(타입체크·린트·**유닛 테스트** 게이트) + `.github/workflows/e2e-nightly.yml`(통합·UI E2E 야간 실행).
 - 셋업 상세: `docs/main_plan/user_plan/bizproject/프런트개발_셋업_가이드.md` 참고.
 
 핵심 커스텀 기능(최근 구현 · 참고 문서)
