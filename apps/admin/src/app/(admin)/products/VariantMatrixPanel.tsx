@@ -21,7 +21,7 @@
  *       사장님 결정 전까지 삭제는 비활성 처리(TODO).
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
@@ -150,7 +150,8 @@ export function VariantMatrixPanel({ product, onRefresh }: Props) {
   const [optionOpen, setOptionOpen] = useState(true);
   const [variantOpen, setVariantOpen] = useState(true);
 
-  const options: ProductOption[] = product.options ?? [];
+  // useMemo 로 감싸 매 렌더 새 배열이 생겨 하위 useCallback 의존성이 흔들리는 것을 막는다.
+  const options: ProductOption[] = useMemo(() => product.options ?? [], [product.options]);
   const variants: ProductVariant[] = product.variants ?? [];
 
   /* ------------------------------------------------------------

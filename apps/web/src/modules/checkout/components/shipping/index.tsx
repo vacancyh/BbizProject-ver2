@@ -107,6 +107,9 @@ const Shipping: React.FC<ShippingProps> = ({
     if (_pickupMethods?.find((m) => m.id === shippingMethodId)) {
       setShowPickupOptions(PICKUP_OPTION_ON)
     }
+    // shippingMethodId 등 선택 상태를 넣으면 가격 재조회 → 상태 갱신 → 재조회 루프가 된다.
+    // 배송수단 목록이 바뀔 때만 재계산하는 것이 의도된 동작.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableShippingMethods])
 
   const handleEdit = () => {

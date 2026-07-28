@@ -91,6 +91,9 @@ export default function ProductActions({
     }
 
     router.replace(pathname + "?" + params.toString())
+    // router.replace 가 searchParams 를 바꾸므로 router/searchParams/pathname 을 의존성에 넣으면
+    // 즉시 재실행되는 루프가 된다. 선택 변형이 바뀔 때만 URL 을 동기화하는 것이 의도된 동작.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant, isValidVariant])
 
   // check if the selected variant is in stock

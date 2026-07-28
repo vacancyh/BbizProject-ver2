@@ -52,6 +52,9 @@ const RecentlyViewed = ({
       write(list)
     }
     setItems(list.filter((i) => i.id !== current?.id))
+    // current 객체 자체를 의존성에 넣으면 매 렌더마다 아이덴티티가 바뀌어 무한 재실행된다.
+    // 값이 실제로 바뀌는 id/handle 만 추적하는 것이 의도된 동작.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.id, current?.handle])
 
   if (items.length === 0) return null

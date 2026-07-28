@@ -82,7 +82,10 @@ const ShippingAddress = ({
     if (cart && !cart.email && customer?.email) {
       setFormAddress(undefined, customer.email)
     }
-  }, [cart]) // Add cart as a dependency
+    // customer.email 을 의존성에 넣으면 사용자가 입력 중인 이메일을 덮어쓸 수 있어 제외한다.
+    // 카트가 갱신될 때만 폼을 동기화하는 것이 의도된 동작.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart])
 
   const handleChange = (
     e: React.ChangeEvent<

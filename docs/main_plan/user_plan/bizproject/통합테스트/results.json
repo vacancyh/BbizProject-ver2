@@ -38,7 +38,7 @@
       "expect": "200+token",
       "status": 200,
       "pass": true,
-      "evidence": "itest_1785218797639@kr-itest.local",
+      "evidence": "itest_1785220150309@kr-itest.local",
       "err": null
     },
     {
@@ -50,7 +50,7 @@
       "expect": "200/201",
       "status": 200,
       "pass": true,
-      "evidence": "cus_01KYKNA47DV6H8CWKH9R4QQ85K",
+      "evidence": "cus_01KYKPKD4NG1A371MER50JD662",
       "err": null
     },
     {
@@ -182,7 +182,7 @@
       "expect": "200+≥1",
       "status": 200,
       "pass": true,
-      "evidence": "n=5",
+      "evidence": "n=6",
       "err": null
     },
     {
@@ -206,7 +206,7 @@
       "expect": "200+balance>0",
       "status": 200,
       "pass": true,
-      "evidence": "balance=5554",
+      "evidence": "balance=4831",
       "err": null
     },
     {
@@ -254,7 +254,7 @@
       "expect": "200+≥1",
       "status": 200,
       "pass": true,
-      "evidence": "n=5",
+      "evidence": "n=6",
       "err": null
     },
     {
@@ -350,7 +350,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=4",
+      "evidence": "n=5",
       "err": null
     },
     {
@@ -398,7 +398,7 @@
       "expect": "≥1",
       "status": 200,
       "pass": true,
-      "evidence": "count=5",
+      "evidence": "count=6",
       "err": null
     },
     {
@@ -410,7 +410,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=4",
+      "evidence": "n=5",
       "err": null
     },
     {
@@ -434,7 +434,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=7",
+      "evidence": "n=8",
       "err": null
     },
     {
@@ -542,7 +542,7 @@
       "expect": "200+cart",
       "status": 200,
       "pass": true,
-      "evidence": "cart_01KYKNA69RSHPCSS8TYG1FBJQV",
+      "evidence": "cart_01KYKPKETE70WD28W94V95XN6F",
       "err": null
     },
     {
@@ -614,7 +614,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "pay_col_01KYKNA7HA59YVRXHPMFS3VW7D",
+      "evidence": "pay_col_01KYKPKFZZQ0AJ687NEJNYK8BM",
       "err": null
     },
     {
@@ -638,7 +638,7 @@
       "expect": "200+order",
       "status": 200,
       "pass": true,
-      "evidence": "order_01KYKNA7PZXPHT23XX339PGHP6",
+      "evidence": "order_01KYKPKG564S79YHZMA05Q436F",
       "err": null
     },
     {
@@ -806,7 +806,7 @@
       "expect": "pending 노출",
       "status": 200,
       "pass": true,
-      "evidence": "rev_01KYKNA8F2ZGKZCYDWD6G68X9Y",
+      "evidence": "rev_01KYKPKGVVZ8W2QQFS4WXX3BDQ",
       "err": null
     },
     {
@@ -842,7 +842,7 @@
       "expect": "≥1",
       "status": 200,
       "pass": true,
-      "evidence": "n=6",
+      "evidence": "n=7",
       "err": null
     },
     {
@@ -866,7 +866,7 @@
       "expect": "+500",
       "status": 200,
       "pass": true,
-      "evidence": "3300→3800",
+      "evidence": "3800→4300",
       "err": null
     },
     {
@@ -878,7 +878,7 @@
       "expect": "일치",
       "status": 200,
       "pass": true,
-      "evidence": "db_sum=3800 api=3800",
+      "evidence": "db_sum=4300 api=4300",
       "err": null
     },
     {
@@ -1178,7 +1178,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=4",
+      "evidence": "n=5",
       "err": null
     },
     {
@@ -1394,7 +1394,7 @@
       "expect": "+500 일치",
       "status": 200,
       "pass": true,
-      "evidence": "5000→5500 (db=5500)",
+      "evidence": "5500→6000 (db=6000)",
       "err": null
     },
     {
@@ -1406,7 +1406,7 @@
       "expect": "≤1",
       "status": 200,
       "pass": true,
-      "evidence": "주문성공=1/3 (statuses=400,400,200)",
+      "evidence": "주문성공=1/3 (statuses=200,400,400)",
       "err": null
     },
     {

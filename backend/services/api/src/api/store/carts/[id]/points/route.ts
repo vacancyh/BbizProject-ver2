@@ -29,13 +29,44 @@ async function getCart(req: MedusaRequest, cartId: string) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { data } = await query.graph({
     entity: "cart",
-    fields: ["id", "item_total", "currency_code", "customer_id", "promotions.code"],
+    fields: [
+      "id",
+      "item_total",
+      "tax_total",
+      "currency_code",
+      "customer_id",
+      "promotions.code",
+    ],
     filters: { id: cartId } as Record<string, unknown>,
   })
   return (data ?? [])[0] as any
 }
 
 const LOCK_ARGS = { timeout: 10 } // 초
+
+/**
+ * 적립금 할인의 과세 기준(2026-07-28 측정으로 확인된 이슈)
+ *
+ * Medusa 프로모션은 **공급가액(pre-tax)** 에 적용된다. 그래서 1,000p 를 쓰면
+ * 최종 결제액은 1,100원 줄어든다(부가세 10% 가 할인에 얹힘 = 고객이 10% 초과 혜택).
+ * 실측: item_total 16,500 → 15,400 / tax 1,500 → 1,400 / 사용 1,000p → 총액 -1,100
+ *
+ * 회계 정책상 "1p = 최종 결제액 1원" 이 맞다면 POINTS_DISCOUNT_POST_TAX=true 로 켠다.
+ * (프로모션 값을 세율로 나눠 등록 → 세금 포함 총액이 정확히 사용액만큼 감소)
+ * 기본은 OFF — 기존 동작을 바꾸지 않는다(운영 전환 시 회계와 합의 후 결정).
+ */
+const POST_TAX_POINTS = process.env.POINTS_DISCOUNT_POST_TAX === "true"
+
+/** 카트의 실효 세율로 프로모션 값 보정(post-tax 모드에서만) */
+function promotionValueFor(points: number, cart: any): number {
+  if (!POST_TAX_POINTS) return points
+  const itemTotal = Number(cart?.item_total ?? 0)
+  const taxTotal = Number(cart?.tax_total ?? 0)
+  const net = itemTotal - taxTotal
+  if (net <= 0 || taxTotal <= 0) return points
+  const rate = taxTotal / net
+  return Math.round(points / (1 + rate))
+}
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const customerId = (req as any).auth_context?.actor_id as string | undefined
@@ -99,7 +130,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
                   status: "active",
                   application_method: {
                     type: "fixed",
-                    value: points,
+                    // POINTS_DISCOUNT_POST_TAX=true 면 세금 포함 총액이 정확히 points 만큼 줄도록 보정
+                    value: promotionValueFor(points, cart),
                     currency_code: cart.currency_code,
                     target_type: "order",
                   },
@@ -116,7 +148,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
         // 2) 적립금 원장 차감
         try {
-          await pointSvc.redeemPoints(customerId, points, "주문 적립금 사용")
+          // 사유에 cartId 를 남긴다 — 취소(DELETE) 시 "실제 차감액" 을 정확히 되돌리기 위함.
+          // (프로모션 값은 과세기준 보정으로 차감액과 다를 수 있으므로 원장을 기준으로 삼는다)
+          await pointSvc.redeemPoints(customerId, points, `주문 적립금 사용 (cart:${cartId})`)
         } catch (e) {
           await updateCartPromotionsWorkflow(req.scope)
             .run({ input: { cart_id: cartId, promo_codes: [code], action: PromotionActions.REMOVE } })
@@ -169,12 +203,27 @@ export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
         const applied = (fresh?.promotions ?? []).find((p: any) => p.code === code)
         if (!applied) return { status: 200, body: { removed: false } }
 
-        const { data } = await query.graph({
-          entity: "promotion",
-          fields: ["code", "application_method.value"],
-          filters: { code } as Record<string, unknown>,
-        })
-        const value = Number((data ?? [])[0]?.application_method?.value ?? 0)
+        // 복원액 = 원장에 기록된 "실제 차감액"(프로모션 값이 아님).
+        // POINTS_DISCOUNT_POST_TAX 모드에서는 프로모션 값이 차감액보다 작으므로
+        // 프로모션 값으로 되돌리면 고객 적립금이 줄어든다.
+        const ledger = await pointSvc.listLedger(customerId)
+        const redeemRow = (ledger ?? []).find(
+          (r: any) =>
+            r.entry_type === "redeem" &&
+            typeof r.reason === "string" &&
+            r.reason.includes(`cart:${cartId}`)
+        )
+        let value = Math.abs(Number(redeemRow?.amount ?? 0))
+
+        if (!value) {
+          // 사유에 cartId 가 없던 과거 데이터 호환 — 프로모션 값으로 폴백
+          const { data } = await query.graph({
+            entity: "promotion",
+            fields: ["code", "application_method.value"],
+            filters: { code } as Record<string, unknown>,
+          })
+          value = Number((data ?? [])[0]?.application_method?.value ?? 0)
+        }
 
         await updateCartPromotionsWorkflow(req.scope).run({
           input: { cart_id: cartId, promo_codes: [code], action: PromotionActions.REMOVE },

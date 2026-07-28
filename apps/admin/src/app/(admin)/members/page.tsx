@@ -237,6 +237,9 @@ function MembersScreen() {
     } finally {
       setLoading(false);
     }
+    // joinOffset 은 컴포넌트 본문의 헬퍼로 filterJoin 만 참조한다(이미 의존성에 포함).
+    // 매 렌더 새로 만들어지므로 의존성에 넣으면 불필요한 재생성만 유발한다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, filterStatus, filterGrade, filterJoin, activeTab, page, groups, sort]);
 
   /* ── 정렬 토글/표시 ── */
