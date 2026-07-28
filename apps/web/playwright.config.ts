@@ -38,5 +38,17 @@ export default defineConfig({
       testMatch: "e2e/storefront-checkout.spec.ts",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      // 접근성(axe) — critical/serious 위반 0 을 게이트로
+      name: "a11y",
+      testMatch: "e2e/storefront-a11y.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // 모바일 반응형 — 실제 모바일 뷰포트/터치 에뮬레이션
+      name: "mobile",
+      testMatch: "e2e/storefront-mobile.spec.ts",
+      use: { ...devices["Pixel 7"] },
+    },
   ],
 })

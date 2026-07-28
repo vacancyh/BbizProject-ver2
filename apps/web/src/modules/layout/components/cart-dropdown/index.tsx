@@ -80,9 +80,11 @@ const CartDropdown = ({
       onMouseLeave={close}
     >
       <Popover className="relative h-full">
-        <PopoverButton className="h-full">
+        {/* a11y(2026-07-28): 기존에는 <button> 안에 <a> 를 중첩해 nested-interactive 위반이었다.
+            as={Fragment} 로 링크 자체를 팝오버 트리거로 삼아 중첩을 제거한다. */}
+        <PopoverButton as={Fragment}>
           <LocalizedClientLink
-            className="hover:text-ui-fg-base"
+            className="h-full flex items-center hover:text-ui-fg-base"
             href="/cart"
             data-testid="nav-cart-link"
           >{`장바구니 (${totalItems})`}</LocalizedClientLink>

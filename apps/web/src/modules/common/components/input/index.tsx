@@ -41,6 +41,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <div className="flex relative z-0 w-full txt-compact-medium">
           <input
             type={inputType}
+            // a11y(2026-07-28): label htmlFor={name} 이 대응할 id 가 없어 폼 라벨 미연결이었다
+            id={name}
             name={name}
             placeholder=" "
             required={required}
@@ -59,6 +61,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {type === "password" && (
             <button
               type="button"
+              aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 표시"}
+              aria-pressed={showPassword}
               onClick={() => setShowPassword(!showPassword)}
               className="text-ui-fg-subtle px-4 focus:outline-none transition-all duration-150 outline-none focus:text-ui-fg-base absolute right-0 top-3"
             >
