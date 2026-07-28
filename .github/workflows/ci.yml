@@ -18,7 +18,7 @@ jobs:
         working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
@@ -37,7 +37,7 @@ jobs:
         working-directory: apps/admin
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
@@ -61,7 +61,7 @@ jobs:
         working-directory: backend/services/api
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
@@ -85,7 +85,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
