@@ -37,7 +37,7 @@ importers:
         version: 4.18.1
       next:
         specifier: 15.5.18
-        version: 15.5.18(@babel/core@7.29.7)(react-dom@19.0.5(react@19.0.5))(react@19.0.5)
+        version: 15.5.18(@babel/core@7.29.7)(@playwright/test@1.62.0)(react-dom@19.0.5(react@19.0.5))(react@19.0.5)
       pg:
         specifier: ^8.11.3
         version: 8.21.0
@@ -66,6 +66,9 @@ importers:
       '@medusajs/types':
         specifier: 2.15.3
         version: 2.15.3
+      '@playwright/test':
+        specifier: ^1.62.0
+        version: 1.62.0
       '@types/lodash':
         specifier: ^4.14.195
         version: 4.17.24
@@ -628,6 +631,11 @@ packages:
   '@nolyfill/is-core-module@1.0.39':
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
+
+  '@playwright/test@1.62.0':
+    resolution: {integrity: sha512-9zOJ6ZQRAena31MpOH9VSzIz8Ou3YJ/wtY/eQm5T2uhfhG7/U3COrMS8xOtUrZrp9OgdmzEnIYODye3nY1VqzA==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@radix-ui/primitive@1.1.4':
     resolution: {integrity: sha512-7AdCK9PQyiljKoBDbN8OuctCbd/esdwZPQ8RtOE3SsyQtUpiPb+ND75q0jEhC1m1ecBI0MFNeLJvwIh9iKHRcQ==}
@@ -1668,6 +1676,11 @@ packages:
   fraction.js@5.3.4:
     resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2222,6 +2235,16 @@ packages:
   pkg-dir@4.2.0:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
+
+  playwright-core@1.62.0:
+    resolution: {integrity: sha512-nsNRyq0r2zsG8AcRHWknc9QRA5XCueC7gWMrs+Gx2tlZn9hcl8zudfh00lhJPY1DE7NmZ6bDsT9g2yey8mXljA==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.62.0:
+    resolution: {integrity: sha512-Z14dG305dgaLu6foB1TXQagFiW8JfSUIUaUuPaKQ6NtBPKF1P/qXcqfh6c6K/icPqdy37JmjbiBXf6JNg6Sylw==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -3258,6 +3281,10 @@ snapshots:
       fastq: 1.20.1
 
   '@nolyfill/is-core-module@1.0.39': {}
+
+  '@playwright/test@1.62.0':
+    dependencies:
+      playwright: 1.62.0
 
   '@radix-ui/primitive@1.1.4': {}
 
@@ -4452,6 +4479,9 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -4825,7 +4855,7 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next@15.5.18(@babel/core@7.29.7)(react-dom@19.0.5(react@19.0.5))(react@19.0.5):
+  next@15.5.18(@babel/core@7.29.7)(@playwright/test@1.62.0)(react-dom@19.0.5(react@19.0.5))(react@19.0.5):
     dependencies:
       '@next/env': 15.5.18
       '@swc/helpers': 0.5.15
@@ -4843,6 +4873,7 @@ snapshots:
       '@next/swc-linux-x64-musl': 15.5.18
       '@next/swc-win32-arm64-msvc': 15.5.18
       '@next/swc-win32-x64-msvc': 15.5.18
+      '@playwright/test': 1.62.0
       sharp: 0.34.5
     transitivePeerDependencies:
       - '@babel/core'
@@ -4994,6 +5025,14 @@ snapshots:
   pkg-dir@4.2.0:
     dependencies:
       find-up: 4.1.0
+
+  playwright-core@1.62.0: {}
+
+  playwright@1.62.0:
+    dependencies:
+      playwright-core: 1.62.0
+    optionalDependencies:
+      fsevents: 2.3.2
 
   possible-typed-array-names@1.1.0: {}
 

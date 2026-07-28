@@ -119,7 +119,7 @@ async function getCapturedOrderId(request: any, token: string): Promise<string> 
   if (!cap) {
     throw new Error("[qa-002] 환불 검증용 captured 주문을 찾지 못했습니다.");
   }
-  _capturedOrderId = cap.id;
+  _capturedOrderId = cap.id as string;
   return _capturedOrderId;
 }
 

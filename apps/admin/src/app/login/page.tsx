@@ -10,8 +10,16 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const expired = searchParams.get("expired") === "1";
   const twofaExpired = searchParams.get("twofa") === "1";
-  const [email, setEmail] = useState("admin@local.test");
-  const [password, setPassword] = useState("djemalsdlqslek12!@");
+  // 보안(2026-07-28): 실제 관리자 자격증명이 클라이언트 번들에 하드코딩돼 있었음(운영 배포 시 노출).
+  // 개발 편의 프리필은 유지하되 **개발 환경 + env 주입 값**으로만 채운다.
+  // (운영 빌드에서는 아래 분기가 정적으로 제거되어 번들에 값이 남지 않음)
+  const devPrefill = process.env.NODE_ENV !== "production";
+  const [email, setEmail] = useState(
+    devPrefill ? process.env.NEXT_PUBLIC_DEV_ADMIN_EMAIL ?? "" : ""
+  );
+  const [password, setPassword] = useState(
+    devPrefill ? process.env.NEXT_PUBLIC_DEV_ADMIN_PASSWORD ?? "" : ""
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   // 2FA 2단계 — 비밀번호 통과 후 이 계정이 2FA 활성이면 코드 입력 단계로 전환.

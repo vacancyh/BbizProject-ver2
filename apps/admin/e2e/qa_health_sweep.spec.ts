@@ -38,6 +38,11 @@ const ROUTES: Route[] = [
   { path: "/settings/maintenance", label: "설정-점검모드" },
   { path: "/settings/reasons", label: "설정-사유관리" },
   { path: "/settings/workflow-logs", label: "설정-워크플로우로그" },
+  // 2026-07-28 추가 — 스윕 목록에서 누락돼 있던 화면(cms/보안)
+  { path: "/settings/customer-service", label: "설정-고객센터콘텐츠" },
+  { path: "/settings/banners", label: "설정-배너·팝업" },
+  { path: "/settings/home-curation", label: "설정-홈큐레이션" },
+  { path: "/settings/security", label: "설정-보안(2FA)" },
 ]
 
 const SHOT_DIR = path.resolve(__dirname, "../test-results/sweep")

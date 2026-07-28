@@ -17,14 +17,18 @@ test("login and save storage state", async ({ page }) => {
   const emailInput = page.locator("input[type='email']");
   const pwInput = page.locator("input[type='password']");
 
+  // 보안(2026-07-28): 스펙에 박혀 있던 실 자격증명 제거 — env 주입, 기본값은 문서화된 로컬 관리자.
+  const E2E_EMAIL = process.env.E2E_ADMIN_EMAIL ?? "admin@shop.local";
+  const E2E_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "admin1234!";
+
   const emailVal = await emailInput.inputValue();
   if (!emailVal) {
-    await emailInput.fill("admin@local.test");
+    await emailInput.fill(E2E_EMAIL);
   }
 
   const pwVal = await pwInput.inputValue();
   if (!pwVal) {
-    await pwInput.fill("djemalsdlqslek12!@");
+    await pwInput.fill(E2E_PASSWORD);
   }
 
   // 로그인 버튼 클릭
