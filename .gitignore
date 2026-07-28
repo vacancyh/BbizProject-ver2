@@ -39,3 +39,6 @@ worklog/
 *.tsbuildinfo
 .claude/
 /CLAUDE.md
+
+# DB 백업 산출물(로컬 리허설용)
+backups/
