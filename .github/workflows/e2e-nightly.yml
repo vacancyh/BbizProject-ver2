@@ -149,7 +149,7 @@ jobs:
       # ── 실패 산출물 ────────────────────────────────────────────────────────
       - name: 실패 산출물 업로드
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-artifacts
           retention-days: 7
