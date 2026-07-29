@@ -13,6 +13,11 @@
 | `SECURITY-REPORT.md` | **종합 리포트** — 심각도별 발견사항 + 조치법 + 적용한 수정 + 양호 사항 |
 | `security-probe.mjs` | 동적 프로브 드라이버(IDOR·인증우회·헤더·레이트리밋·CORS·모더레이션·비즈로직) |
 | `probe-results.json` | 최근 프로브 결과(기계용) |
+| `PRESALE-AUDIT-2026-07-29.md` | **판매 전 종합 점검 리포트** — 9가지 방법 교차 검증 결과 + 사장님 확인 사항 |
+| `presale-security-probe.mjs` | 인증·인가·IDOR·인젝션·헤더·레이트리밋 27케이스 |
+| `presale-abuse-probe.mjs` | 적립금·쿠폰·주문·권한경계 남용 11케이스 |
+| `presale-xss-render-check.mjs` | 저장형 XSS 가 실제 화면에서 이스케이프되는지(원복 포함) |
+| `presale-perf-probe.mjs` | 응답시간·동시부하 스모크 |
 
 ## 동적 프로브 재실행
 전제: 시드된 백엔드가 기동(통합테스트와 동일 환경 재사용). `../통합테스트/setup-test-db.sh`로 임시 DB 준비 후:

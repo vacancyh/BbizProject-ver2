@@ -81,15 +81,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return
   }
 
-  const pointSvc = req.scope.resolve(
-    CUSTOMER_POINT_MODULE
-  ) as unknown as CustomerPointModuleService
-  const balance = await pointSvc.getBalance(customerId)
-  if (points > balance) {
-    res.status(400).json({ message: `보유 적립금(${balance}원)을 초과했습니다.` })
-    return
-  }
-
+  // 판매 전 점검 2026-07-28: **인가(소유권) 검사를 업무 검증보다 먼저** 수행한다.
+  // 이전에는 잔액 검사가 앞서서, 타인 카트를 조작하려 해도 잔액이 부족하면 403 대신 400 이 나왔다.
+  // (차단은 되지만) 인가 실패와 업무 실패가 뒤섞이면 응답만으로 잔액 유무를 유추할 수 있고,
+  // 감사/모니터링에서 인가 위반을 식별하기도 어렵다.
   const cart = await getCart(req, cartId)
   if (!cart) {
     res.status(404).json({ message: "장바구니를 찾을 수 없습니다." })
@@ -100,6 +95,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     res.status(403).json({ message: "본인 장바구니에만 적립금을 사용할 수 있습니다." })
     return
   }
+
+  const pointSvc = req.scope.resolve(
+    CUSTOMER_POINT_MODULE
+  ) as unknown as CustomerPointModuleService
+  const balance = await pointSvc.getBalance(customerId)
+  if (points > balance) {
+    res.status(400).json({ message: `보유 적립금(${balance}원)을 초과했습니다.` })
+    return
+  }
+
   if (points > cart.item_total) {
     res.status(400).json({ message: "주문 금액을 초과해 사용할 수 없습니다." })
     return

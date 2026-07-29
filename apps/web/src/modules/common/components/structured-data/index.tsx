@@ -9,12 +9,27 @@ import { getProductPrice } from "@lib/util/get-product-price"
  * 주의: 표시 가격과 어긋나면 검색엔진 정책 위반이므로 값은 실제 계산 가격에서만 가져온다.
  */
 
+/**
+ * JSON-LD 직렬화 시 XSS 차단.
+ *
+ * `JSON.stringify` 는 `<`·`>` 를 이스케이프하지 않는다. 상품명·설명은 관리자 입력이므로
+ * `</script><script>…` 같은 값이 들어오면 script 태그를 탈출해 **저장형 XSS** 가 된다.
+ * HTML 파서가 태그로 인식하는 문자를 유니코드 이스케이프로 바꾼다(JSON 의미는 동일).
+ */
+function safeJsonLd(data: Record<string, unknown>): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029")
+}
+
 function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
     <script
       type="application/ld+json"
-      // 구조화 데이터는 서버에서 생성한 정적 객체만 직렬화한다(사용자 입력 없음)
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }}
     />
   )
 }

@@ -1,3 +1,14 @@
 allowBuilds:
   sharp: set this to true or false
   unrs-resolver: set this to true or false
+
+# 판매 전 점검 2026-07-28: 전이 의존성 high CVE 상향(패치 수준). 회귀는 빌드·테스트로 검증.
+overrides:
+  brace-expansion@1: '>=1.1.16'
+  brace-expansion@>=2: '>=5.0.8'
+  form-data: '>=4.0.6'
+  axios: '>=1.18.0'
+  js-yaml@3: '>=3.15.0'
+  postcss: '>=8.5.18'
+  immutable: '>=5.1.8'
+  lodash: '>=4.17.24'
