@@ -31,7 +31,7 @@
     "@vitest/coverage-v8": "^4.1.8",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.17.0",
-    "eslint-config-next": "15.5.18",
+    "eslint-config-next": "16.2.12",
     "junit-xml": "^1.2.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
