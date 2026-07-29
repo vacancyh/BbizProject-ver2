@@ -1,3 +1,4 @@
+import { productGridClass } from "@modules/home/components/grid-cols"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@modules/common/components/ui"
 import ProductPreview from "@modules/products/components/product-preview"
@@ -26,7 +27,7 @@ export default async function BestProducts({
           </span>
         </Text>
       </div>
-      <ul className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-10 small:gap-y-12">
+      <ul className={productGridClass(products.length)}>
         {products.map((p, i) => (
           <li key={p.id} className="relative">
             <span

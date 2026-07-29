@@ -37,9 +37,10 @@ export default async function RelatedProducts({
     queryParams,
     countryCode,
   }).then(({ response }) => {
-    return response.products.filter(
-      (responseProduct) => responseProduct.id !== product.id
-    )
+    return response.products
+      .filter((responseProduct) => responseProduct.id !== product.id)
+      // 4개로 맞춰 한 줄이 딱 떨어지게 한다(5개면 4+1 로 갈라져 어색, 2026-07-29)
+      .slice(0, 4)
   })
 
   if (!products.length) {
@@ -57,7 +58,7 @@ export default async function RelatedProducts({
         </p>
       </div>
 
-      <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8">
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-8 small:grid-cols-4">
         {products.map((product) => (
           <li key={product.id}>
             <Product region={region} product={product} />

@@ -1,3 +1,4 @@
+import { productGridClass } from "@modules/home/components/grid-cols"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@modules/common/components/ui"
 import ProductPreview from "@modules/products/components/product-preview"
@@ -17,7 +18,7 @@ export default async function HomeCuration({
       <Text className="text-2xl small:text-3xl font-semibold tracking-tight text-ui-fg-base mb-8">
         MD 추천
       </Text>
-      <ul className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-10 small:gap-y-12">
+      <ul className={productGridClass(products.length)}>
         {products.map((p) => (
           <li key={p.id}>
             <ProductPreview product={p} region={region} isFeatured />

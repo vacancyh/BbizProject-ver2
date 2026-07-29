@@ -17,7 +17,8 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   thumbnail,
   images,
   size = "small",
-  isFeatured,
+  // 비율 통일(4:5) 이후 사용하지 않지만 호출부 호환을 위해 시그니처는 유지한다.
+  isFeatured: _isFeatured,
   className,
   "data-testid": dataTestid,
 }) => {
@@ -29,8 +30,9 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
         "relative w-full overflow-hidden p-4 bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150",
         className,
         {
-          "aspect-[11/14]": isFeatured,
-          "aspect-[9/16]": !isFeatured && size !== "square",
+          // 2026-07-29: 섹션마다 비율이 달라(홈 11:14 / 목록 9:16) 그리드 높이가 들쭉날쭉했다.
+          // 커머스에서 통용되는 4:5 로 통일 — 9:16 은 지나치게 길어 목록 스크롤을 늘리던 원인.
+          "aspect-[4/5]": size !== "square",
           "aspect-[1/1]": size === "square",
           "w-[180px]": size === "small",
           "w-[290px]": size === "medium",

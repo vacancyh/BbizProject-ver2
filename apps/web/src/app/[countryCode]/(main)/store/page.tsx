@@ -13,6 +13,10 @@ type Params = {
     sortBy?: SortOptions
     page?: string
     q?: string
+    /** 카테고리 handle 필터(2026-07-29) */
+    category?: string
+    /** 가격대 프리셋 키(2026-07-29) */
+    price?: string
   }>
   params: Promise<{
     countryCode: string
@@ -22,13 +26,15 @@ type Params = {
 export default async function StorePage(props: Params) {
   const params = await props.params;
   const searchParams = await props.searchParams;
-  const { sortBy, page, q } = searchParams
+  const { sortBy, page, q, category, price } = searchParams
 
   return (
     <StoreTemplate
       sortBy={sortBy}
       page={page}
       q={q}
+      category={category}
+      price={price}
       countryCode={params.countryCode}
     />
   )

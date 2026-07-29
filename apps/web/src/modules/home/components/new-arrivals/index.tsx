@@ -1,3 +1,4 @@
+import { productGridClass } from "@modules/home/components/grid-cols"
 import { listProductsWithSort } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@modules/common/components/ui"
@@ -29,7 +30,7 @@ export default async function NewArrivals({
         </Text>
         <InteractiveLink href="/store?sortBy=created_at">전체 보기</InteractiveLink>
       </div>
-      <ul className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-10 small:gap-y-12">
+      <ul className={productGridClass(products.length)}>
         {products.slice(0, 8).map((p) => (
           <li key={p.id}>
             <ProductPreview product={p} region={region} />

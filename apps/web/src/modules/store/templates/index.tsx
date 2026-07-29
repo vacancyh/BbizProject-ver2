@@ -8,6 +8,7 @@ import {
   getPopularSearchTerms,
   recordSearchTerm,
 } from "@lib/data/search-terms"
+import { listCategories } from "@lib/data/categories"
 
 import PaginatedProducts from "./paginated-products"
 
@@ -15,11 +16,15 @@ const StoreTemplate = async ({
   sortBy,
   page,
   q,
+  category,
+  price,
   countryCode,
 }: {
   sortBy?: SortOptions
   page?: string
   q?: string
+  category?: string
+  price?: string
   countryCode: string
 }) => {
   const pageNumber = page ? parseInt(page) : 1
@@ -31,12 +36,18 @@ const StoreTemplate = async ({
   }
   const popularTerms = await getPopularSearchTerms(8)
 
+  // 필터용 카테고리 목록(최상위만 — 사이드바가 길어지지 않게)
+  const allCategories = await listCategories({ limit: 50 }).catch(() => [])
+  const filterCategories = (allCategories ?? [])
+    .filter((c) => !c.parent_category)
+    .map((c) => ({ id: c.id, name: c.name, handle: c.handle }))
+
   return (
     <div
       className="flex flex-col small:flex-row small:items-start py-6 content-container"
       data-testid="category-container"
     >
-      <RefinementList sortBy={sort} />
+      <RefinementList sortBy={sort} categories={filterCategories} />
       <div className="w-full">
         <div className="mb-8">
           <h1
@@ -58,6 +69,8 @@ const StoreTemplate = async ({
             sortBy={sort}
             page={pageNumber}
             searchQuery={q}
+            categoryHandle={category}
+            priceRange={price}
             countryCode={countryCode}
           />
         </Suspense>

@@ -13,7 +13,10 @@ const TimeSaleSection = async ({
   countryCode: string
   region: HttpTypes.StoreRegion
 }) => {
-  const sales = await listActiveTimeSales(countryCode)
+  const allSales = await listActiveTimeSales(countryCode)
+  // 2026-07-29 수정: 상품이 붙지 않은 세일(삭제·미게시 상품 등)을 렌더 단계에서 건너뛰다 보니
+  // **헤더만 남고 내용이 빈 섹션**이 홈 한가운데 생겼다. 섹션을 그리기 전에 걸러낸다.
+  const sales = allSales.filter((s) => !!s.product)
   if (!sales.length) {
     return null
   }

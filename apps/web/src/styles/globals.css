@@ -5,6 +5,17 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* ─── 브랜드 토큰 · 접근성 대비 보정 (2026-07-29) ─────────────────────────────
+   Medusa UI 프리셋 기본 --fg-interactive(#3b82f6)는 흰 배경에서 대비 3.67:1 로
+   WCAG AA(4.5:1) 미달이었다(axe 검사에서 실제로 지적됨).
+   같은 계열의 더 진한 파랑으로 낮춰 대비를 확보한다. 링크·강조 텍스트에 전역 적용.
+   포인트 컬러를 바꾸려면 아래 두 값만 교체하면 된다. */
+:root {
+  --fg-interactive: #1d4ed8;        /* blue-700 · 흰 배경 대비 약 6.3:1 */
+  --fg-interactive-hover: #1e40af;  /* blue-800 */
+}
+
+
 @layer utilities {
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
