@@ -39,7 +39,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@babel/core": "^7.17.5",
-    "@medusajs/types": "2.15.3",
+    "@medusajs/types": "2.18.0",
     "@playwright/test": "^1.62.0",
     "@types/lodash": "^4.14.195",
     "@types/node": "17.0.21",
