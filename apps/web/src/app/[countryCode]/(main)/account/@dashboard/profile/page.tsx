@@ -4,6 +4,7 @@ import ProfilePhone from "@modules/account//components/profile-phone"
 import ProfileBillingAddress from "@modules/account/components/profile-billing-address"
 import ProfileEmail from "@modules/account/components/profile-email"
 import ProfileName from "@modules/account/components/profile-name"
+import ProfilePassword from "@modules/account/components/profile-password"
 import WithdrawAccount from "@modules/account/components/withdraw-account"
 import { notFound } from "next/navigation"
 import { listRegions } from "@lib/data/regions"
@@ -38,8 +39,9 @@ export default async function Profile() {
         <Divider />
         <ProfilePhone customer={customer} />
         <Divider />
-        {/* <ProfilePassword customer={customer} />
-        <Divider /> */}
+        {/* 비밀번호 변경 — 구현 전이라 주석 처리돼 있었다(2026-07-29 구현·복원) */}
+        <ProfilePassword customer={customer} />
+        <Divider />
         <ProfileBillingAddress customer={customer} regions={regions} />
       </div>
       <WithdrawAccount />

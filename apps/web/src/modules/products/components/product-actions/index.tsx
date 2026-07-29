@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { useToast } from "@modules/common/components/toast"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
@@ -39,6 +40,7 @@ export default function ProductActions({
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const { showToast } = useToast()
   const countryCode = useParams().countryCode as string
 
   // If there is only 1 variant, preselect the options
@@ -130,13 +132,25 @@ export default function ProductActions({
 
     setIsAdding(true)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
-
-    setIsAdding(false)
+    // 2026-07-29: 이전에는 성공/실패 모두 아무 피드백이 없어(토스트 미구현)
+    // 사용자가 "눌렸는지" 알 수 없었다. 결과를 알린다.
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
+      showToast("장바구니에 담았습니다.", "success")
+    } catch (e) {
+      showToast(
+        e instanceof Error && e.message
+          ? e.message
+          : "장바구니에 담지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        "error"
+      )
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (

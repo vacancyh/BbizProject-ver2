@@ -76,7 +76,7 @@ const AccountInfo = ({
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
             {
               "max-h-[1000px] opacity-100": isSuccess,
-              "max-h-0 opacity-0": !isSuccess,
+              "max-h-0 opacity-0 pointer-events-none": !isSuccess,
             }
           )}
           data-testid="success-message"
@@ -95,7 +95,7 @@ const AccountInfo = ({
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
             {
               "max-h-[1000px] opacity-100": isError,
-              "max-h-0 opacity-0": !isError,
+              "max-h-0 opacity-0 pointer-events-none": !isError,
             }
           )}
           data-testid="error-message"
@@ -110,10 +110,14 @@ const AccountInfo = ({
         <Disclosure.Panel
           static
           className={clx(
-            "transition-[max-height,opacity] duration-300 ease-in-out overflow-visible",
+            "transition-[max-height,opacity] duration-300 ease-in-out",
             {
-              "max-h-[1000px] opacity-100": state,
-              "max-h-0 opacity-0": !state,
+              // 열림: 국가 선택 등 드롭다운이 잘리지 않도록 overflow-visible 유지
+              "max-h-[1000px] opacity-100 overflow-visible": state,
+              // 닫힘(2026-07-29 수정): 기존엔 overflow-visible 이라 **보이지 않는 입력 필드가
+              // 화면 위에 그대로 남아 다른 섹션의 클릭을 가로챘다**(사용자에겐 "클릭이 안 먹는" 증상).
+              // 닫힐 때는 잘라내고 포인터 이벤트도 차단한다.
+              "max-h-0 opacity-0 overflow-hidden pointer-events-none": !state,
             }
           )}
         >

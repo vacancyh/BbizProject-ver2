@@ -39,6 +39,11 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      name: "feedback",
+      testMatch: ["e2e/storefront-feedback.spec.ts", "e2e/storefront-password.spec.ts"],
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       // 접근성(axe) — critical/serious 위반 0 을 게이트로
       name: "a11y",
       testMatch: "e2e/storefront-a11y.spec.ts",

@@ -1,6 +1,6 @@
 {
   "stamp": "(시각 미기록)",
-  "base": "http://localhost:9012",
+  "base": "http://localhost:9009",
   "total": 127,
   "passed": 127,
   "failed": 0,
@@ -38,7 +38,7 @@
       "expect": "200+token",
       "status": 200,
       "pass": true,
-      "evidence": "itest_1785282701997@kr-itest.local",
+      "evidence": "itest_1785301620893@kr-itest.local",
       "err": null
     },
     {
@@ -50,7 +50,7 @@
       "expect": "200/201",
       "status": 200,
       "pass": true,
-      "evidence": "cus_01KYNJ8ARD9HB7SFZFESRE3K47",
+      "evidence": "cus_01KYP49PM2RTYTKNDR9HG1RE6F",
       "err": null
     },
     {
@@ -182,7 +182,7 @@
       "expect": "200+≥1",
       "status": 200,
       "pass": true,
-      "evidence": "n=1",
+      "evidence": "n=9",
       "err": null
     },
     {
@@ -206,7 +206,7 @@
       "expect": "200+balance>0",
       "status": 200,
       "pass": true,
-      "evidence": "balance=7000",
+      "evidence": "balance=2662",
       "err": null
     },
     {
@@ -254,7 +254,7 @@
       "expect": "200+≥1",
       "status": 200,
       "pass": true,
-      "evidence": "n=3",
+      "evidence": "n=9",
       "err": null
     },
     {
@@ -338,7 +338,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "Medusa Sweatpants",
+      "evidence": "Medusa Sweatshirt",
       "err": null
     },
     {
@@ -350,7 +350,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=0",
+      "evidence": "n=8",
       "err": null
     },
     {
@@ -398,7 +398,7 @@
       "expect": "≥1",
       "status": 200,
       "pass": true,
-      "evidence": "count=1",
+      "evidence": "count=9",
       "err": null
     },
     {
@@ -410,7 +410,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=2",
+      "evidence": "n=8",
       "err": null
     },
     {
@@ -434,7 +434,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=3",
+      "evidence": "n=11",
       "err": null
     },
     {
@@ -530,7 +530,7 @@
       "expect": "KRW",
       "status": 200,
       "pass": true,
-      "evidence": "reg_01KYNJ597Z73A3ARW0GF7R095W",
+      "evidence": "reg_01KYK9TZF90B4MK57QYQV0XWW5",
       "err": null
     },
     {
@@ -542,7 +542,7 @@
       "expect": "200+cart",
       "status": 200,
       "pass": true,
-      "evidence": "cart_01KYNJ8C9ZXCJSW8WD9SE769GM",
+      "evidence": "cart_01KYP49V7CVA3MPF4JRB3ZDQ95",
       "err": null
     },
     {
@@ -614,7 +614,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "pay_col_01KYNJ8DDB6GV57SWYDBZEC2W4",
+      "evidence": "pay_col_01KYP49Y871DHRPRWW71M9QJM8",
       "err": null
     },
     {
@@ -638,7 +638,7 @@
       "expect": "200+order",
       "status": 200,
       "pass": true,
-      "evidence": "order_01KYNJ8DJ12WT9NK1Z1M5MKEDV",
+      "evidence": "order_01KYP49YQE2Y0KKBG31TTBS4VD",
       "err": null
     },
     {
@@ -710,7 +710,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=3",
+      "evidence": "n=5",
       "err": null
     },
     {
@@ -806,7 +806,7 @@
       "expect": "pending 노출",
       "status": 200,
       "pass": true,
-      "evidence": "rev_01KYNJ8EBV11HV4S4PMQTNYTNA",
+      "evidence": "rev_01KYP4A0G63PBBAYVHC14C9MZW",
       "err": null
     },
     {
@@ -842,7 +842,7 @@
       "expect": "≥1",
       "status": 200,
       "pass": true,
-      "evidence": "n=4",
+      "evidence": "n=10",
       "err": null
     },
     {
@@ -854,7 +854,7 @@
       "expect": "WELCOME10",
       "status": 200,
       "pass": true,
-      "evidence": "[\"WELCOME10\",\"KRW5000\",\"POINTS-W8WD9SE769GM\"]",
+      "evidence": "[\"KRW5000\",\"WELCOME10\",\"POINTS-H8HBQZ6NZD4C\",\"POINTS-5E826GV",
       "err": null
     },
     {
@@ -866,7 +866,7 @@
       "expect": "+500",
       "status": 200,
       "pass": true,
-      "evidence": "1300→1800",
+      "evidence": "5300→5800",
       "err": null
     },
     {
@@ -878,7 +878,7 @@
       "expect": "일치",
       "status": 200,
       "pass": true,
-      "evidence": "db_sum=1800 api=1800",
+      "evidence": "db_sum=5800 api=5800",
       "err": null
     },
     {
@@ -1046,7 +1046,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=4",
+      "evidence": "n=5",
       "err": null
     },
     {
@@ -1070,7 +1070,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=1",
+      "evidence": "n=5",
       "err": null
     },
     {
@@ -1178,7 +1178,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=0",
+      "evidence": "n=8",
       "err": null
     },
     {
@@ -1202,7 +1202,7 @@
       "expect": "200",
       "status": 200,
       "pass": true,
-      "evidence": "n=7",
+      "evidence": "n=10",
       "err": null
     },
     {
@@ -1394,7 +1394,7 @@
       "expect": "+500 일치",
       "status": 200,
       "pass": true,
-      "evidence": "2500→3000 (db=3000)",
+      "evidence": "7000→7500 (db=7500)",
       "err": null
     },
     {
@@ -1406,7 +1406,7 @@
       "expect": "≤1",
       "status": 200,
       "pass": true,
-      "evidence": "주문성공=1/3 (statuses=400,400,200)",
+      "evidence": "주문성공=1/3 (statuses=200,400,400)",
       "err": null
     },
     {

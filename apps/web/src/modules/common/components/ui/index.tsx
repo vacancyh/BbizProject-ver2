@@ -10,7 +10,7 @@ import {
   ThHTMLAttributes,
 } from "react"
 
-// TODO: Add Toaster component back when needed for notifications
+// 토스트 알림은 @modules/common/components/toast 로 구현됨(2026-07-29).
 
 // Re-export clsx as clx for compatibility
 export { clsx as clx }
