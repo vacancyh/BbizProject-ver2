@@ -82,7 +82,7 @@ jobs:
         with: { fetch-depth: 0 } # 전체 이력 스캔(과거 시크릿은 .gitleaks.toml allowlist)
       # 신규 커밋에 시크릿(토큰/키/비번) 유입 시 CI 실패 — 재발 방지 게이트
       - name: 시크릿 스캔 (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: pnpm/action-setup@v4
