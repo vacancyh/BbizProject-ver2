@@ -146,12 +146,24 @@ E2E·QA 자동화가 반복 실행되며 **고객 화면에 테스트 흔적이 
 cd backend/services/api
 npx medusa exec ./src/scripts/cleanup-test-data.ts                     # 미리보기
 CLEANUP_APPLY=true npx medusa exec ./src/scripts/cleanup-test-data.ts  # 실제 삭제
+CLEANUP_APPLY=true CLEANUP_RENAME_TEST_CATEGORIES=true   npx medusa exec ./src/scripts/cleanup-test-data.ts                   # 카테고리 이름·주소까지 정리
 ```
 
 - 자동 삭제: `QA*` 카테고리, 10자리 이상 숫자가 붙은 검색어 등 자동화 흔적
-- **보고만**: `상의(kr-test)` 처럼 이름에 test 가 박힌 시드 카테고리(운영 이름으로 교체 필요),
+- 카테고리 정리(`CLEANUP_RENAME_TEST_CATEGORIES=true`): 이름의 `(kr-test)` 표기 제거 + 비-ASCII handle 을 ASCII 로 치환
+- **보고만**: 시드 상품 15건(`/products/kr-test-p1` 형태 주소 — handle 이 시드 재실행 판정 키),
   자동화 테스트 계정(주문·적립금이 얽혀 있어 일괄 삭제 위험)
-- 실행 결과(2026-07-29): 카테고리 2건·검색어 3건 정리, 인기 검색어가 실제 키워드만 남음
+
+**실행 결과**
+
+- 2026-07-29: 카테고리 2건·검색어 3건 정리, 인기 검색어가 실제 키워드만 남음
+- 2026-07-30: 시드 카테고리 5건 이름·주소 정리 (`상의(kr-test)` → 이름 `상의` / 주소 `tops`).
+  이 과정에서 **한글 handle 카테고리 페이지가 전부 404** 였다는 사실이 드러났다
+  (`/kr/categories/상의` → 404, 영문 handle 은 200). ASCII 로 바꿔 5개 모두 200 확인.
+
+> ⚠️ `medusa exec` 는 서버와 별개 프로세스라 `storefront-revalidate` 구독자가 붙지 않는다.
+> 워크플로우가 이벤트를 발행해도 스토어프론트는 `force-cache` 된 옛 값을 계속 보여준다.
+> → 정리 스크립트가 `POST /api/revalidate` 를 직접 호출하도록 했다.
 
 ## 8. 📌 남은 위험 (수용 또는 계획 필요)
 

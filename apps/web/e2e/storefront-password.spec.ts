@@ -15,7 +15,12 @@ test("비밀번호 변경: 검증 → 실제 변경 → 새 비밀번호로 로�
   const email = `pwreal_${Date.now()}@kr-e2e.local`
   const oldPw = "oldpass1234!"
   const newPw = "newpass1234!"
-  const PUB = process.env.PUBKEY!
+  // 키가 없으면 계정 생성이 조용히 실패해 엉뚱한 지점에서 깨진다 → 여기서 명확히 멈춘다.
+  expect(
+    process.env.PUBKEY,
+    "PUBKEY(publishable key) 미설정 — playwright.config.ts 가 .env.local 에서 읽지 못했습니다."
+  ).toBeTruthy()
+  const PUB = process.env.PUBKEY as string
 
   // API 로 계정 생성(폼 셀렉터 의존 제거)
   const reg = await request.post("http://localhost:9000/auth/customer/emailpass/register", {

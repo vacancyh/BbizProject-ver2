@@ -42,8 +42,10 @@ for (const p of PAGES) {
       ...results.violations.filter((v) => GATE_EXCLUDED.has(v.id)),
     ]
 
+    // 라벨을 impact 등급으로 쓰면 오해가 생긴다 — 면제된 color-contrast 는 impact 가
+    // serious 인데도 추적 버킷에 들어가므로, "게이트 위반 / 추적" 으로 표기한다.
     console.log(
-      `▶ ${p.label}: critical/serious=${critical.length}, moderate/minor=${minor.length}`
+      `▶ ${p.label}: 게이트위반=${critical.length}, 추적(면제 포함)=${minor.length}`
     )
     for (const v of [...critical, ...minor]) {
       console.log(`   [${v.impact}] ${v.id} — ${v.help} (${v.nodes.length}곳)`)
