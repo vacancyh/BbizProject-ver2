@@ -13,9 +13,13 @@
 //  - 판단이 애매한 항목(예: "상의(kr-test)" 같은 시드 카테고리, 테스트 계정)은 **보고만** 한다.
 import { ExecArgs } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { updateProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
+import { resolveRevalidateTarget } from "../subscribers/revalidate-contract"
 import { PRODUCT_CURATION_MODULE } from "../modules/product-curation"
 
 const APPLY = process.env.CLEANUP_APPLY === "true"
+/** 시드 카테고리 이름에서 "(kr-test)" 표기를 떼어낼지(운영 이관용) */
+const RENAME_SEED = process.env.CLEANUP_RENAME_TEST_CATEGORIES === "true"
 
 /**
  * 자동화가 만든 카테고리 판정.
@@ -27,6 +31,19 @@ const QA_CATEGORY = /^qa/i
 const TIMESTAMPED = /\d{10,}/
 /** 프로브가 남긴 검색어 */
 const JUNK_TERMS = ["절대없는검색어zzq123"]
+/**
+ * 시드 카테고리 한글명 → ASCII handle.
+ * 한글 handle 은 URL 인코딩된 채로 라우트에 들어와 **카테고리 페이지가 404** 가 된다(실제로 겪음).
+ * 표시 이름은 한글로 두고 주소만 ASCII 로 만든다(기존 영문 카테고리와도 일관).
+ */
+const HANDLE_BY_NAME: Record<string, string> = {
+  "상의": "tops",
+  "하의": "bottoms",
+  "아우터": "outerwear",
+  "신발": "shoes",
+  "액세서리": "accessories",
+}
+
 /** 자동화 계정 도메인(보고만) */
 const TEST_EMAIL_DOMAINS = [
   "@kr-audit.local",
@@ -78,15 +95,96 @@ export default async function cleanupTestData({ container }: ExecArgs) {
   }
 
   // ── 3. 보고만 — 판단이 필요한 항목 ────────────────────────────────────────
-  const seedTestCategories = (categories ?? []).filter((c: any) =>
-    String(c.name ?? "").includes("kr-test")
+  // 정리 대상: (a) 이름에 kr-test 태그가 남은 카테고리, (b) handle 이 비-ASCII 라 URL 이 깨지는 카테고리
+  const NON_ASCII = /[^ -~]/
+  const seedTestCategories = (categories ?? []).filter(
+    (c: any) =>
+      String(c.name ?? "").includes("kr-test") || NON_ASCII.test(String(c.handle ?? ""))
   )
   if (seedTestCategories.length) {
     logger.info(
-      `[cleanup] ⚠️ 이름에 'kr-test' 가 붙은 시드 카테고리 ${seedTestCategories.length}건 — ` +
-        `고객 화면에 그대로 노출됩니다. 실제 카테고리명으로 바꾸거나 숨기세요.`
+      `[cleanup] 고객 화면에 그대로 노출되는 시드 카테고리 ${seedTestCategories.length}건 ` +
+        `(kr-test 표기 또는 비-ASCII handle).`
     )
     for (const c of seedTestCategories) logger.info(`           - ${c.name} (${c.handle})`)
+
+    if (!RENAME_SEED) {
+      logger.info(
+        `           → 정리하려면 CLEANUP_RENAME_TEST_CATEGORIES=true 로 실행하세요` +
+          `(예: "상의(kr-test)" → 이름 "상의" / 주소 "tops").`
+      )
+    } else {
+      const updates = seedTestCategories.map((c: any) => {
+        const name = String(c.name).replace(/\s*\(kr-test\)\s*/g, "").trim()
+        const stripped = String(c.handle).replace(/\s*\(kr-test\)\s*/g, "").trim()
+        // 한글 handle 은 ASCII 로 치환한다(매핑에 없으면 기존 값 유지).
+        const handle = HANDLE_BY_NAME[name] ?? stripped
+        return { id: c.id, name, handle }
+      })
+      for (const u of updates) {
+        logger.info(`           · 변경: ${u.name} (${u.handle})`)
+      }
+      if (APPLY) {
+        // 워크플로우로 갱신한다 — 모듈 서비스를 직접 호출하면 `product-category.updated`
+        // 이벤트가 발행되지 않아 스토어프론트 ISR 캐시(force-cache)가 **옛 이름 그대로 남는다**
+        // (실제로 겪었고, /api/revalidate 를 수동 호출해야 했다).
+        for (const u of updates) {
+          await updateProductCategoriesWorkflow(container).run({
+            input: { selector: { id: u.id }, update: { name: u.name, handle: u.handle } },
+          })
+        }
+        logger.info(`[cleanup] 시드 카테고리 ${updates.length}건 이름·URL 정리 완료`)
+
+        // 스토어프론트 캐시를 **직접** 무효화한다.
+        // `medusa exec` 는 dev/운영 서버와 별개 프로세스라 in-process 이벤트버스의
+        // storefront-revalidate 구독자가 붙지 않는다 → 워크플로우가 이벤트를 발행해도
+        // 스토어프론트는 옛 이름을 계속 보여준다(실제로 겪음: force-cache + 태그 미무효화).
+        const target = resolveRevalidateTarget()
+        if (!target.enabled || !target.url) {
+          logger.info(
+            `[cleanup] STOREFRONT_URL 미설정 — 스토어프론트 캐시는 수동으로 무효화하세요` +
+              `(POST /api/revalidate {"type":"category"}).`
+          )
+        } else {
+          try {
+            const headers: Record<string, string> = { "Content-Type": "application/json" }
+            if (target.secret) headers["Authorization"] = `Bearer ${target.secret}`
+            const res = await fetch(target.url, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({ type: "category" }),
+              signal: AbortSignal.timeout(5000),
+            })
+            logger.info(
+              res.ok
+                ? `[cleanup] 스토어프론트 카테고리 캐시 무효화 완료`
+                : `[cleanup] ⚠️ 캐시 무효화 실패(${res.status}) — 수동으로 POST /api/revalidate 하세요.`
+            )
+          } catch (e) {
+            logger.info(
+              `[cleanup] ⚠️ 캐시 무효화 호출 실패(${(e as Error)?.message}) — ` +
+                `스토어프론트가 떠 있는지 확인 후 수동 무효화하세요.`
+            )
+          }
+        }
+      }
+    }
+  }
+
+  // 시드 상품 — handle 이 곧 상품 URL(/products/kr-test-p1)이라 고객에게 그대로 보인다.
+  // handle 은 시드의 재실행 판정 키이기도 해서 **자동으로 바꾸지 않고 보고만** 한다.
+  const { data: products } = await query.graph({
+    entity: "product",
+    fields: ["id", "title", "handle"],
+  })
+  const seedProducts = (products ?? []).filter((p: any) =>
+    String(p.handle ?? "").includes("kr-test")
+  )
+  if (seedProducts.length) {
+    logger.info(
+      `[cleanup] ⚠️ 시드 상품 ${seedProducts.length}건 — 주소가 "/products/kr-test-p1" 형태로 ` +
+        `고객에게 노출됩니다. 실제 판매 상품으로 교체하거나 관리자에서 비공개 처리하세요.`
+    )
   }
 
   const { data: customers } = await query.graph({

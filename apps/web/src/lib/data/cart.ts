@@ -24,7 +24,9 @@ import { getLocale } from "./locale-actions"
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
   fields ??=
-    "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name"
+    // 2026-07-29: 수량 선택 상한을 실제 재고로 제한하려면 재고 관련 필드가 필요하다
+    // (이전에는 재고와 무관하게 10 까지 고를 수 있어 결제 단계에서야 실패했다).
+    "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name, +items.variant.inventory_quantity, +items.variant.manage_inventory, +items.variant.allow_backorder"
 
   if (!id) {
     return null

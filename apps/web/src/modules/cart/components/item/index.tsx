@@ -40,9 +40,23 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       })
   }
 
-  // TODO: Update this to grab the actual max inventory
-  const maxQtyFromInventory = 10
-  const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory
+  /**
+   * 수량 선택 상한 (2026-07-29 정리)
+   *
+   * 이전: 재고와 무관하게 항상 10 (v1 잔재, TODO 로 남아 있었음).
+   *       재고가 3개여도 10을 고를 수 있어 **결제 단계에서야 실패**했다.
+   * 이제: 재고를 관리하고 백오더를 허용하지 않는 변형은 **남은 재고까지만** 고를 수 있다.
+   */
+  const UI_MAX = 10
+  const managed =
+    !!item.variant?.manage_inventory && !item.variant?.allow_backorder
+  const rawStock = (item.variant as { inventory_quantity?: number } | undefined)
+    ?.inventory_quantity
+  // 카트 응답에 재고 수치가 없을 수도 있다(필드 미지원 등). 그때는 제한하지 않는다 —
+  // 값이 없다고 1개로 묶어버리면 정상 구매까지 막힌다.
+  const stockKnown = typeof rawStock === "number" && Number.isFinite(rawStock)
+  const maxQuantity =
+    managed && stockKnown ? Math.max(1, Math.min(UI_MAX, rawStock)) : UI_MAX
 
   return (
     <Table.Row className="w-full" data-testid="product-row">
@@ -82,21 +96,12 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
               className="w-14 h-10 p-4"
               data-testid="product-select-button"
             >
-              {/* TODO: Update this with the v2 way of managing inventory */}
-              {Array.from(
-                {
-                  length: Math.min(maxQuantity, 10),
-                },
-                (_, i) => (
-                  <option value={i + 1} key={i}>
-                    {i + 1}
-                  </option>
-                )
-              )}
-
-              <option value={1} key={1}>
-                1
-              </option>
+              {/* 재고 기준 상한까지만 노출. (이전에는 목록 뒤에 "1" 옵션이 한 번 더 붙어 중복됐다) */}
+              {Array.from({ length: maxQuantity }, (_, i) => (
+                <option value={i + 1} key={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
             </CartItemSelect>
             {updating && <Spinner />}
           </div>

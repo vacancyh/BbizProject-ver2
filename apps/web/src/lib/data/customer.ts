@@ -360,3 +360,34 @@ export const updateCustomerAddress = async (
       return { success: false, error: err.toString() }
     })
 }
+
+/**
+ * 로그인 이메일 변경 (2026-07-29 신설)
+ *
+ * 이메일은 로그인 아이디를 겸하므로 고객 레코드와 인증 자격을 함께 갱신해야 한다.
+ * 백엔드 전용 라우트(`/store/customers/me/email`)가 그 처리를 담당한다.
+ * 기존 화면은 아무 것도 하지 않고 성공 메시지만 띄웠다("지원 안 됨" 주석) — 실제 동작으로 교체.
+ */
+export async function changeEmail(
+  newEmail: string,
+  currentPassword: string
+): Promise<{ ok: boolean; email?: string; error?: string }> {
+  try {
+    const res = await sdk.client.fetch<{ ok: boolean; email: string }>(
+      "/store/customers/me/email",
+      {
+        method: "POST",
+        body: { new_email: newEmail, current_password: currentPassword },
+        headers: { ...(await getAuthHeaders()) },
+      }
+    )
+    return { ok: true, email: res?.email ?? newEmail }
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      error:
+        (e as { message?: string })?.message ??
+        "이메일 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    }
+  }
+}

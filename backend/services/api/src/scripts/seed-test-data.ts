@@ -52,19 +52,38 @@ export default async function seedTestData({ container }: ExecArgs) {
   logger.info(`자원 확인: sc=${scId}, region=${regionId}(${CUR}), profile=${shippingProfile.id}`)
 
   // ── 1) 카테고리 5 ─────────────────────────────────────────
-  const catNames = ["상의", "하의", "아우터", "신발", "액세서리"].map((n) => `${n}(${TAG})`)
+  // 카테고리 이름은 **고객 화면(사이드바·푸터)에 그대로 노출**된다.
+  // 예전에는 "상의(kr-test)" 처럼 태그를 붙였다가 판매용 화면에 테스트 흔적이 새어 나갔다.
+  // 이제 표시 이름은 깨끗하게 두고, 테스트 데이터 식별은 상품 handle/주문 metadata 의 TAG 로 한다.
+  const catNames = ["상의", "하의", "아우터", "신발", "액세서리"]
+  const legacyCatNames = catNames.map((n) => `${n}(${TAG})`)
   let categories: any[] = []
   const { data: existingCats } = await query.graph({
     entity: "product_category",
     fields: ["id", "name"],
-    filters: { name: catNames } as any,
+    filters: { name: [...catNames, ...legacyCatNames] } as any,
   })
+  // handle 은 ASCII 로 만든다 — 한글 handle 은 URL 인코딩된 채 라우트에 들어와
+  // 카테고리 페이지가 404 가 된다(실제로 겪음).
+  const catHandles: Record<string, string> = {
+    "상의": "tops",
+    "하의": "bottoms",
+    "아우터": "outerwear",
+    "신발": "shoes",
+    "액세서리": "accessories",
+  }
   if (existingCats.length >= catNames.length) {
     categories = existingCats
     logger.info(`카테고리 존재(skip): ${categories.length}`)
   } else {
     const { result } = await createProductCategoriesWorkflow(container).run({
-      input: { product_categories: catNames.map((name) => ({ name, is_active: true })) },
+      input: {
+        product_categories: catNames.map((name) => ({
+          name,
+          handle: catHandles[name],
+          is_active: true,
+        })),
+      },
     })
     categories = result
     logger.info(`카테고리 생성: ${categories.length}`)
