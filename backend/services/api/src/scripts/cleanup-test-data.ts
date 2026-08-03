@@ -16,6 +16,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { updateProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 import { resolveRevalidateTarget } from "../subscribers/revalidate-contract"
 import { PRODUCT_CURATION_MODULE } from "../modules/product-curation"
+import { LEGAL_DOC_MODULE } from "../modules/legal-kr/legal-doc"
 
 const APPLY = process.env.CLEANUP_APPLY === "true"
 /** 시드 카테고리 이름에서 "(kr-test)" 표기를 떼어낼지(운영 이관용) */
@@ -43,6 +44,14 @@ const HANDLE_BY_NAME: Record<string, string> = {
   "신발": "shoes",
   "액세서리": "accessories",
 }
+
+/**
+ * QA 자동화가 만든 약관 판정.
+ * 스토어프론트는 "가장 최근 effective_at 의 published 약관"을 노출한다.
+ * QA 가 만든 테스트 약관이 published 로 쌓이면서 **실제 이용약관 자리를 차지**했다
+ * (고객 화면에 "QA-008 자동화 테스트 약관 본문입니다" 가 그대로 떠 있었다).
+ */
+const QA_LEGAL_VERSION = /^qa\d*-/i
 
 /** 자동화 계정 도메인(보고만) */
 const TEST_EMAIL_DOMAINS = [
@@ -167,6 +176,41 @@ export default async function cleanupTestData({ container }: ExecArgs) {
             )
           }
         }
+      }
+    }
+  }
+
+  // ── 4. QA 테스트 약관 (고객 화면의 이용약관을 가로챈다) ─────────────────
+  const legalSvc = container.resolve(LEGAL_DOC_MODULE) as any
+  let legalDocs: any[] = []
+  try {
+    legalDocs = await legalSvc.listLegalDocs({})
+  } catch {
+    legalDocs = []
+  }
+  const qaLegal = (legalDocs ?? []).filter(
+    (d: any) => QA_LEGAL_VERSION.test(String(d.version ?? "")) && d.status === "published"
+  )
+  if (qaLegal.length) {
+    logger.info(
+      `[cleanup] ⚠️ QA 테스트 약관 ${qaLegal.length}건이 published 상태입니다 — ` +
+        `스토어프론트는 최신 게시본을 노출하므로 실제 약관이 가려집니다.`
+    )
+    for (const d of qaLegal.slice(0, 5)) {
+      logger.info(`           - ${d.type} ${d.version} (${String(d.body).slice(0, 30)}…)`)
+    }
+    if (APPLY) {
+      await legalSvc.deleteLegalDocs(qaLegal.map((d: any) => d.id))
+      logger.info(`[cleanup] QA 테스트 약관 ${qaLegal.length}건 정리 완료`)
+      // 정리 후 각 종류별로 실제 노출될 약관을 보여준다(사장님 확인용).
+      const rest = (await legalSvc.listLegalDocs({})).filter((d: any) => d.status === "published")
+      const byType: Record<string, any> = {}
+      for (const d of rest) {
+        const cur = byType[d.type]
+        if (!cur || String(d.effective_at) > String(cur.effective_at)) byType[d.type] = d
+      }
+      for (const [type, d] of Object.entries(byType)) {
+        logger.info(`           → 현재 노출 약관: ${type} ${(d as any).version} (${String((d as any).body).length}자)`)
       }
     }
   }
