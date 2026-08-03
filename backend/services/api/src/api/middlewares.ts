@@ -10,6 +10,7 @@
  */
 import {
   defineMiddlewares,
+  errorHandler as defaultErrorHandler,
   type MedusaRequest,
   type MedusaResponse,
   type MedusaNextFunction,
@@ -457,6 +458,41 @@ function passwordPolicyGuard(
   return next()
 }
 
+/**
+ * 장바구니 수량 검증 (2026-08-03 재점검에서 발견)
+ *
+ * 코어 카트 API 는 quantity 를 정수로 강제하지 않는다. 실측:
+ *   quantity=0.4 → 수량 0 짜리 라인아이템이 생성되고 총액 0원 (주문에 유령 항목이 남는다)
+ *   quantity=1.5 → 2 로 반올림, 소수 누적분이 뒤섞여 재고·정산 수치가 어긋난다
+ * 스토어프론트 UI 는 정수만 보내지만 API 는 공개돼 있어 누구나 직접 호출할 수 있다.
+ * → 양의 정수만 허용한다.
+ */
+const MAX_LINE_QTY = 1000
+function cartQuantityGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const q = (req.body as any)?.quantity
+  if (q === undefined || q === null) return next() // 수량 미지정 요청(다른 필드 수정)은 통과
+  const n = Number(q)
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
+    res.status(400).json({
+      message: "수량은 1 이상의 정수여야 합니다.",
+      code: "INVALID_QUANTITY",
+    })
+    return
+  }
+  if (n > MAX_LINE_QTY) {
+    res.status(400).json({
+      message: `한 번에 담을 수 있는 수량은 최대 ${MAX_LINE_QTY}개입니다.`,
+      code: "QUANTITY_TOO_LARGE",
+    })
+    return
+  }
+  return next()
+}
+
 /** 보안 응답 헤더(보안점검 2026-07-27 L1) — 백엔드 API 방어심화(프론트는 next.config 에서 별도 설정). */
 function securityHeaders(
   _req: MedusaRequest,
@@ -560,12 +596,60 @@ const publicWriteRateLimit = ipRateLimit("public-write", 20)
 const viewRateLimit = ipRateLimit("product-view", 120)
 const bestProductsRateLimit = ipRateLimit("best-products", 60)
 
+/**
+ * 전역 오류 핸들러 — 본문 파싱 단계 오류를 올바른 상태코드로 되돌린다 (2026-08-03).
+ *
+ * 실측: ~100KB 를 넘는 요청 본문은 `An unknown error occurred` 와 함께 **500** 이 나갔다.
+ * 본문 파싱은 라우트 미들웨어보다 먼저 실행돼 미들웨어로는 잡을 수 없다(보안 헤더조차 안 붙음).
+ * 500 이면 (a) 공격자가 손쉽게 서버 오류율을 올리고 (b) 진짜 장애 로그가 파묻힌다.
+ * → 페이로드 초과는 413, 깨진 JSON 은 400 으로 명확히 응답한다. 그 외는 기본 핸들러에 위임.
+ */
+const medusaDefaultErrorHandler = defaultErrorHandler()
+function apiErrorHandler(
+  err: any,
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const type = err?.type as string | undefined
+  // body-parser 계열 오류는 type 으로 식별된다(entity.too.large / entity.parse.failed).
+  if (type === "entity.too.large") {
+    res.setHeader("X-Content-Type-Options", "nosniff")
+    res.status(413).json({
+      message: "요청 본문이 너무 큽니다. 내용을 줄여서 다시 시도해 주세요.",
+      code: "PAYLOAD_TOO_LARGE",
+    })
+    return
+  }
+  if (type === "entity.parse.failed") {
+    res.setHeader("X-Content-Type-Options", "nosniff")
+    res.status(400).json({
+      message: "요청 형식이 올바르지 않습니다(JSON 파싱 실패).",
+      code: "INVALID_JSON",
+    })
+    return
+  }
+  return medusaDefaultErrorHandler(err, req as any, res as any, next as any)
+}
+
 export default defineMiddlewares({
+  errorHandler: apiErrorHandler,
   routes: [
     {
       // 보안 응답 헤더 — 전 경로.
       matcher: "/*",
       middlewares: [securityHeaders],
+    },
+    {
+      // 장바구니 수량은 양의 정수만 — 소수점/0/음수 차단.
+      matcher: "/store/carts/:id/line-items",
+      method: ["POST"],
+      middlewares: [cartQuantityGuard],
+    },
+    {
+      matcher: "/store/carts/:id/line-items/:line_id",
+      method: ["POST"],
+      middlewares: [cartQuantityGuard],
     },
     {
       // 익명 쓰기 스팸/저장소 증식 완화(리뷰).
