@@ -142,11 +142,19 @@ export default function CouponsPage() {
           <div className="ph-sub">{subText}</div>
         </div>
         <div className="ph-actions">
-          <button type="button" className="btn">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button type="button" className="btn"
+            disabled
+            title="기획전 기능은 준비 중입니다."
+          >
             <Store size={16} />
             <span>기획전 만들기</span>
           </button>
-          <button type="button" className="btn primary">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button type="button" className="btn primary"
+            disabled
+            title="쿠폰 발급 화면은 준비 중입니다. 목록에서 개별 관리하세요."
+          >
             <Plus size={16} />
             <span>쿠폰 발급</span>
           </button>

@@ -168,7 +168,11 @@ export default function Page() {
               </button>
             ))}
           </div>
-          <button className="btn" type="button">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="btn" type="button"
+            disabled
+            title="대시보드 리포트 내보내기는 준비 중입니다. 주문/회원 목록에서 엑셀로 받으세요."
+          >
             <Download size={16} />
             <span>리포트 내보내기</span>
           </button>
@@ -287,7 +291,11 @@ export default function Page() {
             <h3>매출 추이</h3>
             <span className="ch-sub">최근 7일</span>
             <span className="ch-r">
-              <button className="select" type="button">
+              {/* 동작하지 않던 필터(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="select" type="button"
+            disabled
+            title="기간 단위 전환은 준비 중입니다."
+          >
                 일별 <ChevronDown size={15} />
               </button>
             </span>

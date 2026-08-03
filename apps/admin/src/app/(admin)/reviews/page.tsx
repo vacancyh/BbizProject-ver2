@@ -230,7 +230,11 @@ export default function Page() {
           </div>
         </div>
         <div className="ph-actions">
-          <button className="btn" type="button">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="btn" type="button"
+            disabled
+            title="자주 쓰는 답변 템플릿은 준비 중입니다."
+          >
             {I("message", 16)}
             <span>자주 쓰는 답변</span>
           </button>

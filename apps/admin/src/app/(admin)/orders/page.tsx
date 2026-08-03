@@ -17,6 +17,7 @@ import {
   MoreHorizontal,
   Check,
 } from "lucide-react";
+import CsvExportButton from "@/components/csv-export-button";
 import { DetailDrawer } from "@/components/ui/DetailDrawer";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { formatCurrency } from "@/lib/utils";
@@ -1003,7 +1004,20 @@ export default function OrdersPage() {
           >
             <span>수기 주문 생성</span>
           </button>
-          <button className="btn primary" type="button">
+          {/*
+            상세 내보내기(2026-08-03 추가) — 기존 "엑셀 다운로드"는 목록 API 기준이라
+            컬럼이 8개뿐이고 최대 1,000건이다. 택배사 대량발송 양식에는
+            수령인·연락처·우편번호·주소·상품이 필요해 서버측 내보내기를 따로 연결한다(최대 5만건).
+          */}
+          <CsvExportButton
+            path="/admin/exports/orders"
+            label="상세 내보내기(주소·연락처 포함)"
+          />
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="btn primary" type="button"
+            disabled
+            title="일괄 송장 등록 화면은 준비 중입니다. 주문 상세에서 개별 등록하세요."
+          >
             <Truck size={16} />
             <span>일괄 송장 등록</span>
           </button>

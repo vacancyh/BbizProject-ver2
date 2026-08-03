@@ -129,10 +129,18 @@ export default function Page() {
           <div className="ph-sub">주문·매출 분석 (실데이터 집계)</div>
         </div>
         <div className="ph-actions">
-          <button className="select" type="button">
+          {/* 동작하지 않던 필터(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="select" type="button"
+            disabled
+            title="기간 필터는 준비 중입니다."
+          >
             <span className="sl-k">기간</span> 전체 <ChevronDown size={15} />
           </button>
-          <button className="btn" type="button">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="btn" type="button"
+            disabled
+            title="통계 리포트 내보내기는 준비 중입니다. 주문/회원 목록에서 엑셀로 받으세요."
+          >
             <Download size={16} />
             <span>리포트 내보내기</span>
           </button>

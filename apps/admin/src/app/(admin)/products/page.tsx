@@ -646,7 +646,11 @@ export default function ProductsPage() {
               {statusFilter ? (STATUS_BADGE[statusFilter as ProductStatus]?.label ?? "전체") : "전체"}{" "}
               <ChevronDown size={15} />
             </button>
-            <button className="select" type="button">
+            {/* 동작하지 않던 필터(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="select" type="button"
+            disabled
+            title="재고 상태 필터는 준비 중입니다. 재고 탭에서 확인하세요."
+          >
               <span className="sl-k">재고</span> 전체 <ChevronDown size={15} />
             </button>
             <span className="spacer" />

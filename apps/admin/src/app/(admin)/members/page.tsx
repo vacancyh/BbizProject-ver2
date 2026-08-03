@@ -10,6 +10,7 @@
  * 데이터: Medusa REST 실연동. 적립금/등급(GAP_B) 없으면 "—" 표시.
  */
 import { useCallback, useEffect, useState } from "react";
+import { BACKEND_URL, getToken } from "@/lib/api/client";
 import {
   Download,
   MessageSquare,
@@ -129,6 +130,9 @@ export default function MembersPage() {
 function MembersScreen() {
   /* ── 상태 ── */
   const [rows, setRows] = useState<CustomerListItem[]>([]);
+  // 엑셀 내보내기 상태(2026-08-03 — 이전에는 버튼이 동작하지 않았다)
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -420,11 +424,62 @@ function MembersScreen() {
           </div>
         </div>
         <div className="ph-actions">
-          <button className="btn" type="button">
+          {/*
+            2026-08-03: 이 버튼은 onClick 이 없어 **눌러도 아무 일이 없었다.**
+            서버측 내보내기 API(/admin/exports/customers)에 연결한다.
+            등급·누적구매액·보유적립금·주문건수까지 포함되고, 권한 없는 등급은 403 이다.
+          */}
+          <button
+            className="btn"
+            type="button"
+            disabled={exporting}
+            onClick={async () => {
+              if (exporting) return;
+              setExporting(true);
+              setExportError(null);
+              try {
+                const res = await fetch(`${BACKEND_URL}/admin/exports/customers`, {
+                  headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+                });
+                if (res.status === 403) throw new Error("회원 자료를 내려받을 권한이 없습니다.");
+                if (!res.ok) throw new Error(`내려받기 실패 (${res.status})`);
+                // 서버가 보낸 한글 파일명(RFC 5987)을 그대로 사용
+                const disp = res.headers.get("content-disposition") ?? "";
+                const star = /filename\*=UTF-8''([^;]+)/i.exec(disp);
+                const name = star ? decodeURIComponent(star[1]) : "customers.csv";
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } catch (e) {
+                setExportError((e as Error)?.message ?? "내려받기에 실패했습니다.");
+              } finally {
+                setExporting(false);
+              }
+            }}
+            data-testid="members-export"
+          >
             <Download size={16} />
-            엑셀 다운로드
+            {exporting ? "내려받는 중…" : "엑셀 다운로드"}
           </button>
-          <button className="btn primary" type="button">
+          {exportError && (
+            <span role="alert" style={{ color: "#b91c1c", fontSize: 12 }}>
+              {exportError}
+            </span>
+          )}
+          {/* SMS·메일 발송은 알림 provider 연동(비용 발생) 전까지 동작하지 않는다.
+              눌러도 아무 일이 없으면 고장으로 오해하므로 비활성으로 명시한다. */}
+          <button
+            className="btn primary"
+            type="button"
+            disabled
+            title="알림 서비스(SMS/알림톡) 연동 후 사용할 수 있습니다."
+          >
             <MessageSquare size={16} />
             SMS · 메일 발송
           </button>

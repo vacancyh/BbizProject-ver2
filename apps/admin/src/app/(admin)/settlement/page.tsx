@@ -684,7 +684,11 @@ export default function Page() {
                 >
                   닫기
                 </button>
-                <button type="button" className="btn primary">
+                {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button type="button" className="btn primary"
+            disabled
+            title="정산서 PDF 출력은 준비 중입니다."
+          >
                   정산서 PDF
                 </button>
               </div>

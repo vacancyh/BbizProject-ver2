@@ -336,10 +336,18 @@ export default function ShippingPage() {
           <div className="ph-sub">출고 대기 {kpi["대기"]}건 · 배송 중 {kpi["중"]}건</div>
         </div>
         <div className="ph-actions">
-          <button className="btn ghost" type="button">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="btn ghost" type="button"
+            disabled
+            title="배송 설정은 좌측 '배송정책' 메뉴에서 관리하세요."
+          >
             {I("settings", 16)} <span>배송 설정</span>
           </button>
-          <button className="btn primary" type="button">
+          {/* 동작하지 않던 버튼(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="btn primary" type="button"
+            disabled
+            title="일괄 송장 등록 화면은 준비 중입니다. 주문 상세에서 개별 등록하세요."
+          >
             {I("truck", 16)} <span>일괄 송장 등록</span>
           </button>
         </div>
@@ -425,10 +433,18 @@ export default function ShippingPage() {
               onKeyDown={(e) => e.key === "Enter" && doSearch()}
             />
           </div>
-          <button className="select" type="button">
+          {/* 동작하지 않던 필터(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="select" type="button"
+            disabled
+            title="택배사 필터는 준비 중입니다."
+          >
             <span className="sl-k">택배사</span> {carrierFilter} {I("chevronDown", 15)}
           </button>
-          <button className="select" type="button">
+          {/* 동작하지 않던 필터(2026-08-03) — 눌러도 반응이 없어 고장으로 오해되므로 비활성 + 사유를 표시한다. */}
+          <button className="select" type="button"
+            disabled
+            title="기간 필터는 준비 중입니다."
+          >
             <span className="sl-k">기간</span> 최근 7일 {I("chevronDown", 15)}
           </button>
           <span className="spacer" />
