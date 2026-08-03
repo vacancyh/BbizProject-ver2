@@ -16,6 +16,7 @@ import {
   renderTemplate,
   isValidRecipient,
   checkLength,
+  parseButtons,
   DEFAULT_TEMPLATES,
 } from "./logic"
 import { resolveProvider, type NotificationChannel } from "./provider"
@@ -23,7 +24,7 @@ import { resolveProvider, type NotificationChannel } from "./provider"
 export type NotifyMeta = {
   order_id?: string | null
   customer_id?: string | null
-  /** 기본 채널은 sms. 이메일 알림을 쓰려면 명시한다. */
+  /** 기본 채널은 kakao(알림톡). 문자·이메일을 쓰려면 명시한다. */
   channel?: NotificationChannel
 }
 
@@ -42,7 +43,8 @@ class NotificationKrModuleService extends MedusaService({
     vars: Record<string, unknown> = {},
     meta: NotifyMeta = {}
   ): Promise<{ status: string; reason?: string }> {
-    const channel: NotificationChannel = meta.channel ?? "sms"
+    // 기본은 알림톡. 국내에서 가장 많이 쓰고 문자보다 단가가 싸다.
+    const channel: NotificationChannel = meta.channel ?? "kakao"
 
     const write = async (
       status: string,
@@ -104,10 +106,46 @@ class NotificationKrModuleService extends MedusaService({
       }
 
       const provider = resolveProvider()
-      const res = await provider.send({ channel, to: recipient, title, body: text })
+      const buttons = parseButtons(tpl.buttons)
+      // 버튼 URL 에도 변수가 들어간다(주문 상세 링크 등) — 함께 치환한다.
+      const renderedButtons = buttons.map((b) => ({
+        ...b,
+        url: b.url ? renderTemplate(b.url, vars).text : undefined,
+      }))
 
-      // 변수가 비어 있으면 문구에 {{key}} 가 그대로 남는다 — 운영자가 알아채도록 사유에 남긴다.
+      const res = await provider.send({
+        channel,
+        to: recipient,
+        title,
+        body: text,
+        templateCode: tpl.template_code ?? undefined,
+        buttons: renderedButtons,
+      })
+
+      // 변수가 비어 있으면 문구에 #{key} 가 그대로 남는다 — 운영자가 알아채도록 사유에 남긴다.
       const note = missing.length ? `미치환 변수: ${missing.join(", ")}` : undefined
+
+      // ── 알림톡 실패 시 문자 대체발송 ──────────────────────────────────
+      // 카카오톡 미설치·차단이면 알림톡은 반드시 실패한다. 그대로 두면 고객은
+      // 아무 연락도 못 받는다. 문자로 대신 보내는 것이 국내 실무 표준이다.
+      if (channel === "kakao" && res.status === "failed") {
+        const fallbackRaw = (tpl.fallback_body as string | null) ?? String(tpl.body)
+        const fb = renderTemplate(fallbackRaw, vars).text
+        const fbLen = checkLength("sms", fb)
+        if (!fbLen.ok) {
+          await write("failed", text, title, `알림톡 실패 + 대체문자 길이 초과(${fbLen.bytes}바이트)`)
+          return { status: "failed", reason: "대체발송 길이 초과" }
+        }
+        const fbRes = await provider.send({ channel: "sms", to: recipient, title: null, body: fb })
+        await write(
+          fbRes.status,
+          fb,
+          null,
+          `알림톡 실패(${res.error ?? "사유 미상"}) → 문자 대체발송`
+        )
+        return { status: fbRes.status, reason: "알림톡 실패로 문자 대체발송" }
+      }
+
       await write(res.status, text, title, res.error ?? note)
       return { status: res.status, reason: res.error ?? note }
     } catch (e) {

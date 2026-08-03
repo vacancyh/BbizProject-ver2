@@ -81,11 +81,17 @@ export default async function orderNotificationsHandler({
         customer_name: [addr.last_name, addr.first_name].filter(Boolean).join("") || "고객",
         order_no: order.display_id ?? order.id,
         total: formatKrw(order.total),
+        // 알림톡 버튼(주문 상세보기)에 들어가는 링크. 스토어프론트 주소가 없으면
+        // 버튼 URL 이 비어 #{order_url} 이 그대로 남고, 로그의 "미치환 변수"로 드러난다.
+        order_url: process.env.STOREFRONT_URL
+          ? `${process.env.STOREFRONT_URL.replace(/\/$/, "")}/kr/order/${order.id}`
+          : "",
       },
       {
         order_id: order.id,
         customer_id: order.customer_id ?? null,
-        channel: phone ? "sms" : "email",
+        // 전화번호가 있으면 알림톡(실패 시 문자로 자동 대체발송), 없으면 이메일.
+        channel: phone ? "kakao" : "email",
       }
     )
 

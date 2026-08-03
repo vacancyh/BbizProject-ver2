@@ -17,6 +17,13 @@ export type SendInput = {
   to: string
   title?: string | null
   body: string
+  /**
+   * 카카오에서 사전 심사받은 템플릿 코드(알림톡 전용).
+   * 알림톡은 승인된 템플릿만 발송할 수 있어 이 값이 없으면 업체가 거부한다.
+   */
+  templateCode?: string
+  /** 알림톡 버튼(변수 치환 완료본) */
+  buttons?: { name: string; type: string; url?: string }[]
 }
 
 export type SendResult = {
@@ -39,7 +46,6 @@ export interface NotificationProvider {
 export class LogProvider implements NotificationProvider {
   readonly name = "log"
   async send(input: SendInput): Promise<SendResult> {
-    // eslint-disable-next-line no-console
     console.info(
       `[notification:log] ${input.channel} → ${maskRecipient(input.to)} : ${input.body.slice(0, 60)}`
     )
@@ -65,6 +71,11 @@ export function maskRecipient(to: string): string {
  *
  * 업체 연동 시 여기에 구현체를 추가하고 분기만 늘리면 된다.
  * 구현해야 할 것은 `send()` 하나뿐이다.
+ *
+ * 알림톡을 붙일 때 업체에 넘겨야 하는 것:
+ *   - 발신프로필 키(senderKey)   : 카카오 채널 등록 후 발급
+ *   - 템플릿 코드(templateCode)  : 심사 승인된 템플릿마다 발급 — SendInput 으로 전달됨
+ *   - 버튼(buttons)              : 심사 내용과 일치해야 한다 — SendInput 으로 전달됨
  *
  * 예시(연동 시):
  *   case "aligo":  return new AligoProvider(process.env.ALIGO_API_KEY!, ...)
