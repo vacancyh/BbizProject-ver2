@@ -85,7 +85,25 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: true,
+    /**
+     * 이미지 최적화 (2026-08-03 활성화)
+     *
+     * 이전에는 `unoptimized: true` 라 **원본 파일을 그대로 내려보냈다.**
+     * 쇼핑몰 페이지 무게의 대부분이 상품 이미지이므로 영향이 크다:
+     *   - 모바일 로딩이 느려 이탈률이 오른다(구매전환에 직결)
+     *   - 트래픽 비용이 몇 배로 나간다
+     *   - LCP 저하 → 검색 노출 불이익
+     *
+     * 이제 Next 가 WebP/AVIF 변환 + 화면 크기별 리사이즈를 처리한다.
+     * ⚠️ 운영 서버에서 sharp 네이티브 바이너리가 설치돼야 한다
+     *    (pnpm 이 build script 를 건너뛰면 최적화가 실패한다 — 배포 시 확인할 것).
+     */
+    formats: ["image/avif", "image/webp"],
+    // 상품 이미지는 목록(작게)·상세(크게) 두 용도가 대부분이라 과한 단계는 두지 않는다.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [96, 128, 256, 384],
+    // 원본이 바뀌지 않는 상품 이미지 특성상 길게 캐시한다(31일).
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: "http",
@@ -100,9 +118,16 @@ const nextConfig = {
         hostname: "*.s3.amazonaws.com",
       },
       // 데모용 플레이스홀더 이미지 (운영 전환 시 실제 상품 이미지/CDN 으로 교체)
+      //
+      // ⚠️ 2026-08-03: 이미지 최적화를 켜면 **여기 없는 호스트는 500 을 낸다.**
+      //    실제로 images.pexels.com 이 누락돼 상품 상세 페이지가 통째로 죽었다.
+      //    상품/배너 이미지를 새 호스트에 올리면 반드시 여기에 추가할 것.
+      //    (등록 누락은 preflight-check.ts 가 사전에 잡는다)
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "fastly.picsum.photos" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "images.pexels.com" },
+      { protocol: "https", hostname: "medusa-public-images.s3.eu-west-1.amazonaws.com" },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {

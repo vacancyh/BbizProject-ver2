@@ -1,5 +1,7 @@
 allowBuilds:
-  sharp: set this to true or false
+  # 2026-08-03: 이미지 최적화(next/image)에 sharp 네이티브 바이너리가 필요하다.
+  # 승인하지 않으면 /_next/image 가 500 을 내고 **상품 이미지가 전부 깨진다**(실측).
+  sharp: true
   unrs-resolver: set this to true or false
 
 # 판매 전 점검 2026-07-28: 전이 의존성 high CVE 상향(패치 수준). 회귀는 빌드·테스트로 검증.

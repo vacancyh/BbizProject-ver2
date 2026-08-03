@@ -1,11 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button, Heading } from "@modules/common/components/ui"
 import type { Banner } from "@lib/data/banners"
 
-/** 메인 hero 배너 캐러셀 — 자동 회전 + 도트 네비. 이미지는 <img>(외부 URL). */
+/**
+ * 메인 hero 배너 캐러셀 — 자동 회전 + 도트 네비.
+ *
+ * 2026-08-03: 원본 <img> → next/image 로 전환.
+ * 히어로는 화면에서 가장 큰 이미지이자 **LCP 요소**다. 최적화를 거치지 않으면
+ * 원본 PNG(실측 928KB)가 그대로 내려가 모바일 첫 화면이 눈에 띄게 느려진다.
+ * 전환 후 같은 이미지가 AVIF 11KB 로 줄었다(99% 절감).
+ *
+ * ⚠️ 배너 이미지 호스트는 next.config.js 의 images.remotePatterns 에 있어야 한다.
+ *    없는 호스트를 관리자에서 등록하면 히어로가 깨진다 — 운영 스토리지 확정 시 함께 등록할 것.
+ */
 const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
   const [idx, setIdx] = useState(0)
   const count = banners.length
@@ -21,11 +32,14 @@ const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
 
   const inner = (
     <div className="absolute inset-0">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={b.image_url}
         alt={b.title}
-        className="h-full w-full object-cover"
+        fill
+        // 히어로는 첫 화면에 바로 보이므로 lazy 로딩하면 안 된다(LCP 지연).
+        priority={idx === 0}
+        sizes="100vw"
+        className="object-cover"
       />
       {/* 배너 이미지가 밝아도 흰 텍스트 가독성 확보: 어두운 오버레이 + 하단 그라데이션 */}
       <div className="absolute inset-0 bg-black/40" />

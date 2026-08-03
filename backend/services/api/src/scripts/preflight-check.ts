@@ -200,6 +200,45 @@ export default async function preflightCheck({ container }: ExecArgs) {
     add("WARN", "상품", "대표 이미지 없음", `${noImage.length}건`, "이미지 없는 상품은 구매전환이 크게 떨어집니다")
   }
 
+  // 이미지 호스트 — 스토어프론트 next.config.js 의 remotePatterns 에 없으면
+  // 이미지 최적화가 켜진 상태에서 **해당 상품 페이지가 500 을 낸다**(2026-08-03 실측).
+  try {
+    const { data: images } = await query.graph({ entity: "product", fields: ["thumbnail", "images.url"] })
+    const hosts = new Set<string>()
+    for (const p of (images ?? []) as any[]) {
+      const urls = [p.thumbnail, ...((p.images ?? []).map((i: any) => i.url))].filter(Boolean)
+      for (const u of urls) {
+        const m = /^https?:\/\/([^/]+)/.exec(String(u))
+        if (m) hosts.add(m[1])
+      }
+    }
+    // 스토어프론트에 등록된 호스트 목록(수기 동기화 — 자동 참조가 불가능한 별도 앱이라)
+    const ALLOWED = [
+      "picsum.photos",
+      "fastly.picsum.photos",
+      "images.unsplash.com",
+      "images.pexels.com",
+      "medusa-public-images.s3.eu-west-1.amazonaws.com",
+      "localhost",
+    ]
+    const unknown = [...hosts].filter(
+      (h) => !ALLOWED.some((a) => h === a || h.endsWith(`.${a}`) || /\.s3[.-].*amazonaws\.com$/.test(h))
+    )
+    if (unknown.length) {
+      add(
+        "BLOCK",
+        "이미지",
+        "미등록 호스트",
+        `${unknown.length}종: ${unknown.slice(0, 3).join(", ")}`,
+        "apps/web/next.config.js 의 images.remotePatterns 에 추가하세요 — 없으면 해당 상품 페이지가 500 입니다"
+      )
+    } else {
+      add("OK", "이미지", "호스트 등록", `${hosts.size}종 전부 등록됨`)
+    }
+  } catch {
+    add("WARN", "이미지", "호스트 확인 실패", "product 이미지 조회 불가")
+  }
+
   // 재고
   try {
     const { data: levels } = await query.graph({

@@ -6,6 +6,8 @@ import { PRICE_RANGES } from "@modules/store/components/refinement-list/filter-c
 import ProductPreview from "@modules/products/components/product-preview"
 import { Pagination } from "@modules/store/components/pagination"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getPopularSearchTerms } from "@lib/data/search-terms"
 
 const PRODUCT_LIMIT = 12
 
@@ -118,16 +120,57 @@ export default async function PaginatedProducts({
     : matched
 
   if (effectiveCount === 0) {
+    /**
+     * 검색 결과 0건 화면 (2026-08-03 보강)
+     *
+     * 이전에는 "'xxx'에 대한 검색 결과가 없습니다." 한 줄뿐인 **막다른 화면**이었다.
+     * 고객은 오타를 낸다("티셔쳐"). 현재 검색은 부분일치만 지원하고 오타 보정이 없어
+     * 0건이 실제로 자주 나오는데, 그때 갈 곳이 없으면 그냥 이탈한다.
+     * → 인기 검색어와 전체 상품으로 가는 길을 함께 제시한다.
+     */
+    const suggestions = searchQuery ? await getPopularSearchTerms(6) : []
     return (
-      <div
-        className="py-24 text-center text-ui-fg-muted"
-        data-testid="no-products-message"
-      >
-        {searchQuery
-          ? `'${searchQuery}'에 대한 검색 결과가 없습니다.`
-          : priceRange && priceRange !== "all"
-          ? "선택한 조건에 맞는 상품이 없습니다. 필터를 변경해 보세요."
-          : "표시할 상품이 없습니다."}
+      <div className="py-20 text-center" data-testid="no-products-message">
+        <p className="text-ui-fg-base txt-large">
+          {searchQuery
+            ? `'${searchQuery}'에 대한 검색 결과가 없습니다.`
+            : priceRange && priceRange !== "all"
+            ? "선택한 조건에 맞는 상품이 없습니다."
+            : "표시할 상품이 없습니다."}
+        </p>
+        <p className="mt-2 text-ui-fg-muted txt-medium">
+          {searchQuery
+            ? "다른 검색어를 입력하시거나 아래에서 찾아보세요."
+            : "필터를 변경해 보세요."}
+        </p>
+
+        {suggestions.length > 0 && (
+          <div className="mt-8">
+            <p className="text-ui-fg-subtle txt-compact-small mb-3">인기 검색어</p>
+            <ul className="flex flex-wrap justify-center gap-2" data-testid="search-suggestions">
+              {suggestions.map((term) => (
+                <li key={term}>
+                  <LocalizedClientLink
+                    href={`/store?q=${encodeURIComponent(term)}`}
+                    className="inline-block rounded-full border border-ui-border-base px-4 py-1.5 txt-compact-small hover:bg-ui-bg-subtle"
+                  >
+                    {term}
+                  </LocalizedClientLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-8">
+          <LocalizedClientLink
+            href="/store"
+            className="inline-block border border-ui-border-interactive px-6 py-2.5 txt-medium hover:bg-ui-bg-subtle"
+            data-testid="browse-all-products"
+          >
+            전체 상품 보기
+          </LocalizedClientLink>
+        </div>
       </div>
     )
   }
