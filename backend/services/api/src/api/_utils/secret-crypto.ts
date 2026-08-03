@@ -23,7 +23,6 @@ function key(): Buffer {
   }
   if (!dedicated && !warnedFallback) {
     warnedFallback = true
-    // eslint-disable-next-line no-console
     console.warn(
       "[security] ADMIN_2FA_SECRET_KEY 미설정 — COOKIE_SECRET/dev 폴백 사용(개발 전용). 운영은 전용 키 주입 필수."
     )

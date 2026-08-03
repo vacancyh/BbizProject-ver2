@@ -34,7 +34,9 @@ export default async function timeSaleExpiryCheckJob(
     const { items: activeSales } = await svc.listSales({ status: "active" })
 
     let expiredByTime = 0
-    let expiredByStock = 0
+    // 재고 소진 종료는 아직 구현하지 않았다(아래 ② 참조). 항상 0 이다.
+    // ESLint 가 "재할당되지 않는다"고 짚어준 덕에 드러났다 — 로그에 0 건으로 찍히면
+    // 기능이 도는데 해당 건이 없는 것처럼 보여 오해를 부른다. 아래 로그에 명시한다.
 
     for (const sale of activeSales) {
       // ① 시간 만료 체크: ends_at 이 현재 시각보다 과거
@@ -65,7 +67,8 @@ export default async function timeSaleExpiryCheckJob(
     }
 
     logger.info(
-      `[timeSaleExpiry] 만료 점검 완료. 시간만료=${expiredByTime}건, 재고소진=${expiredByStock}건`
+      `[timeSaleExpiry] 만료 점검 완료. 시간만료=${expiredByTime}건 ` +
+        `(재고소진 자동종료는 미구현 — Inventory 모듈 연동 후속)`
     )
   } catch (err) {
     logger.error(

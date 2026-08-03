@@ -653,7 +653,7 @@ function requestId(
 
   res.on("finish", () => {
     if (res.statusCode >= 400) {
-      // eslint-disable-next-line no-console
+       
       console.warn(
         `[req] ${id} ${req.method} ${req.path} → ${res.statusCode}`
       )

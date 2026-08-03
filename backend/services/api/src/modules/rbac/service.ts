@@ -12,7 +12,8 @@
  * 가드레일: Medusa core(user) 미수정. user_id 는 text 보관.
  */
 import { MedusaService } from "@medusajs/framework/utils"
-import Role, { ROLE_KEYS, type RoleKey } from "./models/role"
+// ROLE_KEYS 는 현재 이 파일에서 직접 쓰지 않는다(등급 확장 시 참조 지점).
+import Role, { type RoleKey } from "./models/role"
 import RolePermission from "./models/role-permission"
 import UserRole from "./models/user-role"
 import { DEFAULT_ROLES, MENU_IDS, buildDefaultPermissions } from "./seed/defaults"

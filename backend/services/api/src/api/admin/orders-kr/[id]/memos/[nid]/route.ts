@@ -10,7 +10,6 @@
  * spec: dag/d2_주문관리/t011_내부메모.md §8 C1
  */
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { ORDER_OPS_KR_MODULE } from "../../../../../../modules/order-ops-kr"
 import OrderOpsKrModuleService from "../../../../../../modules/order-ops-kr/service"
 import { RBAC_MODULE } from "../../../../../../modules/rbac"

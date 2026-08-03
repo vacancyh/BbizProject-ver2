@@ -56,7 +56,7 @@ jobs:
           NEXT_PUBLIC_BACKEND_URL: http://localhost:9000
 
   backend:
-    name: 백엔드 (typecheck·unit)
+    name: 백엔드 (typecheck·lint·unit)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -72,6 +72,8 @@ jobs:
       # 소스 타입 에러가 0 이 되었으므로 정보성 → 게이트로 승격.
       - name: Typecheck
         run: npx tsc --noEmit
+      - name: Lint (eslint — 2026-08-03 도입, 경고 0 유지)
+        run: pnpm lint
       - name: Unit tests (jest — 순수 로직 408케이스, DB 불필요)
         run: pnpm test:unit
       # medusa build 는 medusa-config env 로딩 필요 → 별도(배포 파이프라인) 실행.

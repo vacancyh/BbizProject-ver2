@@ -7,14 +7,14 @@ import {
 } from "@medusajs/framework/utils";
 import {
   createApiKeysWorkflow,
-  createCollectionsWorkflow,
+  // createCollectionsWorkflow,  // 미사용(시드 확장 시 사용)
   createInventoryLevelsWorkflow,
   createProductCategoriesWorkflow,
   createProductsWorkflow,
   createRegionsWorkflow,
   createSalesChannelsWorkflow,
   createShippingOptionsWorkflow,
-  createShippingProfilesWorkflow,
+  // createShippingProfilesWorkflow,  // 미사용(시드 확장 시 사용)
   createStockLocationsWorkflow,
   createStoresWorkflow,
   createTaxRegionsWorkflow,
@@ -71,9 +71,8 @@ export default async function initial_data_seed({
     },
   });
 
-  const {
-    result: [store],
-  } = await createStoresWorkflow(container).run({
+  // 생성된 store 는 이후에 참조하지 않는다(생성 자체가 목적).
+  await createStoresWorkflow(container).run({
     input: {
       stores: [
         {

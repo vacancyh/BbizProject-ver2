@@ -18,7 +18,6 @@ function key(): Buffer {
   }
   if (!dedicated && !warned) {
     warned = true
-    // eslint-disable-next-line no-console
     console.warn("[security] PII_ENCRYPTION_KEY 미설정 — dev 폴백 사용(개발 전용). 운영은 전용 키 필수.")
   }
   const raw = dedicated || process.env.COOKIE_SECRET || "dev-insecure-pii-key"

@@ -234,9 +234,10 @@ async function handleRefund(req: MedusaRequest, res: MedusaResponse) {
   }
 
   // ─── ④ Medusa refundPaymentWorkflow 호출 (PG 환불, spec A1) ───────────────
-  let workflowResult: any
+  // 워크플로우 결과는 사용하지 않는다 — 실패 시 throw 로 아래 catch 가 받는다.
+  // (값을 쓰지 않으므로 변수에 담지 않는다. 2026-08-03 ESLint 도입 시 정리)
   try {
-    workflowResult = await (refundPaymentWorkflow as any)(req.scope).run({
+    await (refundPaymentWorkflow as any)(req.scope).run({
       input: {
         payment_id: capturedPaymentId,
         amount: refundAmount,
