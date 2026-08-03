@@ -94,6 +94,10 @@ const PATH_MENU_MAP: { prefix: string; menu: string }[] = [
   // ── 판매 전 점검 2026-07-28: 미매핑이던 대시보드/지표 API RBAC 매핑 ──
   // 화면(메뉴)에서 가려도 API 를 직접 호출하면 등급과 무관하게 매출·정산 지표가 노출됐다.
   // 더 구체적인 prefix 를 먼저 둔다(위에서부터 순차 매칭).
+  // ── 2026-08-03: CSV 내보내기 — 개인정보가 통째로 나가므로 반드시 RBAC 를 건다.
+  // 더 구체적인 경로를 먼저 둔다(위에서부터 순차 매칭).
+  { prefix: "/admin/exports/orders", menu: "orders" }, // 주문 CSV(고객 성명·연락처·주소 포함)
+  { prefix: "/admin/exports/customers", menu: "members" }, // 회원 CSV(개인정보)
   { prefix: "/admin/dashboard/settlement-kpi", menu: "settlement" }, // 정산 KPI(민감)
   { prefix: "/admin/dashboard", menu: "dashboard" }, // 대시보드 위젯/통계
 ]
