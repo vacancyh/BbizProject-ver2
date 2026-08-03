@@ -165,6 +165,11 @@ module.exports = defineConfig({
       resolve: "./src/modules/product-disclosure",
     },
     {
+      // 한국형 알림(2026-08-03) — 알림 시점 정의 + 문구 템플릿 + 발송 이력.
+      // 발송 업체는 provider 추상화로 분리돼 있어, 계약 후 구현체만 갈아끼우면 된다.
+      resolve: "./src/modules/notification-kr",
+    },
+    {
       // 재입고 알림(GAP) — 품절 상품 재입고 시 고객 알림 구독.
       resolve: "./src/modules/restock-notification",
     },
