@@ -11,7 +11,7 @@ on:
 
 jobs:
   storefront:
-    name: 스토어프론트 (typecheck·lint)
+    name: 스토어프론트 (typecheck·lint·unit)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,6 +27,8 @@ jobs:
         run: npx tsc --noEmit
       - name: Lint
         run: pnpm lint
+      - name: Unit tests (vitest — 순수 로직: 금액 표시·가격 필터·그리드)
+        run: pnpm test
       # next build 는 SSG 중 백엔드 호출 → CI 무백엔드에선 별도(야간 통합) 실행.
 
   admin:
