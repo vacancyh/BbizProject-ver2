@@ -74,8 +74,13 @@ async function placeCapturedOrder(adminToken, regionId, variantId) {
   const cid = c.d?.cart?.id
   if (!cid) return null
   await j("POST", `/store/carts/${cid}/line-items`, { b: { variant_id: variantId, quantity: 1 } })
+  // 배송지는 반드시 설정한다 — 2026-08-03 부터 배송 정보 없는 주문은 서버가 거부한다.
   const addr = { first_name: "감사", last_name: "테스트", address_1: "서울시 강남구 1", city: "서울", postal_code: "06000", country_code: "kr", phone: "010-0000-0000" }
-  await j("POST", `/store/carts/${cid}`, { b: { shipping_address: addr, billing_address: addr } })
+  const addrRes = await j("POST", `/store/carts/${cid}`, { b: { shipping_address: addr, billing_address: addr } })
+  if (addrRes.s >= 400) {
+    console.log(`   (배송지 설정 실패: ${JSON.stringify(addrRes.d).slice(0, 120)})`)
+    return null
+  }
   const so = await j("GET", `/store/shipping-options?cart_id=${cid}`)
   const opt = (so.d?.shipping_options ?? [])[0]
   if (opt) await j("POST", `/store/carts/${cid}/shipping-methods`, { b: { option_id: opt.id } })
@@ -101,7 +106,12 @@ async function main() {
   console.log(`\n대상: ${BASE}\n`)
   const adm = (await j("POST", "/auth/user/emailpass", { b: ADMIN, pub: false })).d?.token
   if (!adm) { console.log("관리자 로그인 실패 — 중단"); process.exit(1) }
-  const regionId = (await j("GET", "/store/regions")).d?.regions?.[0]?.id
+  // 한국 리전을 명시적으로 고른다. regions[0] 이 Europe 이면 kr 주소가 거부된다
+  // ("Country with code kr is not within region Europe") — 실제로 겪은 함정.
+  const allRegions = (await j("GET", "/store/regions")).d?.regions ?? []
+  const regionId = (
+    allRegions.find((r) => (r.countries ?? []).some((c) => c.iso_2 === "kr")) ?? allRegions[0]
+  )?.id
   const { vid } = await pickVariant(regionId)
   if (!vid) { console.log("판매 가능한 variant 없음 — 중단"); process.exit(1) }
 
