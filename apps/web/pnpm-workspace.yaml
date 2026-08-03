@@ -3,12 +3,20 @@ allowBuilds:
   unrs-resolver: set this to true or false
 
 # 판매 전 점검 2026-07-28: 전이 의존성 high CVE 상향(패치 수준). 회귀는 빌드·테스트로 검증.
+# 2026-08-03 재점검: sharp(런타임 libvips CVE) + eslint/webpack 체인 3종 추가.
+# ※ pnpm 11 에서는 package.json 의 "pnpm.overrides" 가 무시된다 — 반드시 이 파일에 둔다.
 overrides:
-  brace-expansion@1: '>=1.1.16'
+  # 상한을 두지 않으면 '>=1.1.16' 이 5.x 로 해석돼 오히려 취약 버전(5.0.6)이 뽑힌다.
+  brace-expansion@1: '>=1.1.17 <2'
   brace-expansion@>=2: '>=5.0.8'
   form-data: '>=4.0.6'
   axios: '>=1.18.0'
   js-yaml@3: '>=3.15.0'
+  js-yaml@>=4: '>=4.3.0'
   postcss: '>=8.5.18'
   immutable: '>=5.1.8'
   lodash: '>=4.17.24'
+  # 런타임 — next 가 이미지 최적화에 사용. libvips CVE(2026-33327/33328/35590/35591).
+  sharp: '>=0.35.0'
+  # 개발 전용(webpack>schema-utils>ajv 체인) — host confusion.
+  fast-uri: '>=3.1.4'
