@@ -94,6 +94,7 @@ const PATH_MENU_MAP: { prefix: string; menu: string }[] = [
   // ── 판매 전 점검 2026-07-28: 미매핑이던 대시보드/지표 API RBAC 매핑 ──
   // 화면(메뉴)에서 가려도 API 를 직접 호출하면 등급과 무관하게 매출·정산 지표가 노출됐다.
   // 더 구체적인 prefix 를 먼저 둔다(위에서부터 순차 매칭).
+  { prefix: "/admin/notifications", menu: "settings" }, // 알림 문구·발송이력(수신처 = 개인정보)
   // ── 2026-08-03: CSV 내보내기 — 개인정보가 통째로 나가므로 반드시 RBAC 를 건다.
   // 더 구체적인 경로를 먼저 둔다(위에서부터 순차 매칭).
   { prefix: "/admin/exports/orders", menu: "orders" }, // 주문 CSV(고객 성명·연락처·주소 포함)
@@ -463,6 +464,131 @@ function passwordPolicyGuard(
 }
 
 /**
+ * 재고 하향 조정 가드 (2026-08-03 재점검에서 발견)
+ *
+ * 실측한 문제: 예약(reserved) 수량보다 낮게 재고를 설정할 수 있었다.
+ *   예약 6건이 걸린 상품의 재고를 2로 설정 → 가용재고 -4
+ *   → 그 상품은 **아무도 장바구니에 담을 수 없게 된다**(전부 400).
+ *   화면에는 아무 경고가 없어서, 팔리던 상품이 조용히 판매 불가가 된다.
+ *
+ * 오버셀 차단 자체는 정상 동작한다(가용재고 기준). 문제는 그 반대 방향이다.
+ *
+ * 처리: 예약 수량 미만으로 내리려 하면 400 + 설명. 정말 그래야 한다면
+ *       `?force=true` 로 명시적으로 진행할 수 있다(실사 후 보정 등 정당한 경우).
+ *       실수는 막고 의도는 허용한다.
+ */
+async function inventoryDecreaseGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    // 강제 진행은 **헤더**로 받는다. 쿼리 파라미터(?force=true)로 하면 코어 라우트의
+    // 쿼리 검증에 걸려 400 이 난다(실측). 헤더는 코어가 검증하지 않는다.
+    if (String(req.headers["x-force-stock-decrease"] ?? "") === "true") return next()
+    const next_ = (req.body as any)?.stocked_quantity
+    if (next_ === undefined || next_ === null) return next()
+
+    const itemId = req.params.id
+    const locationId = req.params.location_id
+    if (!itemId) return next()
+
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+    const { data } = await query.graph({
+      entity: "inventory_level",
+      fields: ["id", "location_id", "stocked_quantity", "reserved_quantity"],
+      filters: { inventory_item_id: itemId } as Record<string, unknown>,
+    })
+    const level = (data ?? []).find(
+      (l: any) => !locationId || l.location_id === locationId
+    ) as any
+    if (!level) return next()
+
+    const reserved = Number(level.reserved_quantity ?? 0)
+    const target = Number(next_)
+    if (Number.isFinite(target) && target < reserved) {
+      res.status(400).json({
+        message:
+          `현재 예약된 수량(${reserved}개)보다 적게 설정할 수 없습니다. ` +
+          `이대로 두면 가용재고가 ${target - reserved}개가 되어 판매가 중단됩니다. ` +
+          `예약분(미출고 주문)을 먼저 처리하거나, 실사 결과가 확실하면 ` +
+          `x-force-stock-decrease: true 헤더로 진행하세요.`,
+        code: "STOCK_BELOW_RESERVED",
+        reserved,
+        requested: target,
+      })
+      return
+    }
+  } catch {
+    // 검증 실패가 재고 관리를 막지 않도록 통과
+  }
+  return next()
+}
+
+/**
+ * 주문 완료 전 배송지 검증 (2026-08-03 재점검에서 발견)
+ *
+ * 실측: 배송지를 전혀 넣지 않고도 주문이 완료됐다.
+ *       생성된 주문 #146 의 배송지 = { 이름:"", 전화:null, 주소:null, 우편번호:null }
+ *       → **배송할 수 없는 주문**이 시스템에 들어온다.
+ *
+ * 스토어프론트 UI 는 주소 입력을 강제하지만 API 는 공개돼 있다.
+ * 화면에서 막는 것과 서버에서 막는 것은 다르다 — 서버가 최종 방어선이어야 한다.
+ *
+ * 배송이 필요 없는 주문(디지털 상품 등)을 나중에 다루게 되면
+ * 배송방법 유무로 분기하도록 확장할 것.
+ */
+async function cartCompleteGuard(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    const cartId = req.params.id
+    if (!cartId) return next()
+
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+    const { data } = await query.graph({
+      entity: "cart",
+      fields: [
+        "id",
+        "email",
+        "shipping_address.first_name",
+        "shipping_address.last_name",
+        "shipping_address.address_1",
+        "shipping_address.postal_code",
+        "shipping_address.city",
+        "shipping_address.phone",
+      ],
+      filters: { id: cartId } as Record<string, unknown>,
+    })
+    const cart = (data ?? [])[0] as any
+    if (!cart) return next() // 존재하지 않는 카트는 코어가 처리
+
+    const a = cart.shipping_address ?? {}
+    const name = `${a.last_name ?? ""}${a.first_name ?? ""}`.trim()
+    const missing: string[] = []
+    if (!name) missing.push("받는 분")
+    if (!a.phone) missing.push("연락처")
+    if (!a.address_1) missing.push("주소")
+    if (!a.postal_code) missing.push("우편번호")
+    if (!cart.email) missing.push("이메일")
+
+    if (missing.length) {
+      res.status(400).json({
+        message: `주문을 완료하려면 배송 정보가 필요합니다. 누락: ${missing.join(", ")}`,
+        code: "SHIPPING_ADDRESS_REQUIRED",
+        missing,
+      })
+      return
+    }
+  } catch {
+    // 검증 실패가 결제를 막지 않도록 통과(코어가 처리) — 가용성 우선
+  }
+  return next()
+}
+
+/**
  * 장바구니 수량 검증 (2026-08-03 재점검에서 발견)
  *
  * 코어 카트 API 는 quantity 를 정수로 강제하지 않는다. 실측:
@@ -494,6 +620,45 @@ function cartQuantityGuard(
     })
     return
   }
+  return next()
+}
+
+/**
+ * 요청 추적 ID (2026-08-03 신설)
+ *
+ * 왜 필요한가: 고객이 "어제 3시쯤 결제가 안 됐어요"라고 하면, 지금까지는 **그 요청을
+ * 로그에서 특정할 방법이 없었다.** 감사 로그는 관리자 행위만 남기고 고객 요청은 안 남는다.
+ *
+ * 동작
+ *  - 요청마다 짧은 ID 를 부여하고 `x-request-id` 응답 헤더로 돌려준다.
+ *  - 앞단(로드밸런서·CDN)이 이미 x-request-id 를 붙였다면 그 값을 이어받는다
+ *    (구간별로 다른 ID 가 생기면 추적이 끊긴다).
+ *  - 오류(4xx/5xx) 응답만 한 줄 로그로 남긴다. 정상 요청까지 남기면 로그 비용이 커진다.
+ *
+ * 활용: 고객에게 보여주는 오류 화면에 이 ID 를 함께 노출하면,
+ *       CS 가 "그 번호 불러주세요" 한마디로 해당 요청을 찾을 수 있다.
+ */
+function requestId(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const inbound = req.headers["x-request-id"]
+  const id =
+    (typeof inbound === "string" && inbound.slice(0, 64)) ||
+    // 외부 의존 없이 짧고 충분히 고유한 값
+    `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
+  ;(req as any).request_id = id
+  res.setHeader("x-request-id", id)
+
+  res.on("finish", () => {
+    if (res.statusCode >= 400) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[req] ${id} ${req.method} ${req.path} → ${res.statusCode}`
+      )
+    }
+  })
   return next()
 }
 
@@ -640,9 +805,21 @@ export default defineMiddlewares({
   errorHandler: apiErrorHandler,
   routes: [
     {
-      // 보안 응답 헤더 — 전 경로.
+      // 요청 추적 ID + 보안 응답 헤더 — 전 경로.
       matcher: "/*",
-      middlewares: [securityHeaders],
+      middlewares: [requestId, securityHeaders],
+    },
+    {
+      // 예약 수량 미만으로 재고를 내려 판매가 조용히 중단되는 것 방지.
+      matcher: "/admin/inventory-items/:id/location-levels/:location_id",
+      method: ["POST"],
+      middlewares: [inventoryDecreaseGuard],
+    },
+    {
+      // 배송 불가능한 주문(배송지 공란) 생성 차단.
+      matcher: "/store/carts/:id/complete",
+      method: ["POST"],
+      middlewares: [cartCompleteGuard],
     },
     {
       // 장바구니 수량은 양의 정수만 — 소수점/0/음수 차단.
