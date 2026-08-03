@@ -2,6 +2,7 @@
  * 주문 환불 Admin API (한국형 커스텀 — Medusa core 미제공)
  *
  *  POST /admin/orders/:id/refund
+ *    ⓪ 멱등키 단위 분산 락 획득 — 동시 요청 직렬화(2026-08-03 추가, 이중 환불 실측 대응)
  *    ① 멱등키 중복 확인 → 409 + 캐시 반환 (spec C1/UT-003)
  *    ② 환불액 계산 (calcProratedRefund 부분환불 / 전액)
  *    ③ 음수·초과 검증 (≤ 결제액 − 기환불)
@@ -19,7 +20,7 @@
  */
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { refundPaymentWorkflow } from "@medusajs/medusa/core-flows"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ORDER_OPS_KR_MODULE } from "../../../../../modules/order-ops-kr"
 import OrderOpsKrModuleService from "../../../../../modules/order-ops-kr/service"
 import {
@@ -62,7 +63,46 @@ interface RefundRequestBody {
   reason?: string
 }
 
+/**
+ * 환불 임계구역을 멱등키 단위로 직렬화한다 (2026-08-03 재점검에서 발견).
+ *
+ * 이전에는 "멱등키 조회 → 없으면 환불 집행 → 멱등키 저장" 이 락 없이 실행됐다.
+ * **순차** 재요청은 409 로 막혔지만 **동시** 요청은 모두 조회를 통과해 각자 환불을 집행했다.
+ * 실측(2026-08-03): 동일 nonce 로 동시 3건 → refund 레코드 3행(1,000원 × 3) 생성.
+ * 즉 요청한 1,000원 대신 3,000원이 실제로 빠져나갔다.
+ *
+ * 락 키를 멱등키로 잡으면 같은 nonce 의 동시 요청이 한 줄로 서고,
+ * 두 번째부터는 락 안에서 ① 검사에 걸려 409(cached)로 반환된다.
+ * timeout 이 넉넉한 이유: 내부에서 PG 환불 워크플로우까지 수행하기 때문.
+ */
+const REFUND_LOCK_ARGS = { timeout: 30 } // 초
+
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
+  const orderId = req.params.id
+  const rawBody = (req.body ?? {}) as RefundRequestBody
+  const lockNonce = rawBody.nonce ?? rawBody.idempotency_key
+  if (!lockNonce) {
+    res.status(400).json({ message: "nonce 또는 idempotency_key 는 필수입니다." })
+    return
+  }
+  const lockKey = `refund:${buildIdempotencyKey(orderId, lockNonce)}`
+  const locking = req.scope.resolve(Modules.LOCKING) as any
+  try {
+    await locking.execute(lockKey, async () => { await handleRefund(req, res) }, REFUND_LOCK_ARGS)
+  } catch (e) {
+    // 락 획득 실패 = 같은 멱등키가 처리 중. 절대 그냥 통과시키지 않는다(이중 환불 방지).
+    console.warn(`[refund] 락/처리 오류(order=${orderId}): ${(e as Error)?.message}`)
+    if (!res.headersSent) {
+      res.status(409).json({
+        message: "동일한 환불 요청이 처리 중입니다. 잠시 후 결과를 확인해 주세요.",
+        code: "REFUND_IN_PROGRESS",
+      })
+    }
+  }
+}
+
+/** 실제 환불 처리 — 반드시 POST 의 멱등키 락 안에서만 호출한다. */
+async function handleRefund(req: MedusaRequest, res: MedusaResponse) {
   const orderId = req.params.id
   const body = (req.body ?? {}) as RefundRequestBody
 

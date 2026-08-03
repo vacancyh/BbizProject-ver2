@@ -140,7 +140,7 @@ class CustomerPointModuleService extends MedusaService({
     validDays: number,
     reason: string = "purchase"
   ): Promise<{ skipped: boolean; points_earned: number; ledger_id: string | null }> {
-    // ① 중복 체크 — 삭제되지 않은 로그 행 조회
+    // ① 중복 체크(빠른 경로) — 삭제되지 않은 로그 행 조회
     const existing = await this.listPointAccrualLogs({ order_id: orderId, reason })
     if (existing.length > 0) {
       // 이미 처리된 주문 — 중복 적립 차단
@@ -152,32 +152,63 @@ class CustomerPointModuleService extends MedusaService({
       }
     }
 
-    // ② 포인트 계산 + 적립
     const points = calcPointsEarn(amount, ratePercent)
-    let ledgerId: string | null = null
 
-    if (points > 0) {
-      const earned = await this.earnFromPurchase(
-        customerId,
-        amount,
-        ratePercent,
-        validDays,
-        new Date().toISOString(),
-        reason
-      )
-      ledgerId = earned?.id ?? null
+    // ② 멱등 토큰을 **원장보다 먼저** 선점한다.
+    //    (2026-08-03 재점검) 이전에는 원장 적립 → 로그 기록 순서였다. 동일 주문 이벤트가
+    //    동시에 두 번 처리되면 둘 다 ①을 통과해 **원장에 2행 적립**되고, 나중 것만
+    //    UNIQUE(order_id, reason) 위반으로 실패했다. 즉 "멱등"이 아니었다.
+    //    로그를 먼저 넣으면 중복 요청은 여기서 DB 제약에 막혀 원장을 건드리지 못한다.
+    let logId: string | null = null
+    try {
+      const [created] = await this.createPointAccrualLogs([
+        {
+          order_id: orderId,
+          customer_id: customerId,
+          reason,
+          points_earned: points,
+          ledger_id: null,
+        },
+      ])
+      logId = created?.id ?? null
+    } catch {
+      // UNIQUE 위반 = 다른 처리가 이미 선점 → 중복으로 간주하고 적립하지 않는다.
+      const again = await this.listPointAccrualLogs({ order_id: orderId, reason })
+      const log = again[0]
+      return {
+        skipped: true,
+        points_earned: log ? Number(log.points_earned) : 0,
+        ledger_id: log?.ledger_id ?? null,
+      }
     }
 
-    // ③ 멱등 로그 1행 기록 (0 포인트도 처리 완료로 기록 — 재시도 차단)
-    await this.createPointAccrualLogs([
-      {
-        order_id: orderId,
-        customer_id: customerId,
-        reason,
-        points_earned: points,
-        ledger_id: ledgerId,
-      },
-    ])
+    // ③ 실제 원장 적립
+    let ledgerId: string | null = null
+    try {
+      if (points > 0) {
+        const earned = await this.earnFromPurchase(
+          customerId,
+          amount,
+          ratePercent,
+          validDays,
+          new Date().toISOString(),
+          reason
+        )
+        ledgerId = earned?.id ?? null
+      }
+    } catch (e) {
+      // 원장 적립 실패 → 선점한 토큰을 반납해야 재시도가 가능하다.
+      // (반납하지 않으면 "처리됨"으로 남아 고객 적립금이 영구히 누락된다)
+      if (logId) {
+        await this.deletePointAccrualLogs([logId]).catch(() => {})
+      }
+      throw e
+    }
+
+    // ④ 원장 id 연결
+    if (logId && ledgerId) {
+      await this.updatePointAccrualLogs([{ id: logId, ledger_id: ledgerId }]).catch(() => {})
+    }
 
     return { skipped: false, points_earned: points, ledger_id: ledgerId }
   }

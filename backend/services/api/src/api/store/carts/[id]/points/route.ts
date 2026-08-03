@@ -4,8 +4,11 @@
  *  - DELETE /store/carts/:id/points            → 적용 취소(할인 제거 + 적립금 복원)
  * 인증: 로그인 고객 본인 카트. 보유 적립금/주문금액 초과 불가.
  * 방식: 적립금 = 1회용 프로모션(fixed)으로 카트에 적용 + customer-point redeem 적재.
- * 동시성(보안점검 2026-07-27 A2): per-cart 락(Modules.LOCKING)으로 임계구역 직렬화 →
- *   동시 POST 이중차감 / 동시 DELETE 이중복원(포인트 인플레) 방지.
+ * 동시성(2026-08-03 재점검으로 수정): **고객 단위** 락(Modules.LOCKING)으로 직렬화.
+ *   이전에는 per-cart 락이었는데, 적립금 잔액은 카트가 아니라 **고객** 단위 자원이다.
+ *   카트를 여러 개 만들어 동시에 요청하면 서로 다른 락을 잡아 상호배제가 전혀 없었고,
+ *   실측 결과 10,000P 보유 고객이 동시 3건으로 30,000원 할인을 받고 잔액이 -20,000P 가 됐다.
+ *   잔액 검사도 락 밖에 있어 TOCTOU 였다 → 검사·차감을 모두 락 안으로 옮겼다.
  * 가드레일: Medusa core 미수정(core-flows + customer-point 모듈 사용).
  */
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
@@ -43,6 +46,15 @@ async function getCart(req: MedusaRequest, cartId: string) {
 }
 
 const LOCK_ARGS = { timeout: 10 } // 초
+
+/**
+ * 락 키는 **고객** 기준이다(카트 기준 금지).
+ * 적립금 잔액은 고객 단위 자원이므로, 카트별로 락을 잡으면 카트를 N개 만들어
+ * 동시에 요청하는 것만으로 잔액을 N배 사용할 수 있다(실측 확인).
+ */
+function pointsLockKey(customerId: string) {
+  return `points-customer:${customerId}`
+}
 
 /**
  * 적립금 할인의 과세 기준(2026-07-28 측정으로 확인된 이슈)
@@ -99,11 +111,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const pointSvc = req.scope.resolve(
     CUSTOMER_POINT_MODULE
   ) as unknown as CustomerPointModuleService
-  const balance = await pointSvc.getBalance(customerId)
-  if (points > balance) {
-    res.status(400).json({ message: `보유 적립금(${balance}원)을 초과했습니다.` })
-    return
-  }
 
   if (points > cart.item_total) {
     res.status(400).json({ message: "주문 금액을 초과해 사용할 수 없습니다." })
@@ -115,13 +122,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   try {
     const out: { status: number; body: any } = await locking.execute(
-      `points-cart:${cartId}`,
+      pointsLockKey(customerId),
       async () => {
         // 락 내부에서 최신 상태 재확인(이미 적용 여부)
         const fresh = await getCart(req, cartId)
         const already = (fresh?.promotions ?? []).some((p: any) => p.code === code)
         if (already) {
           return { status: 409, body: { message: "이미 적립금이 적용되어 있습니다." } }
+        }
+
+        // 잔액 검사는 **반드시 락 안**에서 한다.
+        // 밖에서 검사하면 동시 요청이 모두 통과해 잔액이 음수가 된다(실측 -20,000P).
+        const balance = await pointSvc.getBalance(customerId)
+        if (points > balance) {
+          return {
+            status: 400,
+            body: { message: `보유 적립금(${balance}원)을 초과했습니다.` },
+          }
         }
 
         // 1) 1회용 프로모션 생성(없으면) + 카트 적용
@@ -201,7 +218,7 @@ export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
 
   try {
     const out: { status: number; body: any } = await locking.execute(
-      `points-cart:${cartId}`,
+      pointsLockKey(customerId),
       async () => {
         // 락 내부 재확인: 프로모션이 아직 적용돼 있을 때만 복원(동시 DELETE 이중복원 방지)
         const fresh = await getCart(req, cartId)
