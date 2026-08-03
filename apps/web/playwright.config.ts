@@ -57,7 +57,11 @@ export default defineConfig({
     },
     {
       name: "feedback",
-      testMatch: ["e2e/storefront-feedback.spec.ts", "e2e/storefront-password.spec.ts"],
+      testMatch: [
+        "e2e/storefront-feedback.spec.ts",
+        "e2e/storefront-password.spec.ts",
+        "e2e/postcode-search.spec.ts",
+      ],
       use: { ...devices["Desktop Chrome"] },
     },
     {

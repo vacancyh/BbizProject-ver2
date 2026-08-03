@@ -45,7 +45,15 @@ const CSP = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://cdn.jsdelivr.net",
   CONNECT_SRC,
-  "frame-src 'self' https://*.daum.net https://postcode.map.daum.net",
+  // 우편번호 검색 iframe.
+  // ⚠️ 2026-08-03: 다음 우편번호 서비스가 **kakao.com 도메인으로 이전**했는데
+  //    CSP 는 daum.net 만 허용하고 있어 iframe 이 통째로 차단됐다
+  //    ("Framing 'http://postcode.map.kakao.com/' violates ... frame-src").
+  //    팝업(.open) 방식일 때는 frame-src 가 적용되지 않아 드러나지 않았다.
+  //    구 도메인도 함께 남긴다(서비스가 어느 쪽을 쓸지 보장되지 않는다).
+  //    http: 도 허용 — 카카오가 http 로 프레임을 요청한다(실측).
+  "frame-src 'self' https://*.daum.net https://postcode.map.daum.net " +
+    "https://*.kakao.com http://postcode.map.kakao.com https://postcode.map.kakao.com",
   "frame-ancestors 'self'",
   "object-src 'none'",
   "base-uri 'self'",
