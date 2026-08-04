@@ -3,14 +3,36 @@
 import { Button } from "@modules/common/components/ui"
 import { useState } from "react"
 
-// 휴대폰 본인인증 (MOCK) — 실제 운영 시 PASS/NICE 본인인증 연동.
-// 데모: 인증번호 발송 → 6자리 입력 → 인증 완료. (발송 코드는 데모로 화면에 표시)
+/**
+ * 휴대폰 본인인증 (데모) — 실제 운영 시 PASS/NICE 연동 필요.
+ *
+ * ⚠️ 2026-08-03 안전장치 추가.
+ *
+ * 이 컴포넌트는 **아무 실질적 효과가 없다.**
+ *  - 인증번호가 고정값(000000)이고 화면에 그대로 표시된다
+ *  - 인증 결과가 서버로 전송되지 않는다(순수 클라이언트 state)
+ *  - 즉 "✓ 본인인증이 완료되었습니다" 표시만 뜰 뿐, 어디에도 기록되지 않는다
+ *
+ * 그런데 고객은 그 문구를 보고 **인증이 됐다고 믿는다.**
+ * 운영에 이대로 나가면 만 14세 미만 차단 같은 법적 목적을 전혀 달성하지 못하면서
+ * 인증을 한 것처럼 보이게 만든다 — 안 하느니 못하다.
+ *
+ * → 실제 본인인증 연동 전까지 **운영에서는 노출 자체를 막는다.**
+ *   개발에서는 화면 흐름 확인용으로 남기되 데모임을 눈에 띄게 알린다.
+ */
+const DEMO_VERIFY_ALLOWED =
+  process.env.NODE_ENV !== "production" ||
+  process.env.NEXT_PUBLIC_ALLOW_DEMO_PHONE_VERIFY === "true"
+
 const PhoneVerify = () => {
   const [phone, setPhone] = useState("")
   const [sent, setSent] = useState<string | null>(null)
   const [code, setCode] = useState("")
   const [verified, setVerified] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // 운영에서 "인증한 척"하는 UI 가 나가면 안 된다 → 아예 렌더하지 않는다.
+  if (!DEMO_VERIFY_ALLOWED) return null
 
   const sendCode = () => {
     setError(null)
@@ -45,8 +67,19 @@ const PhoneVerify = () => {
   return (
     <div className="flex flex-col gap-y-2" data-testid="phone-verify">
       <span className="text-small-regular text-ui-fg-subtle">
-        휴대폰 본인인증 (선택)
+        휴대폰 본인인증 (선택 · 데모)
       </span>
+      {/* 데모라는 사실을 입력창 위에 둔다. 아래 각주만으로는 읽히지 않는다. */}
+      <div
+        className="rounded-rounded border border-ui-border-error bg-ui-bg-subtle px-3 py-2"
+        role="note"
+        data-testid="phone-verify-demo-warning"
+      >
+        <p className="text-xsmall-regular text-ui-fg-error">
+          ⚠️ 실제 본인인증이 아닙니다. 인증 결과는 저장되지 않으며,
+          운영 배포 시 이 영역은 표시되지 않습니다.
+        </p>
+      </div>
       <div className="flex gap-x-2">
         <input
           type="tel"

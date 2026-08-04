@@ -44,6 +44,16 @@ export default async function CustomerServicePage() {
       {/* 공지사항 */}
       <section className="mb-12" data-testid="cs-notices">
         <h2 className="text-large-semi mb-4">공지사항</h2>
+        {/* 비었을 때 제목만 남고 아래가 텅 비면 고장으로 보인다 → 명시적으로 안내한다.
+            (2026-08-03: 예전에는 비면 데모용 가짜 공지를 채웠는데, 운영에서는 그게 더 위험하다) */}
+        {notices.length === 0 && (
+          <p
+            className="py-8 text-center text-small-regular text-ui-fg-muted"
+            data-testid="cs-notices-empty"
+          >
+            등록된 공지사항이 없습니다.
+          </p>
+        )}
         <ul className="flex flex-col divide-y divide-ui-border-base">
           {notices.map((n) => (
             <li key={n.id} className="py-4">
@@ -71,6 +81,14 @@ export default async function CustomerServicePage() {
       {/* 자주 묻는 질문 */}
       <section data-testid="cs-faqs">
         <h2 className="text-large-semi mb-4">자주 묻는 질문</h2>
+        {faqs.length === 0 && (
+          <p
+            className="py-8 text-center text-small-regular text-ui-fg-muted"
+            data-testid="cs-faqs-empty"
+          >
+            등록된 질문이 없습니다. 궁금한 점은 고객센터로 문의해 주세요.
+          </p>
+        )}
         <ul className="flex flex-col divide-y divide-ui-border-base">
           {faqs.map((f) => (
             <li key={f.id} className="py-1">

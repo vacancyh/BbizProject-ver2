@@ -365,6 +365,35 @@ export default async function preflightCheck({ container }: ExecArgs) {
     add("WARN", "테스트데이터", "조회 실패", "customer/category 조회 불가")
   }
 
+  // ═══ 6-1. 데모 소셜 로그인 계정 ══════════════════════════════════════════
+  // 실측(2026-08-03): "카카오로 시작하기" 를 누른 **모든 방문자가 같은 데모 계정**으로
+  // 로그인됐다. 운영에 나가면 다른 고객의 주문내역·배송지가 그대로 보인다.
+  // 스토어프론트는 운영 빌드에서 이 버튼을 렌더하지 않도록 막아 두었지만,
+  // 계정 자체가 남아 있으면 위험하므로 여기서도 확인한다.
+  try {
+    const { data: socials } = await query.graph({
+      entity: "customer",
+      fields: ["id", "email"],
+    })
+    const demoSocial = (socials ?? []).filter((c: any) =>
+      /^(kakao|naver)-demo@/.test(String(c.email ?? ""))
+    )
+    if (demoSocial.length) {
+      add(
+        "BLOCK",
+        "계정",
+        "공용 데모 소셜 계정",
+        `${demoSocial.length}건(${demoSocial.map((d: any) => d.email).join(", ")}) — ` +
+          `이 계정으로 로그인하면 서로 다른 방문자가 같은 계정을 쓰게 됩니다.`,
+        "실제 OAuth 연동 후 이 계정을 삭제하세요. 운영 빌드에서는 버튼이 숨겨지지만 계정은 남아 있습니다."
+      )
+    } else {
+      add("OK", "계정", "공용 데모 소셜 계정", "0건")
+    }
+  } catch {
+    add("WARN", "계정", "데모 소셜 계정 확인 실패", "customer 조회 불가")
+  }
+
   // ═══ 7. 관리자 계정 ══════════════════════════════════════════════════════
   try {
     const { data: users } = await query.graph({ entity: "user", fields: ["id", "email"] })

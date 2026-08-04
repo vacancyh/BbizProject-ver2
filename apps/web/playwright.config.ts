@@ -61,6 +61,7 @@ export default defineConfig({
         "e2e/storefront-feedback.spec.ts",
         "e2e/storefront-password.spec.ts",
         "e2e/postcode-search.spec.ts",
+        "e2e/demo-guards.spec.ts",
       ],
       use: { ...devices["Desktop Chrome"] },
     },

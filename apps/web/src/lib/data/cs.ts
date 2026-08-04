@@ -3,7 +3,14 @@
 // 백엔드 store 라우트로 게시된 공지/FAQ를 조회한다.
 //   - GET /store/notices  (backend: src/api/store/notices/route.ts)
 //   - GET /store/faqs     (backend: src/api/store/faqs/route.ts)
-// 네트워크/백엔드 오류 시 결정적 mock 으로 폴백(화면 깨짐 방지).
+// 네트워크/백엔드 오류 시 폴백.
+//
+// ⚠️ 2026-08-03 수정: 예전에는 **운영에서도** 데이터가 비면 데모용 가짜 공지를 보여줬다.
+//    운영자가 데모 공지를 지우는 순간 "[안내] 설 연휴 배송 일정 안내"(이미 지난 날짜) 같은
+//    **존재하지 않는 공지가 고객에게 표시**된다. 운영자는 "지웠는데 왜 있지?" 하고 혼란스럽고,
+//    고객은 사실이 아닌 안내를 읽는다.
+//    → 가짜 데이터는 **개발 환경에서만** 쓴다. 운영에서는 빈 목록을 그대로 돌려주고
+//      화면이 "등록된 공지가 없습니다"를 표시하게 한다.
 
 import { sdk } from "@lib/config"
 import { getCacheOptions } from "./cookies"
@@ -23,6 +30,12 @@ export type Faq = {
   question: string
   answer: string
 }
+
+/**
+ * 데모 화면용 예시 데이터 — **개발 환경 전용**.
+ * 운영에서 이 값이 고객에게 보이면 사실이 아닌 안내를 하는 것이 된다.
+ */
+const DEMO_FALLBACK_ALLOWED = process.env.NODE_ENV !== "production"
 
 const MOCK_NOTICES: Notice[] = [
   {
@@ -87,8 +100,12 @@ export async function listNotices(): Promise<Notice[]> {
     )
     const notices = res?.notices ?? []
     // 백엔드가 비어있지 않으면 그대로, 비어있으면 mock 폴백(데모 화면 보장)
-    return notices.length ? notices : MOCK_NOTICES
+    if (notices.length) return notices
+    // 비어 있으면 — 운영에서는 빈 목록(화면이 "등록된 공지가 없습니다" 표시)
+    return DEMO_FALLBACK_ALLOWED ? MOCK_NOTICES : []
   } catch {
+    // 조회 실패 — 운영에서는 가짜 공지 대신 빈 목록. 없는 안내를 지어내지 않는다.
+    if (!DEMO_FALLBACK_ALLOWED) return []
     return [...MOCK_NOTICES].sort((a, b) => {
       if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
       return a.created_at < b.created_at ? 1 : -1
@@ -104,8 +121,10 @@ export async function listFaqs(): Promise<Faq[]> {
       next,
     })
     const faqs = res?.faqs ?? []
-    return faqs.length ? faqs : MOCK_FAQS
+    if (faqs.length) return faqs
+    return DEMO_FALLBACK_ALLOWED ? MOCK_FAQS : []
   } catch {
+    if (!DEMO_FALLBACK_ALLOWED) return []
     return MOCK_FAQS
   }
 }
