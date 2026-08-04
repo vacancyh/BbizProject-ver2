@@ -1,0 +1,3 @@
+# 빌드 중간 산출물 — node build.mjs 로 언제든 다시 생김
+*.html
+_*.png
