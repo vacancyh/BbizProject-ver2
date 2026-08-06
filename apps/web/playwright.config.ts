@@ -72,6 +72,24 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      // 양 언어 전 화면 — 영어에서만 깨지는 레이아웃·런타임 에러를 잡는다(2026-08-06)
+      name: "bilingual",
+      testMatch: "e2e/storefront-bilingual.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // 양 언어 실제 조작 — 라벨만 번역되고 동작이 안 붙는 것을 잡는다(2026-08-06)
+      name: "bilingual-flow",
+      testMatch: "e2e/storefront-bilingual-flow.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // 양 언어 × 모바일 — 영문이 길어져 좁은 화면에서 넘치는지
+      name: "bilingual-mobile",
+      testMatch: "e2e/storefront-bilingual.spec.ts",
+      use: { ...devices["Pixel 7"] },
+    },
+    {
       // 접근성(axe) — critical/serious 위반 0 을 게이트로
       name: "a11y",
       testMatch: "e2e/storefront-a11y.spec.ts",

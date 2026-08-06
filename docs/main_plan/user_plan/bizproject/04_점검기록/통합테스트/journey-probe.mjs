@@ -25,6 +25,13 @@
  */
 
 const BASE = process.env.BASE || "http://localhost:9000"
+/**
+ * 언어. 지정하면 모든 요청에 x-medusa-locale 을 붙인다.
+ *   LOCALE=en-US node journey-probe.mjs
+ * 영어 고객이 실제로 끝까지 살 수 있는지 확인하는 용도다 —
+ * 번역 적용 과정에서 금액·재고·주문 흐름이 깨지지 않는지는 따로 봐야 한다.
+ */
+const LOCALE = process.env.LOCALE || null
 const PUB = process.env.PUBKEY || process.env.MEDUSA_PUBLISHABLE_KEY || ""
 
 const stamp = Date.now()
@@ -45,6 +52,7 @@ function step(name, ok, detail) {
 async function api(path, { method = "GET", body, auth = true, headers = {} } = {}) {
   const h = { "content-type": "application/json", ...headers }
   if (PUB) h["x-publishable-api-key"] = PUB
+  if (LOCALE) h["x-medusa-locale"] = LOCALE
   if (auth && token) h["authorization"] = `Bearer ${token}`
   const r = await fetch(BASE + path, {
     method,
@@ -64,7 +72,7 @@ async function api(path, { method = "GET", body, auth = true, headers = {} } = {
 const won = (n) => (n == null ? "?" : Number(n).toLocaleString("ko-KR") + "원")
 
 console.log(`\n구매 전 과정 실주행 → ${BASE}`)
-console.log(`고객: ${CUST.email}`)
+console.log(`고객: ${CUST.email}${LOCALE ? ` · 언어: ${LOCALE}` : ""}`)
 console.log("─".repeat(70))
 
 // ── 1. 회원가입 ─────────────────────────────────────────────────────

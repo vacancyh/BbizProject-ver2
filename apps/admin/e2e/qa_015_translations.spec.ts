@@ -75,5 +75,26 @@ test.describe("QA-015 상품 다국어 입력", () => {
     // 번역이 원본을 덮으면 한국어 고객에게 영어가 보인다 — 가장 큰 사고다.
     await tabs().first().click()
     await expect(titleInput()).toHaveValue(baseTitle)
+
+    // ── 뒷정리: 화면에서 번역을 비워 저장한다 ────────────────────────────
+    // 안 지우면 **실제 상품에 "QA English Title …" 이 남아** 영어 고객에게 그대로 보인다.
+    // (2026-08-06 실측: 이전 실행분이 상품 목록에 남아 있었다)
+    // 지우는 것도 화면에서 하므로 "번역 삭제" 경로까지 함께 검증된다.
+    await tabs().nth(1).click()
+    await titleInput().fill("")
+    // 입력 반영(React 상태)이 끝난 뒤 저장을 눌러야 한다.
+    // 바로 누르면 비우기 전 값으로 저장돼 삭제가 안 된다.
+    await expect(titleInput()).toHaveValue("")
+    await dlg.getByRole("button", { name: "변경사항 저장" }).click()
+    await expect(page.locator('[data-testid="toast"]').first()).toBeVisible({ timeout: 20_000 })
+
+    // 저장 후 컴포넌트가 스스로 다시 읽으므로 제자리에서 확인한다.
+    // (닫았다 다시 여는 방식은 토스트·재렌더와 겹쳐 불안정했다)
+    await expect(titleInput()).toHaveValue("", { timeout: 15_000 })
+    // 미입력 표시(•)가 다시 붙어야 한다 = 번역이 실제로 사라졌다는 화면 근거
+    await expect(tabs().nth(1)).toContainText("•", { timeout: 10_000 })
+    // 원문은 끝까지 그대로
+    await tabs().first().click()
+    await expect(titleInput()).toHaveValue(baseTitle)
   })
 })

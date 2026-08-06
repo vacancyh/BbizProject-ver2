@@ -10,6 +10,19 @@ import AxeBuilder from "@axe-core/playwright"
 
 const CC = process.env.STOREFRONT_REGION ?? "kr"
 
+/**
+ * 언어 지정(2026-08-06). `E2E_LOCALE=en-US` 로 실행하면 **영어 화면의 접근성**을 검사한다.
+ * 문구가 바뀌면 대비·라벨·읽기 순서가 달라질 수 있어 언어별로 봐야 한다.
+ */
+const E2E_LOCALE = process.env.E2E_LOCALE || null
+test.beforeEach(async ({ context }) => {
+  if (E2E_LOCALE) {
+    await context.addCookies([
+      { name: "_medusa_locale", value: E2E_LOCALE, url: "http://localhost:8000" },
+    ])
+  }
+})
+
 const PAGES: { path: string; label: string }[] = [
   { path: `/${CC}`, label: "홈" },
   { path: `/${CC}/store`, label: "전체상품" },

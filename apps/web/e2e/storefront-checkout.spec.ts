@@ -21,6 +21,20 @@ const MEMBER = {
 
 test.describe.configure({ mode: "serial" })
 
+/**
+ * 언어 지정(2026-08-06). `E2E_LOCALE=en-US` 로 실행하면 같은 흐름을 **영어 화면**으로 돈다.
+ * 기존 테스트가 전부 한국어 기준이라, 영어 고객이 실제로 결제까지 가는지는 검증된 적이 없었다.
+ * 지정하지 않으면 기존과 동일(한국어).
+ */
+const E2E_LOCALE = process.env.E2E_LOCALE || null
+test.beforeEach(async ({ context }) => {
+  if (E2E_LOCALE) {
+    await context.addCookies([
+      { name: "_medusa_locale", value: E2E_LOCALE, url: "http://localhost:8000" },
+    ])
+  }
+})
+
 /** 목록 → 첫 상품 상세 → 옵션 선택 → 장바구니 담기 */
 async function addFirstProductToCart(page: Page) {
   await page.goto(`/${CC}/store`)
