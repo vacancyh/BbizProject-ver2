@@ -15,9 +15,9 @@ const Notice = model.define("notice", {
   // 고유 id (prefix = ntc)
   id: model.id({ prefix: "ntc" }).primaryKey(),
   // 공지 제목
-  title: model.text(),
+  title: model.text().translatable(),
   // 공지 본문
-  body: model.text(),
+  body: model.text().translatable(),
   // 상단 고정 여부 (true = 목록 최상단 노출)
   pinned: model.boolean().default(false),
   // 게시 상태

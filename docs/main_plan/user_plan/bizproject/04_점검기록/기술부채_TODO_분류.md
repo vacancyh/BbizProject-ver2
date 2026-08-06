@@ -101,7 +101,7 @@ CLEANUP_APPLY=true CLEANUP_RENAME_TEST_CATEGORIES=true   npx medusa exec ./src/s
 
 회귀 방지 프로브를 남겨 두었다:
 ```bash
-BASE=http://localhost:9000 PUBKEY=pk_...   node docs/main_plan/user_plan/bizproject/보안점검/audit3-concurrency-probe.mjs
+BASE=http://localhost:9000 PUBKEY=pk_...   node docs/main_plan/user_plan/bizproject/04_점검기록/보안점검/audit3-concurrency-probe.mjs
 ```
 
 ---

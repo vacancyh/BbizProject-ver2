@@ -18,6 +18,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createUsersWorkflow } from "@medusajs/medusa/core-flows"
 
 import setupKorea from "./setup-korea"
+import setupTranslation from "./setup-translation"
 import localizeShopData from "./localize-shop-data"
 import seedTestData from "./seed-test-data"
 import seedProductTypes from "./seed-product-types"
@@ -112,6 +113,10 @@ export default async function seedAll({ container }: ExecArgs) {
   // 1) 한국 설정
   await step("한국(KRW) 설정", () => setupKorea({ container } as any))
   await step("현지화(가격/창고명)", () => localizeShopData({ container } as any))
+  // 다국어: 스토어 지원 언어(한국어·영어) + 번역 대상 필드 지정.
+  // 이게 없으면 `/store/locales` 가 빈 배열이라 **스토어프론트 언어 선택기가 아예 안 뜬다.**
+  // (2026-08-05 실측: fresh DB 에서 마이그레이션만 하면 이 상태가 된다)
+  await step("다국어(지원 언어·번역 대상)", () => setupTranslation({ container } as any))
 
   // 2) 카탈로그·고객·주문·재고
   await step("테스트 데이터(상품/고객/주문/리뷰/적립금)", () => seedTestData({ container } as any))

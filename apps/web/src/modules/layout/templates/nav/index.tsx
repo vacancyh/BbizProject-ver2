@@ -1,5 +1,7 @@
 import { Suspense } from "react"
 
+import { BIZ } from "@lib/business-info"
+import { getT } from "@lib/i18n"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
 import { listRegions } from "@lib/data/regions"
@@ -11,6 +13,7 @@ import SearchBar from "@modules/layout/components/search-bar"
 import SideMenu from "@modules/layout/components/side-menu"
 
 export default async function Nav() {
+  const t = await getT()
   const [regions, locales, currentLocale, categories] = await Promise.all([
     listRegions().then((regions: StoreRegion[]) => regions),
     listLocales(),
@@ -44,7 +47,7 @@ export default async function Nav() {
               className="txt-compact-xlarge-plus hover:text-ui-fg-base"
               data-testid="nav-store-link"
             >
-              쇼핑몰
+              {BIZ.name}
             </LocalizedClientLink>
           </div>
 
@@ -56,7 +59,7 @@ export default async function Nav() {
                 href="/account"
                 data-testid="nav-account-link"
               >
-                내 계정
+                {t("nav.account")}
               </LocalizedClientLink>
             </div>
             <Suspense
@@ -66,7 +69,7 @@ export default async function Nav() {
                   href="/cart"
                   data-testid="nav-cart-link"
                 >
-                  장바구니 (0)
+                  {t("nav.cartWithCount", { count: 0 })}
                 </LocalizedClientLink>
               }
             >

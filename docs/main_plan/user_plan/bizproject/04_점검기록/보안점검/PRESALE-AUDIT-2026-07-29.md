@@ -120,7 +120,7 @@ nosniff·X-Frame-Options DENY·Referrer-Policy 설정 · 404/오류 응답에 �
 
 ```bash
 # 전제: 백엔드 :9000 · 스토어프론트 :8000 기동
-cd docs/main_plan/user_plan/bizproject/보안점검
+cd docs/main_plan/user_plan/bizproject/04_점검기록/보안점검
 
 BASE=http://localhost:9000 PUBKEY=<퍼블리셔블키> node presale-security-probe.mjs   # 27 케이스
 BASE=http://localhost:9000 PUBKEY=<퍼블리셔블키> node presale-abuse-probe.mjs      # 11 케이스

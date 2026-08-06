@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import {
   Popover,
   PopoverButton,
@@ -22,6 +23,7 @@ const CartDropdown = ({
 }: {
   cart?: HttpTypes.StoreCart | null
 }) => {
+  const t = useT()
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
   )
@@ -87,7 +89,7 @@ const CartDropdown = ({
             className="h-full flex items-center hover:text-ui-fg-base"
             href="/cart"
             data-testid="nav-cart-link"
-          >{`장바구니 (${totalItems})`}</LocalizedClientLink>
+          >{t("nav.cartWithCount", { count: totalItems })}</LocalizedClientLink>
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}
@@ -105,7 +107,7 @@ const CartDropdown = ({
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
-              <h3 className="text-large-semi">장바구니</h3>
+              <h3 className="text-large-semi">{t("cart.title")}</h3>
             </div>
             {cartState && cartState.items?.length ? (
               <>
@@ -199,7 +201,7 @@ const CartDropdown = ({
                       size="large"
                       data-testid="go-to-cart-button"
                     >
-                      장바구니로 이동
+                      {t("nav.goToCart")}
                     </Button>
                   </LocalizedClientLink>
                 </div>
@@ -210,7 +212,7 @@ const CartDropdown = ({
                   <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
                     <span>0</span>
                   </div>
-                  <span>장바구니가 비어 있습니다.</span>
+                  <span>{t("cart.empty")}</span>
                   <div>
                     <LocalizedClientLink href="/store">
                       <>

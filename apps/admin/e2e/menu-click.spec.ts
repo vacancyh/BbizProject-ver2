@@ -2,7 +2,12 @@
 import { test, expect } from "@playwright/test"
 
 test("사이드바 모든 메뉴 클릭 이동 + 에러 0", async ({ page }) => {
-  test.setTimeout(200000)
+  // 예산 근거(2026-08-05 실측): 메뉴 30개를 **차갑게** 도는 데 269초가 걸렸다.
+  // Next.js dev 는 라우트마다 첫 진입에서 8~13초를 컴파일에 쓴다.
+  // 200초로 잡아두면 `.next` 가 데워져 있을 때만 통과하는 **환경 의존 테스트**가 된다
+  // (실제로 프로덕션 빌드 후 dev 를 재기동하자 캐시가 비면서 실패했다).
+  // 컴파일 비용은 제품 문제가 아니므로, 차가운 상태에서도 돌 만큼 여유를 준다.
+  test.setTimeout(420000)
   const errors: string[] = []
   page.on("pageerror", (e) => errors.push("pageerror:" + e.message))
   page.on("console", (m) => { if (m.type() === "error") errors.push("console:" + m.text().slice(0,100)) })

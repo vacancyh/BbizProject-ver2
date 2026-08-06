@@ -1,3 +1,4 @@
+import { useT } from "@lib/i18n/client"
 import { login } from "@lib/data/customer"
 import SocialLogin from "@modules/account/components/social-login"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -12,6 +13,7 @@ type Props = {
 }
 
 const Login = ({ setCurrentView }: Props) => {
+  const t = useT()
   const [message, formAction] = useActionState(login, null)
 
   return (
@@ -19,23 +21,23 @@ const Login = ({ setCurrentView }: Props) => {
       className="max-w-sm w-full flex flex-col items-center"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi mb-6">다시 오신 것을 환영합니다</h1>
+      <h1 className="text-large-semi mb-6">{t("account.welcomeBack")}</h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-8">
-        로그인하시면 더 편리한 쇼핑을 즐기실 수 있습니다.
+        {t("account.loginHint")}
       </p>
       <form className="w-full" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
-            label="이메일"
+            label={t("account.email")}
             name="email"
             type="email"
-            title="올바른 이메일 주소를 입력하세요."
+            title={t("account.emailInvalid")}
             autoComplete="email"
             required
             data-testid="email-input"
           />
           <Input
-            label="비밀번호"
+            label={t("account.password")}
             name="password"
             type="password"
             autoComplete="current-password"
@@ -50,22 +52,22 @@ const Login = ({ setCurrentView }: Props) => {
             className="text-small-regular text-ui-fg-muted hover:text-ui-fg-base underline"
             data-testid="forgot-password-link"
           >
-            비밀번호를 잊으셨나요?
+            {t("account.forgotPassword")}
           </LocalizedClientLink>
         </div>
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-          로그인
+          {t("account.login")}
         </SubmitButton>
       </form>
       <SocialLogin />
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        아직 회원이 아니신가요?{" "}
+        {t("account.noAccount")}{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
           className="underline"
           data-testid="register-button"
         >
-          회원가입
+          {t("account.register")}
         </button>
       </span>
     </div>

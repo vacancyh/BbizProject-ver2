@@ -31,6 +31,12 @@ function add(level: Level, area: string, title: string, detail: string, action?:
 /** 값이 "아직 안 채운 자리표시자" 인지 판정 */
 const PLACEHOLDER = /\[.*?\]|CHANGE_ME|example\.com|TODO|테스트|QA-\d|placeholder|담당자명|1600-0000|000-00-00000/i
 
+/** 앱 앞의 신뢰 프록시 대수(api/_utils/client-ip.ts 와 동일 규칙) */
+function trustedProxyHops(): number {
+  const n = Number(process.env.TRUSTED_PROXY_HOPS)
+  return Number.isInteger(n) && n > 0 && n < 10 ? n : 0
+}
+
 /** 개발용으로 알려진 위험한 기본값 */
 const KNOWN_DEV_SECRETS = [
   "supersecret",
@@ -90,23 +96,83 @@ export default async function preflightCheck({ container }: ExecArgs) {
     add("WARN", "법정문서", "조회 실패", String((e as Error)?.message).slice(0, 80))
   }
 
-  // ═══ 2. 사업자 정보(스토어프론트 푸터·약관 표기) ═════════════════════════
-  const bizKeys = [
-    { key: "NEXT_PUBLIC_BIZ_NAME", label: "상호" },
-    { key: "NEXT_PUBLIC_BIZ_CEO", label: "대표자" },
-    { key: "NEXT_PUBLIC_BIZ_REG_NO", label: "사업자등록번호" },
-    { key: "NEXT_PUBLIC_BIZ_MAIL_ORDER_NO", label: "통신판매업 신고번호" },
-    { key: "NEXT_PUBLIC_BIZ_ADDRESS", label: "사업장 주소" },
-    { key: "NEXT_PUBLIC_BIZ_PRIVACY_OFFICER", label: "개인정보보호책임자" },
+  // ═══ 2. 사업자 정보(스토어프론트 푸터·고객센터 표기) ═════════════════════
+  //
+  // env 를 채웠는지 묻는 것만으로는 부족하다. 2026-08-04 에 실제로,
+  // 푸터는 env 를 쓰는데 **고객센터 페이지만 번호가 하드코딩**돼 있어
+  // env 를 다 채워도 화면에는 예시 번호(1600-0000)가 그대로 떠 있었다.
+  // 그래서 여기서는 **실제로 렌더된 화면을 받아서** 자리표시자가 남아 있는지 본다.
+  // (env 존재 여부만 보면 거짓 초록불이 된다 — /health 가 DB 죽어도 OK 를 반환하던 것과 같은 유형)
+  const bizLabels = [
+    "상호",
+    "대표자",
+    "사업자등록번호",
+    "통신판매업 신고번호",
+    "사업장 주소",
+    "개인정보보호책임자",
+    "고객센터 전화·이메일",
   ]
-  // 백엔드 프로세스에는 스토어프론트 env 가 없다 — 안내만 한다.
-  add(
-    "WARN",
-    "사업자정보",
-    "푸터 표기 6종",
-    `스토어프론트 .env 에서 설정합니다: ${bizKeys.map((b) => b.label).join(" · ")}`,
-    "전자상거래법상 표시 의무. 통신판매업 신고는 관할 구청에 직접 신청해야 합니다."
+  const storefront = (process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_BASE_URL || "").replace(
+    /\/+$/,
+    ""
   )
+  if (!storefront) {
+    add(
+      "WARN",
+      "사업자정보",
+      "표기 7종",
+      `STOREFRONT_URL 이 없어 화면 확인을 건너뛰었습니다. 스토어프론트 .env 에서 설정합니다: ${bizLabels.join(" · ")}`,
+      "STOREFRONT_URL=https://... 을 주고 다시 실행하면 실제 화면에 자리표시자가 남았는지 검사합니다."
+    )
+  } else {
+    // 표기 정보가 실제로 보이는 두 화면. 자리표시자가 그대로면 법정 표기 위반이다.
+    const pages = [
+      { path: "/kr", label: "푸터(홈)" },
+      { path: "/kr/customer-service", label: "고객센터" },
+    ]
+    for (const p of pages) {
+      try {
+        const ac = new AbortController()
+        const t = setTimeout(() => ac.abort(), 8000)
+        const r = await fetch(storefront + p.path, { signal: ac.signal })
+        clearTimeout(t)
+        if (!r.ok) {
+          add("WARN", "사업자정보", p.label, `${p.path} 응답 ${r.status} — 확인하지 못했습니다.`)
+          continue
+        }
+        const html = await r.text()
+        // 화면에 남아 있으면 안 되는 예시값들
+        const leftovers = [
+          "1600-0000",
+          "000-00-00000",
+          "2026-서울강남-00000",
+          "help@shop.example",
+          "privacy@shop.example",
+          "테헤란로 000",
+        ].filter((v) => html.includes(v))
+        if (leftovers.length) {
+          add(
+            "BLOCK",
+            "사업자정보",
+            p.label,
+            `화면에 예시값이 그대로 노출됩니다: ${leftovers.join(" · ")}`,
+            "스토어프론트 .env 의 NEXT_PUBLIC_BIZ_* / NEXT_PUBLIC_CS_* 를 채우고 **재빌드**하세요(NEXT_PUBLIC_ 은 빌드 시점에 박힙니다)."
+          )
+        } else {
+          add("OK", "사업자정보", p.label, "예시값 없음")
+        }
+      } catch (e: any) {
+        add("WARN", "사업자정보", p.label, `확인 실패: ${e?.message ?? e}`)
+      }
+    }
+    add(
+      "WARN",
+      "사업자정보",
+      "통신판매업 신고",
+      "관할 구청에 직접 신청해야 합니다(자동 확인 불가).",
+      "전자상거래법상 표시 의무"
+    )
+  }
 
   // ═══ 3. 시크릿·운영 설정 ═════════════════════════════════════════════════
   const isProd = process.env.NODE_ENV === "production"
@@ -126,6 +192,54 @@ export default async function preflightCheck({ container }: ExecArgs) {
     } else {
       add("OK", "시크릿", s.label, "설정됨")
     }
+  }
+
+  // ── 레이트리밋이 고객별로 걸리는가 ──────────────────────────────────────
+  // 스토어프론트의 데이터 계층은 Next.js 서버 액션이라, 로그인·리뷰·주문조회가
+  // 고객 브라우저가 아니라 스토어프론트 서버에서 백엔드로 나온다.
+  // 고객 IP 전달을 켜지 않으면 백엔드는 모든 고객을 서버 한 대로 보고,
+  // IP 레이트리밋이 "고객별"이 아니라 "쇼핑몰 전체 합산"이 된다.
+  // 실측(2026-08-04): 서로 다른 고객 10명이 비밀번호를 틀리자 11번째 고객까지 429.
+  if (!process.env.INTERNAL_CLIENT_IP_SECRET) {
+    add(
+      isProd ? "BLOCK" : "WARN",
+      "레이트리밋",
+      "고객 IP 전달",
+      "INTERNAL_CLIENT_IP_SECRET 미설정 — 모든 고객이 레이트리밋 버킷 하나를 공유합니다.",
+      "백엔드와 스토어프론트에 같은 값을 넣고, 스토어프론트 STOREFRONT_TRUSTED_PROXY_HOPS 를 프록시 대수로 설정하세요. 안 하면 고객 10명이 비밀번호를 틀리면 전체 로그인이 5분간 막힙니다."
+    )
+  } else {
+    add("OK", "레이트리밋", "고객 IP 전달", "공유 시크릿 설정됨")
+  }
+  if (isProd && trustedProxyHops() === 0) {
+    add(
+      "WARN",
+      "레이트리밋",
+      "프록시 홉 수",
+      "TRUSTED_PROXY_HOPS 가 0 입니다 — 프록시 뒤라면 직접 호출자 구분이 안 됩니다.",
+      "LB/CDN 뒤에 배포한다면 실제 대수로 설정하세요(보통 1)."
+    )
+  }
+
+  // ── 키 교체(로테이션) 안전성 ────────────────────────────────────────────
+  // ADMIN_2FA_SECRET_KEY / PII_ENCRYPTION_KEY 를 따로 안 넣으면 COOKIE_SECRET 에서 파생된다.
+  // 그 상태로 COOKIE_SECRET 을 바꾸면 **저장된 2FA 시크릿과 PII 가 전부 복호화 불가**가 되는데,
+  // 두 복호화 함수 모두 실패 시 예외 없이 빈 문자열을 돌려주므로 조용히 망가진다
+  // (2FA: 관리자 전원 로그인 불가 / PII: 사업자번호가 빈 값으로 보임).
+  const derivedFrom = [
+    !process.env.ADMIN_2FA_SECRET_KEY ? "2FA 시크릿" : null,
+    !process.env.PII_ENCRYPTION_KEY ? "PII(사업자번호)" : null,
+  ].filter(Boolean)
+  if (derivedFrom.length) {
+    add(
+      isProd ? "BLOCK" : "WARN",
+      "시크릿",
+      "키 파생 의존",
+      `${derivedFrom.join(" · ")} 가 COOKIE_SECRET 에서 파생됩니다 → COOKIE_SECRET 을 바꾸면 함께 깨집니다.`,
+      "전용 키를 따로 주입하세요. 이미 데이터가 있다면 교체 전 rotate-encryption-keys.ts 로 재암호화해야 합니다."
+    )
+  } else {
+    add("OK", "시크릿", "키 파생 의존", "2FA·PII 모두 전용 키 사용")
   }
 
   // 분산 락 — 이번 점검(2026-08-03)에서 고친 금전 결함 3건의 전제 조건

@@ -4,14 +4,16 @@
  * 가드레일: Medusa core 미수정. cms 모듈 전용 테이블만 조회.
  */
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { applyTranslations } from "../../_utils/apply-translations"
 import { CMS_MODULE } from "../../../modules/cms"
 import type CmsModuleService from "../../../modules/cms/service"
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const cms = req.scope.resolve(CMS_MODULE) as unknown as CmsModuleService
   const faqs = await cms.listPublishedFaqs()
+  const localized = await applyTranslations(req, "faq", faqs as any[])
   res.json({
-    faqs: faqs.map((f: any) => ({
+    faqs: localized.map((f: any) => ({
       id: f.id,
       category: f.category,
       question: f.question,

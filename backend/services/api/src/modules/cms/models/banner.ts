@@ -16,7 +16,7 @@ const Banner = model.define("banner", {
   // 종류 (hero=메인 슬라이드, popup=홈 팝업)
   kind: model.text().default("hero"),
   // 제목/문구
-  title: model.text(),
+  title: model.text().translatable(),
   // 이미지 URL
   image_url: model.text(),
   // 클릭 시 이동 링크 (null=링크 없음)

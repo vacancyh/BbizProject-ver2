@@ -44,6 +44,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={t.id}
             className="flex items-center gap-2 rounded bg-surface px-3.5 py-2.5 text-sm shadow-md"
             role="status"
+            // 스토어프론트 토스트와 같은 훅 — E2E 에서 저장 성공/실패를 확인한다
+            data-testid="toast"
+            data-variant={t.tone}
           >
             <span
               className={cn(

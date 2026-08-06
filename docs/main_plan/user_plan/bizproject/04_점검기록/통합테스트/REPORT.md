@@ -29,8 +29,8 @@
 |---|---|---|---|---|---|---|---|
 | A1 | 관리자 로그인 | POST | `/auth/user/emailpass` | 200+token | 200 | ✅ | token |
 | A2 | 관리자 로그인 실패(오비번) | POST | `/auth/user/emailpass` | 401 | 401 | ✅ | status=401 |
-| A3 | 고객 회원가입(register) | POST | `/auth/customer/emailpass/register` | 200+token | 200 | ✅ | itest_1785301620893@kr-itest.local |
-| A4 | 고객 프로필 생성 | POST | `/store/customers` | 200/201 | 200 | ✅ | cus_01KYP49PM2RTYTKNDR9HG1RE6F |
+| A3 | 고객 회원가입(register) | POST | `/auth/customer/emailpass/register` | 200+token | 200 | ✅ | itest_1785974188932@kr-itest.local |
+| A4 | 고객 프로필 생성 | POST | `/store/customers` | 200/201 | 200 | ✅ | cus_01KZA5PVDC7BJ2GCWBTZEVKEQT |
 | A5 | 중복 회원가입 차단 | POST | `/auth/customer/emailpass/register` | 4xx | 401 | ✅ | status=401 |
 | A6 | 신규 고객 로그인 | POST | `/auth/customer/emailpass` | 200+token | 200 | ✅ | token |
 | A7 | 고객 로그인 실패(오비번) | POST | `/auth/customer/emailpass` | 401 | 401 | ✅ | status=401 |
@@ -46,13 +46,13 @@
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
 | B1 | 내 정보 조회 | GET | `/store/customers/me` | 200 | 200 | ✅ | gold@kr-demo.local |
-| B2 | 배송지 목록 | GET | `/store/customers/me/addresses` | 200+≥1 | 200 | ✅ | n=9 |
+| B2 | 배송지 목록 | GET | `/store/customers/me/addresses` | 200+≥1 | 200 | ✅ | n=1 |
 | B3 | 배송지 추가 | POST | `/store/customers/me/addresses` | 200/201 | 200 | ✅ | status=200 |
-| B4 | 적립금 조회 | GET | `/store/customers/me/points` | 200+balance>0 | 200 | ✅ | balance=2662 |
+| B4 | 적립금 조회 | GET | `/store/customers/me/points` | 200+balance>0 | 200 | ✅ | balance=7000 |
 | B5 | 멤버십 등급 | GET | `/store/customers/me/membership` | 200+골드 | 200 | ✅ | tier=골드 |
 | B6a | 동의 조회 | GET | `/store/customers/me/consents` | 200 | 200 | ✅ | {"marketing":false,"sms":false,"email":true} |
 | B6b | 동의 변경 | POST | `/store/customers/me/consents` | 200/201 | 200 | ✅ | status=200 |
-| B7 | 주문 목록 | GET | `/store/orders` | 200+≥1 | 200 | ✅ | n=9 |
+| B7 | 주문 목록 | GET | `/store/orders` | 200+≥1 | 200 | ✅ | n=3 |
 | B8 | 주문 상세 | GET | `/store/orders/:id` | 200 | 200 | ✅ | 19 |
 | B9a | 위시리스트 추가 | POST | `/store/customers/me/wishlist` | 200/201 | 201 | ✅ | status=201 |
 | B9b | 위시리스트 조회 | GET | `/store/customers/me/wishlist` | 200 | 200 | ✅ | status=200 |
@@ -64,15 +64,15 @@
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
 | C1 | 상품 목록 | GET | `/store/products` | 200+상품 | 200 | ✅ | n=5 |
-| C2 | 상품 상세 | GET | `/store/products/:id` | 200 | 200 | ✅ | Medusa Sweatshirt |
-| C3 | 상품 리뷰 목록 | GET | `/store/products/:id/reviews` | 200 | 200 | ✅ | n=8 |
+| C2 | 상품 상세 | GET | `/store/products/:id` | 200 | 200 | ✅ | Medusa Shorts |
+| C3 | 상품 리뷰 목록 | GET | `/store/products/:id/reviews` | 200 | 200 | ✅ | n=0 |
 | C4 | 상품 문의 목록 | GET | `/store/products/:id/inquiries` | 200 | 200 | ✅ | status=200 |
 | C5 | 상품정보고시 | GET | `/store/products/:id/disclosure` | 200/404 | 200 | ✅ | status=200 |
 | C6 | 상품 조회수 기록 | POST | `/store/products/:id/view` | 202 | 202 | ✅ | status=202 |
-| C6b | DB: 조회수 누적 기록 | - | `-` | ≥1 | 200 | ✅ | count=9 |
-| C7 | 쿠폰 | GET | `/store/coupons` | 200 | 200 | ✅ | n=8 |
+| C6b | DB: 조회수 누적 기록 | - | `-` | ≥1 | 200 | ✅ | count=1 |
+| C7 | 쿠폰 | GET | `/store/coupons` | 200 | 200 | ✅ | n=2 |
 | C8 | 타임세일 | GET | `/store/time-sales` | 200 | 200 | ✅ | n=2 |
-| C9 | 배너(hero) | GET | `/store/banners` | 200 | 200 | ✅ | n=11 |
+| C9 | 배너(hero) | GET | `/store/banners` | 200 | 200 | ✅ | n=3 |
 | C10 | 공지 | GET | `/store/notices` | 200 | 200 | ✅ | n=3 |
 | C11 | FAQ | GET | `/store/faqs` | 200 | 200 | ✅ | n=6 |
 | C12 | 홈 큐레이션 | GET | `/store/curated-products` | 200 | 200 | ✅ | n=6 |
@@ -85,16 +85,16 @@
 
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
-| D0 | 리전(KRW) 확보 | GET | `/store/regions` | KRW | 200 | ✅ | reg_01KYK9TZF90B4MK57QYQV0XWW5 |
-| D1 | 카트 생성 | POST | `/store/carts` | 200+cart | 200 | ✅ | cart_01KYP49V7CVA3MPF4JRB3ZDQ95 |
+| D0 | 리전(KRW) 확보 | GET | `/store/regions` | KRW | 200 | ✅ | reg_01KZA59EC9PN44P27VXVQJET7D |
+| D1 | 카트 생성 | POST | `/store/carts` | 200+cart | 200 | ✅ | cart_01KZA5PZVYANJEYTTS4JYAK9X3 |
 | D2 | 카트 배송지 | POST | `/store/carts/:id` | 200 | 200 | ✅ | status=200 |
 | D3a | 배송옵션 조회 | GET | `/store/shipping-options` | 200+옵션 | 200 | ✅ | n=1 |
 | D3b | 배송방법 설정 | POST | `/store/carts/:id/shipping-methods` | 200 | 200 | ✅ | status=200 |
 | D4 | 쿠폰(WELCOME10) 적용 | POST | `/store/carts/:id/promotions` | 200+할인 | 200 | ✅ | discount=1650 |
 | D5 | 적립금 적용 | POST | `/store/carts/:id/points` | 200/400 | 200 | ✅ | status=200 |
-| D6a | 결제 컬렉션 | POST | `/store/payment-collections` | 200 | 200 | ✅ | pay_col_01KYP49Y871DHRPRWW71M9QJM8 |
+| D6a | 결제 컬렉션 | POST | `/store/payment-collections` | 200 | 200 | ✅ | pay_col_01KZA5Q3ZFFFEMB841745H4A3H |
 | D6b | 결제 세션 | POST | `/store/payment-collections/:id/payment-sessions` | 200 | 200 | ✅ | status=200 |
-| D7 | 주문 완료(checkout) | POST | `/store/carts/:id/complete` | 200+order | 200 | ✅ | order_01KYP49YQE2Y0KKBG31TTBS4VD |
+| D7 | 주문 완료(checkout) | POST | `/store/carts/:id/complete` | 200+order | 200 | ✅ | order_01KZA5Q47MX711C36768J6QK29 |
 | D7b | DB: 주문 레코드 존재 | - | `-` | =1 | 200 | ✅ | rows=1 |
 
 ### E. 관리자 기능  (11/11)
@@ -105,7 +105,7 @@
 | E2 | 주문 목록 | GET | `/admin/orders` | 200 | 200 | ✅ | n=5 |
 | E3 | 회원 목록 | GET | `/admin/customers` | 200 | 200 | ✅ | n=5 |
 | E4 | 리뷰 목록 | GET | `/admin/reviews` | 200 | 200 | ✅ | n=10 |
-| E5 | 프로모션 목록 | GET | `/admin/promotions` | 200 | 200 | ✅ | n=5 |
+| E5 | 프로모션 목록 | GET | `/admin/promotions` | 200 | 200 | ✅ | n=3 |
 | E6a | 배너 목록 | GET | `/admin/banners` | 200 | 200 | ✅ | status=200 |
 | E6b | 배너 생성 | POST | `/admin/banners` | 200/201 | 201 | ✅ | status=201 |
 | E7 | 대시보드 통계 | GET | `/admin/dashboard/stats` | 200 | 200 | ✅ | status=200 |
@@ -118,13 +118,13 @@
 | ID | 케이스 | METHOD | PATH | 기대 | status | 결과 | 근거 |
 |---|---|---|---|---|---|---|---|
 | F1a | 리뷰 작성(pending) | POST | `/store/products/:id/reviews` | 200/201 | 201 | ✅ | status=201 |
-| F1b | 관리자 큐 노출 | GET | `/admin/reviews` | pending 노출 | 200 | ✅ | rev_01KYP4A0G63PBBAYVHC14C9MZW |
+| F1b | 관리자 큐 노출 | GET | `/admin/reviews` | pending 노출 | 200 | ✅ | rev_01KZA5Q5KAGNGE0NK32XJXMPTB |
 | F1c | 관리자 리뷰 승인 | POST | `/admin/reviews/:id` | 200 | 200 | ✅ | status=200 |
 | F1d | 승인 리뷰 스토어 노출 | GET | `/store/products/:id/reviews` | published 노출 | 200 | ✅ | 노출 |
-| F2 | 주문→관리자검색 노출 | GET | `/admin/orders-kr/search` | ≥1 | 200 | ✅ | n=10 |
-| F3 | 쿠폰 admin→store 노출 | GET | `/store/coupons` | WELCOME10 | 200 | ✅ | ["KRW5000","WELCOME10","POINTS-H8HBQZ6NZD4C","POINTS-5E826GV |
-| F4 | 관리자 적립→고객 잔액 | POST | `/admin/points/customers/:id/earn` | +500 | 200 | ✅ | 5300→5800 |
-| F4b | DB: 원장 합계=잔액 | - | `-` | 일치 | 200 | ✅ | db_sum=5800 api=5800 |
+| F2 | 주문→관리자검색 노출 | GET | `/admin/orders-kr/search` | ≥1 | 200 | ✅ | n=4 |
+| F3 | 쿠폰 admin→store 노출 | GET | `/store/coupons` | WELCOME10 | 200 | ✅ | ["WELCOME10","KRW5000","POINTS-YTTS4JYAK9X3"] |
+| F4 | 관리자 적립→고객 잔액 | POST | `/admin/points/customers/:id/earn` | +500 | 200 | ✅ | 1300→1800 |
+| F4b | DB: 원장 합계=잔액 | - | `-` | 일치 | 200 | ✅ | db_sum=1800 api=1800 |
 | F5a | 상품 문의 작성 | POST | `/store/products/:id/inquiries` | 200/201 | 201 | ✅ | status=201 |
 | F5b | 관리자 문의 답변 | POST | `/admin/reviews/:id` | 200 | 200 | ✅ | status=200 |
 | F6a | 비회원 주문조회(정상) | POST | `/store/orders/lookup` | 200 | 200 | ✅ | display_id=19 |
@@ -143,9 +143,9 @@
 | G1g | 상품검색·핸들 필터 | GET | `/store/products` | 200 | 200 | ✅ | n=1 |
 | G1h | 상품검색·카테고리 | GET | `/store/products?category_id[]` | 200 | 200 | ✅ | n=1 |
 | G2a | 주문검색·전체 | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=5 |
-| G2b | 주문검색·키워드(email) | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=5 |
+| G2b | 주문검색·키워드(email) | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=4 |
 | G2c | 주문검색·결제상태(captured) | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=0 |
-| G2d | 주문검색·결제상태(authorized) | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=5 |
+| G2d | 주문검색·결제상태(authorized) | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=1 |
 | G2e | 주문검색·배송상태(not_fulfilled) | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=5 |
 | G2f | 주문검색·페이지네이션 | GET | `/admin/orders-kr/search` | 200 | 200 | ✅ | n=2 |
 | G3a | 회원검색·전체 | GET | `/admin/customers` | 200 | 200 | ✅ | n=5 |
@@ -154,9 +154,9 @@
 | G3d | 회원검색·무매칭 | GET | `/admin/customers` | 200 | 200 | ✅ | n=0 |
 | G3e | 회원검색·페이지네이션 | GET | `/admin/customers` | 200 | 200 | ✅ | n=3 |
 | G4a | 리뷰검색·리뷰 전체 | GET | `/admin/reviews` | 200 | 200 | ✅ | n=10 |
-| G4b | 리뷰검색·리뷰 pending | GET | `/admin/reviews` | 200 | 200 | ✅ | n=8 |
+| G4b | 리뷰검색·리뷰 pending | GET | `/admin/reviews` | 200 | 200 | ✅ | n=0 |
 | G4c | 리뷰검색·리뷰 published | GET | `/admin/reviews` | 200 | 200 | ✅ | n=10 |
-| G4d | 리뷰검색·문의(inquiry) | GET | `/admin/reviews` | 200 | 200 | ✅ | n=10 |
+| G4d | 리뷰검색·문의(inquiry) | GET | `/admin/reviews` | 200 | 200 | ✅ | n=7 |
 
 ### H. 부정·경계  (12/12)
 
@@ -182,7 +182,7 @@
 | I1 | 중복가입 레이스: 1건만 성공 | - | `-` | =1 | 200 | ✅ | success=1/5 |
 | I2 | 위시리스트 동시찜 → 중복 없음 | - | `-` | ≤1 | 200 | ✅ | db_rows=0 |
 | I3 | 동시 조회 10건 정합성 | - | `-` | 모두 200 | 200 | ✅ | 200=10/10 |
-| I4 | 동시 적립 lost-update 없음 | - | `-` | +500 일치 | 200 | ✅ | 7000→7500 (db=7500) |
+| I4 | 동시 적립 lost-update 없음 | - | `-` | +500 일치 | 200 | ✅ | 2500→3000 (db=3000) |
 | I5 | 재고 1개 동시주문 3건 → 오버셀 없음 | - | `-` | ≤1 | 200 | ✅ | 주문성공=1/3 (statuses=200,400,400) |
 | I5b | DB: 가용재고 음수 아님 | - | `-` | ≥0 | 200 | ✅ | available=0 |
 

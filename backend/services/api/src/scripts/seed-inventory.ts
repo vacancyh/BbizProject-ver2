@@ -62,10 +62,23 @@ export default async function seedInventory({ container }: ExecArgs) {
     }
 
     // 레벨 설정: 있으면 수량 갱신, 없으면 생성
+    //
+    // ⚠️ **예약분을 얹어서** 설정한다.
+    // 가용재고 = stocked - reserved 이므로, 예약이 쌓인 상태에서 stocked 만 45 로 맞추면
+    // 가용이 0 이 되어 "재고를 넣었는데 담기가 안 되는" 상태가 된다.
+    // (2026-08-05 실측: stocked=45 · reserved=45 · 가용=0 → E2E 2건이
+    //  "Some variant does not have the required inventory" 로 실패)
+    // 프로브·E2E 가 만든 주문의 예약은 그대로 남으므로, 이 스크립트는
+    // **가용재고가 qty 가 되도록** 맞춰 준다.
     const existing = levelByItem.get(itemId!)
     if (existing) {
+      const reserved = Number((existing as any).reserved_quantity ?? 0) || 0
       await inv.updateInventoryLevels([
-        { inventory_item_id: itemId, location_id: locationId, stocked_quantity: qty },
+        {
+          inventory_item_id: itemId,
+          location_id: locationId,
+          stocked_quantity: qty + reserved,
+        },
       ])
       updated++
     } else {

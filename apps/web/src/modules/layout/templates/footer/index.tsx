@@ -5,25 +5,9 @@ import { Text, clx } from "@modules/common/components/ui";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import MedusaCTA from "@modules/layout/components/medusa-cta";
 
-/**
- * 전자상거래법 필수 표기 정보 — 코드가 아니라 **환경변수**로 관리한다.
- * 판매 전 점검 2026-07-28: 기존에는 코드에 하드코딩돼 있어 운영 배포 시 수정 누락 위험이 컸다.
- * `.env.local`(또는 배포 환경변수)에 아래 키를 채우면 그대로 반영된다.
- */
-const BIZ = {
-  name: process.env.NEXT_PUBLIC_BIZ_NAME ?? "쇼핑몰",
-  ceo: process.env.NEXT_PUBLIC_BIZ_CEO ?? "홍길동",
-  regNo: process.env.NEXT_PUBLIC_BIZ_REG_NO ?? "000-00-00000",
-  mailOrderNo: process.env.NEXT_PUBLIC_BIZ_MAIL_ORDER_NO ?? "2026-서울강남-00000",
-  address: process.env.NEXT_PUBLIC_BIZ_ADDRESS ?? "서울특별시 강남구 테헤란로 000",
-  privacyOfficer:
-    process.env.NEXT_PUBLIC_BIZ_PRIVACY_OFFICER ?? "홍길동(privacy@shop.example)",
-  csPhone: process.env.NEXT_PUBLIC_CS_PHONE ?? "1600-0000",
-  csHours: process.env.NEXT_PUBLIC_CS_HOURS ?? "평일 10:00–18:00 (점심 12:00–13:00)",
-  csEmail: process.env.NEXT_PUBLIC_CS_EMAIL ?? "help@shop.example",
-  // 필수 항목이 하나라도 비어 있으면 예시값으로 간주해 화면에 경고를 띄운다.
-  isPlaceholder: !process.env.NEXT_PUBLIC_BIZ_REG_NO,
-}
+// 표기 정보는 @lib/business-info 한 곳에서만 정의한다 —
+// 화면마다 따로 두면 한 곳을 고치고 다른 곳을 빠뜨린다(2026-08-04 고객센터 페이지에서 실제로 발생).
+import { BIZ } from "@lib/business-info"
 
 export default async function Footer() {
   const { collections } = await listCollections({

@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 
+import { BIZ } from "@lib/business-info"
 import { listFaqs, listNotices } from "@lib/data/cs"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import SupportInquiryForm from "@modules/common/components/support-inquiry-form"
@@ -31,12 +32,14 @@ export default async function CustomerServicePage() {
       {/* 1:1 문의 안내 */}
       <section className="rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 mb-12">
         <h2 className="text-large-semi mb-2">1:1 문의</h2>
+        {/* 연락처는 하드코딩 금지 — 푸터와 같은 출처(@lib/business-info)를 쓴다.
+            예전에는 여기만 하드코딩이라 env 를 다 채워도 예시 번호가 노출됐다(2026-08-04). */}
         <p className="text-base-regular text-ui-fg-subtle">
-          전화 <span className="text-ui-fg-base font-semibold">1600-0000</span>{" "}
-          (평일 10:00–18:00, 점심 12:00–13:00)
+          전화 <span className="text-ui-fg-base font-semibold">{BIZ.csPhone}</span>{" "}
+          ({BIZ.csHours})
         </p>
         <p className="text-base-regular text-ui-fg-subtle mb-4">
-          이메일 help@shop.example · 주말·공휴일 휴무
+          이메일 {BIZ.csEmail} · {BIZ.csClosed}
         </p>
         <SupportInquiryForm />
       </section>

@@ -6,7 +6,14 @@
  * kind=hero(메인 슬라이드) / popup(홈 진입 팝업). 게시(published) 항목이 스토어프론트에 노출.
  * 이미지는 URL 입력(외부 스토리지 불필요).
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  TranslationFields,
+  type TranslationFieldsHandle,
+} from "@/components/ui/TranslationFields";
+
+/** 백엔드 translation_settings.banner 와 같은 필드명이어야 저장된다. */
+const BANNER_TR_FIELDS = [{ name: "title", label: "제목/문구", placeholder: "배너 문구" }];
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { ConfirmModal, useToast } from "@/components/ui";
 import {
@@ -31,6 +38,7 @@ export default function BannersPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const trRef = useRef<TranslationFieldsHandle>(null);
   const [saving, setSaving] = useState(false);
 
   const [kind, setKind] = useState<BannerKind>("hero");
@@ -96,7 +104,20 @@ export default function BannersPage() {
       };
       if (editId) await updateBanner(editId, payload);
       else await createBanner(payload);
-      toast.show(editId ? "수정했습니다." : "등록했습니다.", "success");
+      let trFailed: string | null = null;
+      try {
+        await trRef.current?.save();
+      } catch (e) {
+        trFailed = (e as Error).message;
+      }
+      toast.show(
+        trFailed
+          ? `저장했지만 번역 저장에 실패했습니다: ${trFailed}`
+          : editId
+            ? "수정했습니다."
+            : "등록했습니다.",
+        trFailed ? "danger" : "success"
+      );
       reset();
       await load();
     } catch (e) {
@@ -196,16 +217,15 @@ export default function BannersPage() {
                     </select>
                   </label>
                 </div>
-                <label className="field-l">
-                  제목/문구
-                  <input
-                    className="inp"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="배너 문구"
-                    data-testid="banner-title"
-                  />
-                </label>
+                {/* 배너 문구는 고객 화면에 보이는 글자 → 언어별 입력(2026-08-05) */}
+                <TranslationFields
+                  ref={trRef}
+                  reference="banner"
+                  referenceId={editId}
+                  fields={BANNER_TR_FIELDS}
+                  baseValues={{ title }}
+                  onBaseChange={(_, value) => setTitle(value)}
+                />
                 <label className="field-l">
                   이미지 URL
                   <input
@@ -301,6 +321,7 @@ export default function BannersPage() {
                       type="button"
                       className="btn secondary"
                       style={{ padding: "4px 10px", fontSize: 12 }}
+                      aria-label="배너 수정"
                       onClick={() => openEdit(b)}
                     >
                       <Pencil size={13} />
@@ -309,6 +330,7 @@ export default function BannersPage() {
                       type="button"
                       className="btn secondary"
                       style={{ padding: "4px 10px", fontSize: 12 }}
+                      aria-label="배너 삭제"
                       onClick={() => setDelId(b.id)}
                       data-testid="banner-delete"
                     >

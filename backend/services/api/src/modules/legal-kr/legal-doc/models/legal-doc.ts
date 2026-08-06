@@ -28,7 +28,7 @@ const LegalDoc = model.define("legal_doc", {
   // 버전 문자열 (예: "v1.0", "v2.0", "2026-06-01")
   version: model.text(),
   // 약관 본문 (1자 이상)
-  body: model.text(),
+  body: model.text().translatable(),
   // 시행일 (오늘 이후만 허용)
   effective_at: model.dateTime(),
   // 게시 상태 (draft → published → archived)

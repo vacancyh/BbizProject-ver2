@@ -6,7 +6,12 @@
  *  - 카테고리 = 스토어프론트 진열 축(계층/순서/노출). 상품 분류 체계(상품군/유형)와 별개.
  *  - 컬렉션·태그 = GAP_A(메두사 有·우리 자리 신설). 홈 큐레이션 연계 자리.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  TranslationFields,
+  type TranslationFieldsHandle,
+} from "@/components/ui/TranslationFields";
+
 import { Plus, X, FolderTree, Trash2, Search } from "lucide-react";
 import {
   PageHeader,
@@ -46,6 +51,15 @@ import {
   type CategoryOptionMap,
 } from "@/lib/api/category-option-map";
 import { getProductTypes, type ProductTypeNode } from "@/lib/api/product-types";
+
+/**
+ * 카테고리에서 번역 가능한 필드.
+ * 백엔드 `translation_settings.product_category.fields` (name, description) 와 일치해야 한다.
+ */
+const CATEGORY_TR_FIELDS = [
+  { name: "name", label: "카테고리명" },
+  { name: "description", label: "설명", multiline: true },
+];
 
 type Tab = "categories" | "collections" | "tags" | "option-map";
 
@@ -105,6 +119,7 @@ function CategoriesTab() {
 
   const [detail, setDetail] = useState<(Category & { products?: { id: string; title: string; thumbnail: string | null }[] }) | null>(null);
   const [edit, setEdit] = useState({ name: "", handle: "", description: "", is_active: true, rank: 0 });
+  const trRef = useRef<TranslationFieldsHandle>(null);
   const [busy, setBusy] = useState(false);
   const [confirmDel, setConfirmDel] = useState<Category | null>(null);
 
@@ -199,8 +214,21 @@ function CategoriesTab() {
         is_active: edit.is_active,
         rank: Number(edit.rank) || 0,
       });
+      // 번역은 원본과 별도 테이블 — 따로 저장하고 실패를 구분해 알린다.
+      let trFailed: string | null = null;
+      try {
+        await trRef.current?.save();
+      } catch (e) {
+        trFailed = (e as Error).message;
+      }
       await reloadDetail(detail.id);
-      toast.show("카테고리를 저장했습니다.");
+      await trRef.current?.reload();
+      toast.show(
+        trFailed
+          ? `카테고리는 저장했지만 번역 저장에 실패했습니다: ${trFailed}`
+          : "카테고리를 저장했습니다.",
+        trFailed ? "danger" : undefined
+      );
     } catch (e) {
       toast.show(`저장 실패: ${(e as Error).message}`, "danger");
     } finally {
@@ -354,12 +382,18 @@ function CategoriesTab() {
         {detail ? (
           <div className="space-y-5 text-sm">
             <section className="space-y-3 rounded-sm bg-surface-2 p-3">
-              <LabeledInput label="카테고리명" value={edit.name} onChange={(v) => setEdit((s) => ({ ...s, name: v }))} />
+              {/* 카테고리명·설명은 고객 화면에 보이는 글자라 언어별로 필요하다.
+                  slug 는 URL 이므로 번역 대상이 아니다(2026-08-05). */}
+              <TranslationFields
+                ref={trRef}
+                variant="tailwind"
+                reference="product_category"
+                referenceId={detail.id}
+                fields={CATEGORY_TR_FIELDS}
+                baseValues={{ name: edit.name, description: edit.description }}
+                onBaseChange={(name, value) => setEdit((s) => ({ ...s, [name]: value }))}
+              />
               <LabeledInput label="slug(handle)" value={edit.handle} onChange={(v) => setEdit((s) => ({ ...s, handle: v }))} />
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium text-text-2">설명</span>
-                <textarea className="w-full rounded-sm border border-border bg-surface p-2 text-sm outline-none focus:border-primary" rows={2} value={edit.description} onChange={(e) => setEdit((s) => ({ ...s, description: e.target.value }))} />
-              </label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2">
                   <input type="checkbox" checked={edit.is_active} onChange={(e) => setEdit((s) => ({ ...s, is_active: e.target.checked }))} />

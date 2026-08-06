@@ -5,7 +5,22 @@
 # 이후 별도 터미널에서:
 #   cd backend/services/api && DATABASE_URL="postgres://shop:shop_local_2026@127.0.0.1:5434/shop_test" PORT=9009 npx medusa develop
 set -e
-API_DIR="${API_DIR:-$(cd "$(dirname "$0")/../../../../../backend/services/api" && pwd)}"
+# 저장소 루트를 이름으로 찾아 올라간다 — 문서 폴더가 옮겨져도 안 깨지게.
+# (2026-08-04: 문서를 04_점검기록/ 아래로 한 단계 옮기면서 고정 상대경로 `../×5` 가 깨졌다)
+_find_api_dir() {
+  local d
+  d="$(cd "$(dirname "$0")" && pwd)"
+  while [ "$d" != "/" ] && [ -n "$d" ]; do
+    if [ -d "$d/backend/services/api" ]; then
+      printf '%s\n' "$d/backend/services/api"
+      return 0
+    fi
+    d="$(dirname "$d")"
+  done
+  echo "저장소 루트를 찾지 못했습니다. API_DIR 환경변수로 직접 지정하세요." >&2
+  return 1
+}
+API_DIR="${API_DIR:-$(_find_api_dir)}" || exit 1
 DB_URL="postgres://shop:shop_local_2026@127.0.0.1:5434/shop_test"
 export NODE_TLS_REJECT_UNAUTHORIZED=0
 

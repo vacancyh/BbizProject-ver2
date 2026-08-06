@@ -11,6 +11,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PRODUCT_CURATION_MODULE } from "../../../modules/product-curation"
 import type ProductCurationModuleService from "../../../modules/product-curation/service"
 import { rlIncr } from "../../_utils/rate-limit"
+import { clientIp } from "../../_utils/client-ip"
 
 /** 인기 검색어로 노출할 최소 누적 검색 횟수. */
 const MIN_COUNT = 2
@@ -19,10 +20,7 @@ const MIN_COUNT = 2
 // 캐시 서비스(운영: Redis) 기반 → 다중 인스턴스 공유. 미가용 시 인메모리 폴백.
 const RL_WINDOW_MS = 60_000
 const RL_MAX = 30
-function clientIp(req: MedusaRequest): string {
-  const xf = (req.headers["x-forwarded-for"] as string) || ""
-  return (xf.split(",")[0].trim() || req.ip || "unknown").toString()
-}
+// IP 산출은 공통 유틸로 일원화 — XFF 위조로 버킷을 갈아치우는 우회를 막는다(2026-08-04).
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(

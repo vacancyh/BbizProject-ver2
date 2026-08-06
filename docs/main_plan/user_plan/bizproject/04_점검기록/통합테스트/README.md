@@ -50,7 +50,7 @@ BbizProject 백엔드의 `/store` · `/admin` · `/auth` API를 직접 호출해
 
 ```bash
 # 1) 임시 테스트 DB 준비 (스크립트가 마지막에 PUBKEY 를 출력)
-bash docs/main_plan/user_plan/bizproject/통합테스트/setup-test-db.sh
+bash docs/main_plan/user_plan/bizproject/04_점검기록/통합테스트/setup-test-db.sh
 
 # 2) 테스트 백엔드를 별도 포트로 기동 (in-memory redis 로 자동 격리)
 cd backend/services/api
@@ -58,7 +58,7 @@ DATABASE_URL="postgres://shop:shop_local_2026@127.0.0.1:5434/shop_test" PORT=900
 #  → "Server is ready on port: 9009" 대기 (curl http://localhost:9009/health = 200)
 
 # 3) 테스트 실행
-cd ../../../docs/main_plan/user_plan/bizproject/통합테스트
+cd ../../../docs/main_plan/user_plan/bizproject/04_점검기록/통합테스트
 BASE=http://localhost:9009 PUBKEY=<위 출력값> RUN_STAMP="$(date '+%F %T')" node run-all.mjs
 
 #    특정 도메인만:  node run-all.mjs 05-admin 07-search

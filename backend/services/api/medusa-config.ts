@@ -21,6 +21,14 @@ function requireSecret(name: string): string {
 }
 
 module.exports = defineConfig({
+  // ─── 피처 플래그 ─────────────────────────────────────────────────────────
+  // translation: 다국어 콘텐츠 번역(상품명·설명·카테고리명 등)을 켠다.
+  //   이 플래그가 꺼져 있으면 `/store/locales`·`/admin/translations` 라우트가
+  //   **404 로 응답한다** — 모듈을 등록하고 마이그레이션을 돌려도 마찬가지다(2026-08-05 실측).
+  //   기본값은 false 이므로 여기서 명시적으로 켠다. env 로 끌 수도 있다(MEDUSA_FF_TRANSLATION=false).
+  featureFlags: {
+    translation: process.env.MEDUSA_FF_TRANSLATION !== "false",
+  },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     http: {
@@ -76,6 +84,34 @@ module.exports = defineConfig({
           },
         ]
       : []),
+    // ─── 다국어 콘텐츠 번역 (2026-08-05 활성화) ─────────────────────────────
+    //
+    // Medusa 2.15.3 에 이미 들어 있는 모듈인데 **등록이 안 돼 있어 잠들어 있었다.**
+    // 그래서 `/store/locales` 가 404 였고, 스토어프론트의 언어 선택 UI 가
+    // 목록을 못 받아 화면에 안 보였다(코드는 이미 있었다).
+    //
+    // 무엇을 해 주나:
+    //   · `locale`               지원 언어 목록 (로더가 기본 언어 60여 개 자동 시드, ko-KR/en-US 포함)
+    //   · `translation`          엔티티별·언어별 필드 번역값 (reference + reference_id + locale_code)
+    //   · `translation_settings` 어떤 엔티티의 어떤 필드를 번역 대상으로 볼지
+    //
+    // 어떻게 쓰나:
+    //   관리자 — GET/POST `/admin/translations` · `/admin/translations/settings` · `/admin/locales`
+    //   고객   — `x-medusa-locale` 헤더를 붙이면 상품·카테고리 응답이 해당 언어로 치환된다
+    //            (스토어프론트는 `lib/util/get-locale-header.ts` 에서 이미 붙이고 있다)
+    //
+    // ⚠️ 이건 **운영자가 관리하는 콘텐츠**(상품명·설명·카테고리명) 전용이다.
+    //    화면 버튼·안내문 같은 UI 라벨은 번역 대상이 아니라 코드(ko/en 메시지)에서 관리한다.
+    {
+      resolve: "@medusajs/translation",
+      // 커스텀 모듈(공지·FAQ·배너·약관·상품고시)은 **모듈 옵션이 아니라 모델에서** 지정한다.
+      // 필드에 `.translatable()` 을 붙여야 번역 대상으로 인정된다
+      // (모듈 옵션에 넣어도 "notice is not a translatable entity" 로 거부된다 — 2026-08-05 실측).
+      //
+      // ⚠️ 표시만으로는 코어가 응답에 **자동 적용해 주지 않는다.**
+      //    각 store 라우트에서 `applyTranslations()` 를 호출해야 화면에 반영된다
+      //    (src/api/_utils/apply-translations.ts).
+    },
     {
       resolve: "./src/modules/state-machine",
     },

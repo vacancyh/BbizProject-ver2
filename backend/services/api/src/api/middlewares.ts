@@ -26,6 +26,7 @@ import type Admin2faModuleService from "../modules/admin-2fa/service"
 import { CUSTOMER_DORMANCY_MODULE } from "../modules/customer-dormancy"
 import type CustomerDormancyModuleService from "../modules/customer-dormancy/service"
 import { rlGet, rlIncr, rlReset } from "./_utils/rate-limit"
+import { clientIp } from "./_utils/client-ip"
 import { isTokenDenylisted } from "./_utils/token-denylist"
 
 const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
@@ -350,10 +351,6 @@ const FAIL_WINDOW_MS = 5 * 60_000 // IP 5분 창
 const FAIL_MAX = 10 // IP: 창 내 실패 10회 초과 시 차단
 const ACCT_WINDOW_MS = 15 * 60_000 // 계정 15분 창
 const ACCT_FAIL_MAX = 5 // 계정: 창 내 실패 5회 초과 시 잠금
-function clientIp(req: MedusaRequest): string {
-  const xf = (req.headers["x-forwarded-for"] as string) || ""
-  return (xf.split(",")[0].trim() || req.ip || "unknown").toString()
-}
 function loginEmail(req: MedusaRequest): string | null {
   const e = (req.body as any)?.email
   return typeof e === "string" && e.includes("@") ? e.trim().toLowerCase() : null
@@ -684,9 +681,7 @@ async function orderLookupRateLimit(
   next: MedusaNextFunction
 ) {
   try {
-    const fwd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
-    const ip = fwd || (req as any).ip || "unknown"
-    const n = await rlIncr(req.scope, `rl:order-lookup:${ip}`, 60_000)
+    const n = await rlIncr(req.scope, `rl:order-lookup:${clientIp(req)}`, 60_000)
     if (n > 30) {
       res.status(429).json({ message: "요청이 많습니다. 잠시 후 다시 시도해 주세요." })
       return
@@ -730,8 +725,7 @@ async function twoFaVerifyRateLimit(
 ) {
   try {
     const uid = actorIdOf(req)
-    const fwd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
-    const who = uid || fwd || (req as any).ip || "unknown"
+    const who = uid || clientIp(req)
     const n = await rlIncr(req.scope, `rl:2fa-verify:${who}`, 5 * 60_000)
     if (n > 20) {
       res.status(429).json({ message: "인증 시도가 많습니다. 잠시 후 다시 시도해 주세요.", code: "TOO_MANY_ATTEMPTS" })
@@ -747,9 +741,7 @@ async function twoFaVerifyRateLimit(
 function ipRateLimit(bucket: string, max: number, windowMs = 60_000) {
   return async function (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
     try {
-      const fwd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
-      const ip = fwd || (req as any).ip || "unknown"
-      const n = await rlIncr(req.scope, `rl:${bucket}:${ip}`, windowMs)
+      const n = await rlIncr(req.scope, `rl:${bucket}:${clientIp(req)}`, windowMs)
       if (n > max) {
         res.status(429).json({ message: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.", code: "RATE_LIMITED" })
         return

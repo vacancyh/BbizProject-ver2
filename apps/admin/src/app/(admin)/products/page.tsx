@@ -26,6 +26,10 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { DetailDrawer } from "@/components/ui/DetailDrawer";
+import {
+  TranslationFields,
+  type TranslationFieldsHandle,
+} from "@/components/ui/TranslationFields";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
@@ -67,7 +71,17 @@ const PAGE_SIZE = 20;
 const INV_PAGE_SIZE = 20;
 
 type ActiveTab = "products" | "inventory";
-type LangTab = "KR" | "EN" | "JP";
+/**
+ * 상품에서 번역 가능한 필드.
+ * 백엔드 `translation_settings.product.fields` 와 이름이 같아야 저장된다
+ * (setup-translation.ts 에서 title/subtitle/description/material 로 설정).
+ * handle 은 URL 이라 언어별로 달라지면 안 되므로 제외한다.
+ */
+const PRODUCT_TR_FIELDS = [
+  { name: "title", label: "상품명", placeholder: "예) 프리미엄 코튼 오버핏 티셔츠" },
+  { name: "subtitle", label: "부제" },
+  { name: "description", label: "상세 설명", multiline: true },
+];
 /** 상세 드로어 내부 탭 — [d3] 옵션·변형 / 가격관리 추가 */
 type DetailTab = "basic" | "variants" | "price";
 
@@ -140,7 +154,7 @@ export default function ProductsPage() {
   const [confirmStop, setConfirmStop]   = useState<ProductDetail | null>(null);
   const [busy, setBusy]                 = useState(false);
   const [creating, setCreating]         = useState(false);
-  const [langTab, setLangTab]           = useState<LangTab>("KR");
+  const detailTrRef = useRef<TranslationFieldsHandle>(null);
   /** [d3] 상세 드로어 내부 탭 */
   const [detailTab, setDetailTab]       = useState<DetailTab>("basic");
 
@@ -347,7 +361,7 @@ export default function ProductsPage() {
     const md = (p.metadata ?? {}) as { catalog_type_id?: string; disclosure?: Record<string, string> };
     setTypeId(md.catalog_type_id ?? "");
     setDisclosure(md.disclosure ?? {});
-    setLangTab("KR");
+
   }
 
   async function openDetail(p: ProductListItem) {
@@ -384,8 +398,22 @@ export default function ProductsPage() {
         description: basic.description.trim() || null,
         handle: basic.handle.trim(),
       });
+      // 번역은 원본과 별도 테이블이라 따로 저장한다.
+      // 번역만 실패해도 기본 정보 저장은 이미 끝났으므로, 실패를 구분해서 알린다.
+      let trFailed: string | null = null;
+      try {
+        await detailTrRef.current?.save();
+      } catch (e) {
+        trFailed = (e as Error).message;
+      }
       await reloadDetail(detail.id);
-      toast.show("기본 정보를 저장했습니다.");
+      await detailTrRef.current?.reload();
+      toast.show(
+        trFailed
+          ? `기본 정보는 저장했지만 번역 저장에 실패했습니다: ${trFailed}`
+          : "기본 정보를 저장했습니다.",
+        trFailed ? "danger" : undefined
+      );
     } catch (e) {
       toast.show(`저장 실패: ${(e as Error).message}`, "danger");
     } finally { setBusy(false); }
@@ -989,21 +1017,19 @@ export default function ProductsPage() {
             {/* ── 기본 정보 ── */}
             <div className="dsec">
               <div className="dsec-t">기본 정보</div>
-              {/* langField: 상품명 */}
-              <div className="frow">
-                <span className="field-l">상품명 <span className="req">*</span></span>
-                <div className="lang-tabs">
-                  {(["KR", "EN", "JP"] as LangTab[]).map((l) => (
-                    <span key={l} className={`lang-tab${langTab === l ? " active" : ""}`} onClick={() => setLangTab(l)}>{l}</span>
-                  ))}
-                </div>
-                <input
-                  className="inp"
-                  value={basic.title}
-                  placeholder="예) 프리미엄 코튼 오버핏 티셔츠"
-                  onChange={(e) => setBasic((b) => ({ ...b, title: e.target.value }))}
-                />
-              </div>
+              {/* 언어별 입력 — 예전엔 KR/EN/JP 탭이 화면에만 있고 동작하지 않았다.
+                  지금은 스토어 지원 언어에서 탭을 만들고, 기본 언어 외에는
+                  번역 테이블에 저장한다(2026-08-05). */}
+              <TranslationFields
+                ref={detailTrRef}
+                reference="product"
+                referenceId={detail.id}
+                fields={PRODUCT_TR_FIELDS}
+                baseValues={basic}
+                onBaseChange={(name, value) =>
+                  setBasic((b) => ({ ...b, [name]: value }))
+                }
+              />
               {/* 카테고리 */}
               <div className="frow">
                 <span className="field-l">카테고리 <span className="req">*</span></span>
@@ -1016,32 +1042,13 @@ export default function ProductsPage() {
                   </select>
                 </div>
               </div>
-              {/* 상품코드 */}
+              {/* 상품코드 — URL 에 쓰이므로 언어별로 달라지면 안 된다(번역 대상 아님) */}
               <div className="frow">
                 <span className="field-l">상품코드</span>
                 <input
                   className="inp"
                   value={basic.handle}
                   onChange={(e) => setBasic((b) => ({ ...b, handle: e.target.value }))}
-                />
-              </div>
-              {/* 부제 */}
-              <div className="frow">
-                <span className="field-l">부제</span>
-                <input
-                  className="inp"
-                  value={basic.subtitle}
-                  onChange={(e) => setBasic((b) => ({ ...b, subtitle: e.target.value }))}
-                />
-              </div>
-              {/* 설명 */}
-              <div className="frow">
-                <span className="field-l">상세 설명</span>
-                <textarea
-                  className="inp"
-                  rows={3}
-                  value={basic.description}
-                  onChange={(e) => setBasic((b) => ({ ...b, description: e.target.value }))}
                 />
               </div>
             </div>
@@ -1237,20 +1244,19 @@ export default function ProductsPage() {
 
           <div className="dsec">
             <div className="dsec-t">기본 정보</div>
-            {/* langField */}
+            {/* 신규 등록에는 언어 탭을 두지 않는다 — 저장 전에는 번역을 붙일 대상(id)이 없다.
+                저장 후 상세에서 언어 탭이 나타난다(2026-08-05). */}
             <div className="frow">
               <span className="field-l">상품명 <span className="req">*</span></span>
-              <div className="lang-tabs">
-                {(["KR", "EN", "JP"] as LangTab[]).map((l) => (
-                  <span key={l} className={`lang-tab${langTab === l ? " active" : ""}`} onClick={() => setLangTab(l)}>{l}</span>
-                ))}
-              </div>
               <input
                 className="inp"
                 value={form.title}
                 placeholder="예) 프리미엄 코튼 오버핏 티셔츠"
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               />
+              <p className="hint" style={{ marginTop: 4 }}>
+                영어 등 다국어 이름은 저장한 뒤 상세 화면에서 입력합니다.
+              </p>
             </div>
             {/* 카테고리 */}
             <div className="frow">

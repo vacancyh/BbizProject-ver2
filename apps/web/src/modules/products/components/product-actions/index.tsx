@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { addToCart } from "@lib/data/cart"
 import { useToast } from "@modules/common/components/toast"
 import { useIntersection } from "@lib/hooks/use-in-view"
@@ -34,6 +35,7 @@ export default function ProductActions({
   product,
   disabled,
 }: ProductActionsProps) {
+  const t = useT()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -140,12 +142,12 @@ export default function ProductActions({
         quantity: 1,
         countryCode,
       })
-      showToast("장바구니에 담았습니다.", "success")
+      showToast(t("product.addedToCart"), "success")
     } catch (e) {
       showToast(
         e instanceof Error && e.message
           ? e.message
-          : "장바구니에 담지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          : t("product.addToCartFailed"),
         "error"
       )
     } finally {
@@ -195,10 +197,10 @@ export default function ProductActions({
           data-testid="add-product-button"
         >
           {!selectedVariant && !options
-            ? "옵션을 선택하세요"
+            ? t("product.selectOption")
             : !inStock || !isValidVariant
-            ? "품절"
-            : "장바구니 담기"}
+            ? t("product.soldOut")
+            : t("product.addToCart")}
         </Button>
 
         {/* 품절 변형 선택 시 재입고 알림 신청 */}

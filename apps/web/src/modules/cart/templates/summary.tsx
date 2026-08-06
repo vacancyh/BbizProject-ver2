@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button, Heading } from "@modules/common/components/ui"
 
 import CartTotals from "@modules/common/components/cart-totals"
@@ -24,6 +25,7 @@ function getCheckoutStep(cart: HttpTypes.StoreCart) {
 }
 
 const Summary = ({ cart }: SummaryProps) => {
+  const t = useT()
   const step = getCheckoutStep(cart)
 
   return (
@@ -42,7 +44,7 @@ const Summary = ({ cart }: SummaryProps) => {
         href={"/checkout?step=" + step}
         data-testid="checkout-button"
       >
-        <Button className="w-full h-12 rounded-none text-base">주문하기</Button>
+        <Button className="w-full h-12 rounded-none text-base">{t("cart.checkout")}</Button>
       </LocalizedClientLink>
     </div>
   )

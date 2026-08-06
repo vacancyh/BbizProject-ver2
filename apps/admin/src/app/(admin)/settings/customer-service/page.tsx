@@ -6,8 +6,22 @@
  * 백엔드 cms 모듈(/admin/notices, /admin/faqs) 래핑(@/lib/api/cms).
  * 게시(published) 콘텐츠가 스토어프론트 /고객센터 화면에 노출된다.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  TranslationFields,
+  type TranslationFieldsHandle,
+} from "@/components/ui/TranslationFields";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
+
+/** 백엔드 translation_settings 의 필드명과 같아야 저장된다. */
+const NOTICE_TR_FIELDS = [
+  { name: "title", label: "제목", placeholder: "공지 제목" },
+  { name: "body", label: "본문", multiline: true, placeholder: "공지 본문" },
+];
+const FAQ_TR_FIELDS = [
+  { name: "question", label: "질문", placeholder: "질문" },
+  { name: "answer", label: "답변", multiline: true, placeholder: "답변" },
+];
 import { ConfirmModal, useToast } from "@/components/ui";
 import {
   listNotices,
@@ -50,6 +64,8 @@ export default function CustomerServicePage() {
   // 폼 상태 (생성/수정 공용). editId=null → 생성
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const noticeTrRef = useRef<TranslationFieldsHandle>(null);
+  const faqTrRef = useRef<TranslationFieldsHandle>(null);
   const [saving, setSaving] = useState(false);
 
   // 공지 폼 필드
@@ -158,7 +174,22 @@ export default function CustomerServicePage() {
         if (editId) await updateFaq(editId, payload);
         else await createFaq(payload);
       }
-      toast.show(editId ? "수정했습니다." : "등록했습니다.", "success");
+      // 번역은 원본과 별도 테이블 — 따로 저장하고 실패를 구분해 알린다.
+      let trFailed: string | null = null;
+      try {
+        if (tab === "notices") await noticeTrRef.current?.save();
+        else await faqTrRef.current?.save();
+      } catch (e) {
+        trFailed = (e as Error).message;
+      }
+      toast.show(
+        trFailed
+          ? `저장했지만 번역 저장에 실패했습니다: ${trFailed}`
+          : editId
+            ? "수정했습니다."
+            : "등록했습니다.",
+        trFailed ? "danger" : "success"
+      );
       resetForm();
       await load();
     } catch (e) {
@@ -246,27 +277,19 @@ export default function CustomerServicePage() {
 
               {tab === "notices" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <label className="field-l">
-                    제목
-                    <input
-                      className="inp"
-                      value={nTitle}
-                      onChange={(e) => setNTitle(e.target.value)}
-                      placeholder="공지 제목"
-                      data-testid="notice-title"
-                    />
-                  </label>
-                  <label className="field-l">
-                    본문
-                    <textarea
-                      className="inp"
-                      rows={4}
-                      value={nBody}
-                      onChange={(e) => setNBody(e.target.value)}
-                      placeholder="공지 본문"
-                      data-testid="notice-body"
-                    />
-                  </label>
+                  {/* 공지는 고객 화면에 그대로 보이는 글자 → 언어별 입력(2026-08-05).
+                      신규 등록(editId 없음)에는 붙일 대상 id 가 없어 기본 언어만 받는다. */}
+                  <TranslationFields
+                    ref={noticeTrRef}
+                    reference="notice"
+                    referenceId={editId}
+                    fields={NOTICE_TR_FIELDS}
+                    baseValues={{ title: nTitle, body: nBody }}
+                    onBaseChange={(name, value) => {
+                      if (name === "title") setNTitle(value)
+                      else setNBody(value)
+                    }}
+                  />
                   <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                     <label
                       style={{ display: "flex", gap: 6, alignItems: "center" }}
@@ -341,27 +364,17 @@ export default function CustomerServicePage() {
                       </select>
                     </label>
                   </div>
-                  <label className="field-l">
-                    질문
-                    <input
-                      className="inp"
-                      value={fQuestion}
-                      onChange={(e) => setFQuestion(e.target.value)}
-                      placeholder="질문"
-                      data-testid="faq-question"
-                    />
-                  </label>
-                  <label className="field-l">
-                    답변
-                    <textarea
-                      className="inp"
-                      rows={3}
-                      value={fAnswer}
-                      onChange={(e) => setFAnswer(e.target.value)}
-                      placeholder="답변"
-                      data-testid="faq-answer"
-                    />
-                  </label>
+                  <TranslationFields
+                    ref={faqTrRef}
+                    reference="faq"
+                    referenceId={editId}
+                    fields={FAQ_TR_FIELDS}
+                    baseValues={{ question: fQuestion, answer: fAnswer }}
+                    onBaseChange={(name, value) => {
+                      if (name === "question") setFQuestion(value)
+                      else setFAnswer(value)
+                    }}
+                  />
                 </div>
               )}
 
@@ -417,6 +430,7 @@ export default function CustomerServicePage() {
                         type="button"
                         className="btn secondary"
                         style={{ padding: "4px 10px", fontSize: 12 }}
+                        aria-label="공지 수정"
                         onClick={() => openEditNotice(n)}
                       >
                         <Pencil size={13} />
@@ -425,6 +439,7 @@ export default function CustomerServicePage() {
                         type="button"
                         className="btn secondary"
                         style={{ padding: "4px 10px", fontSize: 12 }}
+                        aria-label="공지 삭제"
                         onClick={() => setDelTarget({ kind: "notices", id: n.id })}
                         data-testid="notice-delete"
                       >
@@ -455,6 +470,7 @@ export default function CustomerServicePage() {
                       type="button"
                       className="btn secondary"
                       style={{ padding: "4px 10px", fontSize: 12 }}
+                      aria-label="FAQ 수정"
                       onClick={() => openEditFaq(f)}
                     >
                       <Pencil size={13} />
@@ -463,6 +479,7 @@ export default function CustomerServicePage() {
                       type="button"
                       className="btn secondary"
                       style={{ padding: "4px 10px", fontSize: 12 }}
+                      aria-label="FAQ 삭제"
                       onClick={() => setDelTarget({ kind: "faqs", id: f.id })}
                       data-testid="faq-delete"
                     >

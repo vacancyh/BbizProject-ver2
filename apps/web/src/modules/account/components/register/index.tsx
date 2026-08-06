@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { useActionState } from "react"
 import Input from "@modules/common/components/input"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
@@ -14,6 +15,7 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
+  const t = useT()
   const [message, formAction] = useActionState(signup as (state: string | null, formData: FormData) => Promise<string | null>, null as string | null)
 
   return (
@@ -21,28 +23,28 @@ const Register = ({ setCurrentView }: Props) => {
       className="max-w-sm flex flex-col items-center"
       data-testid="register-page"
     >
-      <h1 className="text-large-semi mb-6">회원가입</h1>
+      <h1 className="text-large-semi mb-6">{t("account.register")}</h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-4">
-        회원으로 가입하시고 더 편리한 쇼핑 혜택을 누려보세요.
+        {t("account.registerHint")}
       </p>
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
-            label="이름"
+            label={t("account.firstName")}
             name="first_name"
             required
             autoComplete="given-name"
             data-testid="first-name-input"
           />
           <Input
-            label="성"
+            label={t("account.lastName")}
             name="last_name"
             required
             autoComplete="family-name"
             data-testid="last-name-input"
           />
           <Input
-            label="이메일"
+            label={t("account.email")}
             name="email"
             required
             type="email"
@@ -50,25 +52,25 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="email-input"
           />
           <Input
-            label="휴대폰"
+            label={t("account.phone")}
             name="phone"
             type="tel"
             autoComplete="tel"
             data-testid="phone-input"
           />
           <Input
-            label="비밀번호"
+            label={t("account.password")}
             name="password"
             required
             type="password"
             autoComplete="new-password"
             minLength={8}
             pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
-            title="8자 이상, 영문과 숫자를 포함해 주세요."
+            title={t("account.passwordRule")}
             data-testid="password-input"
           />
           <p className="text-xsmall-regular text-ui-fg-muted -mt-2">
-            비밀번호는 8자 이상이며 영문과 숫자를 포함해야 합니다.
+            {t("account.passwordRuleHint")}
           </p>
           <div className="mt-2">
             <PhoneVerify />
@@ -76,33 +78,33 @@ const Register = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage error={message} data-testid="register-error" />
         <span className="text-center text-ui-fg-base text-small-regular mt-6">
-          가입 시{" "}
+          {t("account.agreePrefix")}{" "}
           <LocalizedClientLink
             href="/content/privacy-policy"
             className="underline"
           >
-            개인정보처리방침
+            {t("account.privacyPolicy")}
           </LocalizedClientLink>{" "}
-          및{" "}
+          {t("account.agreeMiddle")}{" "}
           <LocalizedClientLink
             href="/content/terms-of-use"
             className="underline"
           >
-            이용약관
+            {t("account.termsOfUse")}
           </LocalizedClientLink>
-          에 동의하게 됩니다.
+          {t("account.agreeSuffix")}
         </span>
         <SubmitButton className="w-full mt-6" data-testid="register-button">
-          가입하기
+          {t("account.submitRegister")}
         </SubmitButton>
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        이미 회원이신가요?{" "}
+        {t("account.hasAccount")}{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
           className="underline"
         >
-          로그인
+          {t("account.login")}
         </button>
       </span>
     </div>

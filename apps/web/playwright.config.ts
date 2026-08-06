@@ -66,6 +66,12 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      // 다국어 — 언어 전환이 조용히 끊기거나 번역 키가 노출되는 것을 막는다(2026-08-05)
+      name: "i18n",
+      testMatch: "e2e/storefront-i18n.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       // 접근성(axe) — critical/serious 위반 0 을 게이트로
       name: "a11y",
       testMatch: "e2e/storefront-a11y.spec.ts",
