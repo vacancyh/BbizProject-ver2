@@ -71,19 +71,28 @@ const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
         inner
       )}
 
+      {/* 점은 8px 로 보이되 **누르는 영역은 24px** 로 넓힌다.
+          버튼 자체를 8×8 로 두면 모바일에서 사실상 못 누른다(WCAG 2.5.8 최소 24×24).
+          gap 을 줄여 시각적 간격은 그대로 유지한다. (2026-08-06 실측으로 발견) */}
       {count > 1 && (
-        <div className="absolute bottom-5 inset-x-0 z-20 flex justify-center gap-2">
+        <div className="absolute bottom-3 inset-x-0 z-20 flex justify-center gap-0">
           {banners.map((_, i) => (
             <button
               key={i}
               type="button"
               aria-label={`배너 ${i + 1}`}
+              aria-current={i === idx ? "true" : undefined}
               onClick={() => setIdx(i)}
-              className={
-                "h-2 w-2 rounded-full transition-colors " +
-                (i === idx ? "bg-white" : "bg-white/50")
-              }
-            />
+              className="grid h-6 w-6 place-items-center"
+            >
+              <span
+                aria-hidden="true"
+                className={
+                  "block h-2 w-2 rounded-full transition-colors " +
+                  (i === idx ? "bg-white" : "bg-white/50")
+                }
+              />
+            </button>
           ))}
         </div>
       )}

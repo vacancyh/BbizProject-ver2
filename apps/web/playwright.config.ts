@@ -84,6 +84,12 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      // 레이아웃 깨짐 — 요소 화면밖·이미지깨짐·작은 터치타깃을 4개 폭 × 2언어로(2026-08-06)
+      name: "layout",
+      testMatch: "e2e/storefront-layout.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       // 양 언어 × 모바일 — 영문이 길어져 좁은 화면에서 넘치는지
       name: "bilingual-mobile",
       testMatch: "e2e/storefront-bilingual.spec.ts",
