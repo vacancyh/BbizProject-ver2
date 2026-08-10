@@ -10,6 +10,7 @@ import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SearchBar from "@modules/layout/components/search-bar"
+import LanguageSwitcher from "@modules/layout/components/language-switcher"
 import SideMenu from "@modules/layout/components/side-menu"
 
 export default async function Nav() {
@@ -37,7 +38,7 @@ export default async function Nav() {
         <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
           <div className="flex-1 basis-0 h-full flex items-center">
             <div className="h-full">
-              <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} categories={topCategories} />
+              <SideMenu regions={regions} categories={topCategories} />
             </div>
           </div>
 
@@ -53,6 +54,11 @@ export default async function Nav() {
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <SearchBar />
+            {/* 언어 전환 — 사이드메뉴 안에 있어 찾기 어려웠다. 헤더로 올렸다(2026-08-10).
+                모바일에서도 보이도록 small: 분기 밖에 둔다. */}
+            {!!locales?.length && (
+              <LanguageSwitcher locales={locales} currentLocale={currentLocale} />
+            )}
             <div className="hidden small:flex items-center gap-x-6 h-full">
               <LocalizedClientLink
                 className="hover:text-ui-fg-base"

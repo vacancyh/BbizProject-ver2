@@ -8,8 +8,6 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { Text, clx } from "@modules/common/components/ui"
 import { Fragment } from "react"
 import CountrySelect from "../country-select"
-import LanguageSelect from "../language-select"
-import { Locale } from "@lib/data/locales"
 
 
 const SideMenuItems: { label: string; href: string; testid: string }[] = [
@@ -21,19 +19,14 @@ const SideMenuItems: { label: string; href: string; testid: string }[] = [
 
 type SideMenuProps = {
   regions: HttpTypes.StoreRegion[] | null
-  locales: Locale[] | null
-  currentLocale: string | null
   categories?: HttpTypes.StoreProductCategory[]
 }
 
 const SideMenu = ({
   regions,
-  locales,
-  currentLocale,
   categories = [],
 }: SideMenuProps) => {
   const countryToggleState = useToggleState()
-  const languageToggleState = useToggleState()
 
   return (
     <div className="h-full">
@@ -116,26 +109,9 @@ const SideMenu = ({
                         </ul>
                       </div>
                     )}
+                    {/* 언어 선택은 헤더로 옮겼다(2026-08-10) — 사이드메뉴 안에 있어 찾기 어려웠다.
+                        → modules/layout/components/language-switcher */}
                     <div className="flex flex-col gap-y-6">
-                      {!!locales?.length && (
-                        <div
-                          className="flex justify-between"
-                          onMouseEnter={languageToggleState.open}
-                          onMouseLeave={languageToggleState.close}
-                        >
-                          <LanguageSelect
-                            toggleState={languageToggleState}
-                            locales={locales}
-                            currentLocale={currentLocale}
-                          />
-                          <ArrowRightMini
-                            className={clx(
-                              "transition-transform duration-150",
-                              languageToggleState.state ? "-rotate-90" : ""
-                            )}
-                          />
-                        </div>
-                      )}
                       <div
                         className="flex justify-between"
                         onMouseEnter={countryToggleState.open}

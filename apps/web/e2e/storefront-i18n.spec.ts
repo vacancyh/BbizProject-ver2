@@ -83,6 +83,31 @@ test.describe("다국어 화면", () => {
     }
   })
 
+  test("헤더 언어 전환기로 실제 전환된다", async ({ page }) => {
+    // 언어 선택은 사이드메뉴가 아니라 **헤더**에 있어야 한다(2026-08-10 이동).
+    // 쿠키를 직접 심는 다른 테스트와 달리, 여기서는 고객이 하는 그대로 눌러서 바꾼다.
+    await visit(page, `/${CC}/cart`)
+
+    const btn = page.getByTestId("language-switcher-button")
+    await expect(btn).toBeVisible({ timeout: 30_000 })
+    expect(await btn.evaluate((el) => !!el.closest("header")), "헤더 안에 있어야 한다").toBe(true)
+
+    // 기본은 한국어
+    await expect(btn).toContainText("KO")
+    await expect(page.getByText("장바구니가 비어 있습니다")).toBeVisible()
+
+    // 영어로 전환
+    await btn.click()
+    await page.getByTestId("language-option-en-US").click()
+    await expect(page.getByText("Your cart is empty")).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByTestId("language-switcher-button")).toContainText("EN")
+
+    // 다시 한국어로
+    await page.getByTestId("language-switcher-button").click()
+    await page.getByTestId("language-option-ko-KR").click()
+    await expect(page.getByText("장바구니가 비어 있습니다")).toBeVisible({ timeout: 30_000 })
+  })
+
   test("모르는 언어는 기본(한국어)으로 떨어진다", async ({ page }) => {
     await visit(page, `/${CC}/cart`, "zz-ZZ")
     await expect(page.getByText("장바구니가 비어 있습니다")).toBeVisible({ timeout: 30_000 })
