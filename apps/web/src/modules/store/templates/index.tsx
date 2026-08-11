@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
 import SearchSuggestions from "@modules/store/components/search-suggestions"
+import { getT } from "@lib/i18n"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import {
   getPopularSearchTerms,
@@ -27,6 +28,7 @@ const StoreTemplate = async ({
   price?: string
   countryCode: string
 }) => {
+  const t = await getT()
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
 
@@ -56,10 +58,11 @@ const StoreTemplate = async ({
           >
             {q ? (
               <>
-                <span className="text-ui-fg-interactive">{q}</span> 검색 결과
+                <span className="text-ui-fg-interactive">{q}</span>
+                {t("store.searchResultsSuffix")}
               </>
             ) : (
-              "전체 상품"
+              t("store.title")
             )}
           </h1>
         </div>

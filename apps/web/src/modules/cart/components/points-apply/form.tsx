@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button } from "@modules/common/components/ui"
 import { applyPoints, removePoints } from "@lib/data/points-checkout"
 import { convertToLocale } from "@lib/util/money"
@@ -17,6 +18,7 @@ const PointsForm = ({
   applied: number
   currencyCode: string
 }) => {
+  const t = useT()
   const router = useRouter()
   const [amount, setAmount] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -27,11 +29,11 @@ const PointsForm = ({
     setError(null)
     const pts = Math.floor(Number(amount))
     if (!pts || pts <= 0) {
-      setError("사용할 적립금을 입력해 주세요.")
+      setError(t("cart.pointsEmpty"))
       return
     }
     if (pts > balance) {
-      setError(`보유 적립금(${balance.toLocaleString()}원)을 초과했습니다.`)
+      setError(t("cart.pointsOver", { amount: balance.toLocaleString() }))
       return
     }
     startTransition(async () => {
@@ -40,7 +42,7 @@ const PointsForm = ({
         setAmount("")
         router.refresh()
       } else {
-        setError("적립금 사용에 실패했습니다. (보유/주문금액 확인)")
+        setError(t("cart.pointsFailed"))
       }
     })
   }
@@ -55,16 +57,20 @@ const PointsForm = ({
   return (
     <div className="flex flex-col gap-y-2" data-testid="points-apply">
       <div className="flex items-center justify-between">
-        <span className="txt-medium text-ui-fg-subtle">적립금 사용</span>
+        <span className="txt-medium text-ui-fg-subtle">{t("checkout.usePoints")}</span>
         <span className="txt-small text-ui-fg-muted">
-          보유 {convertToLocale({ amount: balance, currency_code: currencyCode })}
+          {t("cart.pointsBalance", {
+            amount: convertToLocale({ amount: balance, currency_code: currencyCode }),
+          })}
         </span>
       </div>
 
       {applied > 0 ? (
         <div className="flex items-center justify-between">
           <span className="txt-medium text-ui-fg-interactive">
-            {convertToLocale({ amount: applied, currency_code: currencyCode })} 사용 중
+            {t("cart.pointsApplied", {
+              amount: convertToLocale({ amount: applied, currency_code: currencyCode }),
+            })}
           </span>
           <button
             type="button"
@@ -73,7 +79,7 @@ const PointsForm = ({
             className="txt-small underline text-ui-fg-subtle"
             data-testid="remove-points"
           >
-            사용 취소
+            {t("cart.pointsCancel")}
           </button>
         </div>
       ) : (
@@ -83,7 +89,7 @@ const PointsForm = ({
             min={0}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="사용할 금액"
+            placeholder={t("cart.pointsPlaceholder")}
             className="flex-1 border border-ui-border-base rounded-none bg-transparent px-3 h-10 text-base-regular outline-none focus:border-ui-fg-base"
             data-testid="points-input"
           />
@@ -95,7 +101,7 @@ const PointsForm = ({
             disabled={balance <= 0}
             data-testid="apply-points"
           >
-            적용
+            {t("cart.pointsApply")}
           </Button>
         </form>
       )}

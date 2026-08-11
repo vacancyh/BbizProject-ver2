@@ -1,20 +1,22 @@
 import { Metadata } from "next"
+import { getT } from "@lib/i18n"
 
 import InteractiveLink from "@modules/common/components/interactive-link"
 
 export const metadata: Metadata = {
   title: "404",
-  description: "페이지를 찾을 수 없습니다",
+  description: "Page not found",
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getT()
   return (
     <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-64px)]">
-      <h1 className="text-2xl-semi text-ui-fg-base">페이지를 찾을 수 없습니다</h1>
+      <h1 className="text-2xl-semi text-ui-fg-base">{t("error.notFoundTitle")}</h1>
       <p className="text-small-regular text-ui-fg-base">
-        요청하신 페이지가 존재하지 않습니다.
+        {t("error.notFoundBody")}
       </p>
-      <InteractiveLink href="/">홈으로 가기</InteractiveLink>
+      <InteractiveLink href="/">{t("error.goHome")}</InteractiveLink>
     </div>
   )
 }

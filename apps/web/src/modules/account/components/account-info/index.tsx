@@ -1,3 +1,4 @@
+import { useT } from "@lib/i18n/client"
 import { Disclosure } from "@headlessui/react"
 import { Badge, Button, clx } from "@modules/common/components/ui"
 import { useEffect } from "react"
@@ -22,10 +23,11 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage = "오류가 발생했습니다. 다시 시도해 주세요.",
+  errorMessage,
   children,
   'data-testid': dataTestid
 }: AccountInfoProps) => {
+  const t = useT()
   const { state, close, toggle } = useToggleState()
 
   const { pending } = useFormStatus()
@@ -63,7 +65,7 @@ const AccountInfo = ({
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "취소" : "수정"}
+            {state ? t("common.cancel") : t("common.edit")}
           </Button>
         </div>
       </div>
@@ -82,7 +84,7 @@ const AccountInfo = ({
           data-testid="success-message"
         >
           <Badge className="p-2 my-4" color="green">
-            <span>{label} 정보가 변경되었습니다</span>
+            <span>{t("account.changed", { label })}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -130,7 +132,7 @@ const AccountInfo = ({
                 type="submit"
                 data-testid="save-button"
               >
-                변경 저장
+                {t("account.saveChanges")}
               </Button>
             </div>
           </div>

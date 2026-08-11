@@ -3,6 +3,7 @@
 // 재입고 알림 데이터 계층 (실제 백엔드 연동)
 // 백엔드 store 라우트 `POST /store/restock-notifications` (restock-notification 모듈).
 
+import { getT } from "@lib/i18n"
 import { sdk } from "@lib/config"
 import { getAuthHeaders } from "./cookies"
 
@@ -20,6 +21,6 @@ export async function subscribeRestock(
     })
     return { ok: true }
   } catch {
-    return { ok: false, error: "알림 신청에 실패했습니다. 이메일을 확인해 주세요." }
+    return { ok: false, error: (await getT())("err.restock") }
   }
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Plus } from "@medusajs/icons"
 import { Button, Heading } from "@modules/common/components/ui"
 import { useActionState, useEffect, useRef, useState } from "react"
@@ -22,6 +23,7 @@ const AddAddress = ({
   /** 호출부 호환용(현재 컴포넌트에서 미사용) */
   addresses?: HttpTypes.StoreCustomerAddress[]
 }) => {
+  const t = useT()
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
   const formRef = useRef<HTMLFormElement>(null)
@@ -56,27 +58,27 @@ const AddAddress = ({
         onClick={open}
         data-testid="add-address-button"
       >
-        <span className="text-base-semi">새 배송지</span>
+        <span className="text-base-semi">{t("address.new")}</span>
         <Plus />
       </button>
 
       <Modal isOpen={state} close={close} data-testid="add-address-modal">
         <Modal.Title>
-          <Heading className="mb-2">배송지 추가</Heading>
+          <Heading className="mb-2">{t("address.addTitle")}</Heading>
         </Modal.Title>
         <form action={formAction} ref={formRef}>
           <Modal.Body>
             <div className="flex flex-col gap-y-2">
               <div className="grid grid-cols-2 gap-x-2">
                 <Input
-                  label="이름"
+                  label={t("address.firstName")}
                   name="first_name"
                   required
                   autoComplete="given-name"
                   data-testid="first-name-input"
                 />
                 <Input
-                  label="성"
+                  label={t("address.lastName")}
                   name="last_name"
                   required
                   autoComplete="family-name"
@@ -84,7 +86,7 @@ const AddAddress = ({
                 />
               </div>
               <Input
-                label="회사 (선택)"
+                label={t("address.company")}
                 name="company"
                 autoComplete="organization"
                 data-testid="company-input"
@@ -98,28 +100,28 @@ const AddAddress = ({
                 }}
               />
               <Input
-                label="주소"
+                label={t("address.address")}
                 name="address_1"
                 required
                 autoComplete="address-line1"
                 data-testid="address-1-input"
               />
               <Input
-                label="상세주소"
+                label={t("address.detail")}
                 name="address_2"
                 autoComplete="address-line2"
                 data-testid="address-2-input"
               />
               <div className="grid grid-cols-[144px_1fr] gap-x-2">
                 <Input
-                  label="우편번호"
+                  label={t("address.postalCode")}
                   name="postal_code"
                   required
                   autoComplete="postal-code"
                   data-testid="postal-code-input"
                 />
                 <Input
-                  label="도시"
+                  label={t("address.city")}
                   name="city"
                   required
                   autoComplete="locality"
@@ -127,7 +129,7 @@ const AddAddress = ({
                 />
               </div>
               <Input
-                label="도/광역시"
+                label={t("address.province")}
                 name="province"
                 autoComplete="address-level1"
                 data-testid="state-input"
@@ -140,7 +142,7 @@ const AddAddress = ({
                 data-testid="country-select"
               />
               <Input
-                label="휴대폰"
+                label={t("address.phone")}
                 name="phone"
                 autoComplete="phone"
                 data-testid="phone-input"
@@ -164,9 +166,9 @@ const AddAddress = ({
                 className="h-10"
                 data-testid="cancel-button"
               >
-                취소
+                {t("common.cancel")}
               </Button>
-              <SubmitButton data-testid="save-button">저장</SubmitButton>
+              <SubmitButton data-testid="save-button">{t("common.save")}</SubmitButton>
             </div>
           </Modal.Footer>
         </form>

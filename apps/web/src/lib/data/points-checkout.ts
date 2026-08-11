@@ -3,6 +3,7 @@
 // 적립금 사용(체크아웃) 데이터 계층 (실제 백엔드 연동)
 // 백엔드 store 라우트 `POST/DELETE /store/carts/:id/points` (프로모션 할인 + 원장 차감).
 
+import { getT } from "@lib/i18n"
 import { sdk } from "@lib/config"
 import { getAuthHeaders, getCacheTag } from "./cookies"
 import { revalidateTag } from "next/cache"
@@ -21,7 +22,7 @@ export async function applyPoints(
     revalidateTag(await getCacheTag("carts"))
     return { ok: true }
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "적립금 사용에 실패했습니다."
+    const msg = e instanceof Error ? e.message : (await getT())("err.pointsApply")
     return { ok: false, error: msg }
   }
 }

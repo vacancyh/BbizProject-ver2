@@ -1,3 +1,5 @@
+import { getT } from "@lib/i18n"
+import { TIER_NAME_KEY } from "@lib/data/membership"
 import { clx } from "@modules/common/components/ui"
 
 import { retrieveMembership } from "@lib/data/membership"
@@ -12,6 +14,7 @@ const MembershipTier = async ({
   customerId,
   currencyCode,
 }: MembershipTierProps) => {
+  const t = await getT()
   const { membership, tiers, current, next, amount_to_next } =
     await retrieveMembership(customerId)
 
@@ -31,17 +34,17 @@ const MembershipTier = async ({
     <div className="w-full" data-testid="membership-tier">
       {/* 현재 등급 요약 */}
       <div className="rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 mb-8">
-        <span className="text-base-regular text-ui-fg-muted">현재 등급</span>
+        <span className="text-base-regular text-ui-fg-muted">{t("tier.current")}</span>
         <div className="flex items-baseline gap-x-3 mt-1">
           <span className="text-3xl-semi" data-testid="current-tier">
-            {membership.current_tier}
+            {t(TIER_NAME_KEY[membership.current_tier])}
           </span>
           <span className="text-base-regular text-ui-fg-subtle">
-            적립률 {current.earn_rate}%
+            {t("tier.earnRate", { rate: current.earn_rate })}
           </span>
         </div>
         <div className="text-small-regular text-ui-fg-subtle mt-2">
-          누적 구매액{" "}
+          {t("tier.cumulative")}{" "}
           {convertToLocale({
             amount: membership.accrued_amount,
             currency_code: currencyCode,
@@ -51,13 +54,13 @@ const MembershipTier = async ({
         {next ? (
           <div className="mt-5">
             <div className="flex justify-between text-small-regular text-ui-fg-subtle mb-2">
-              <span>다음 등급 {next.tier}까지</span>
+              <span>{t("tier.toNext", { tier: t(TIER_NAME_KEY[next.tier]) })}</span>
               <span>
                 {convertToLocale({
                   amount: amount_to_next ?? 0,
                   currency_code: currencyCode,
                 })}{" "}
-                남음
+                {t("tier.remaining")}
               </span>
             </div>
             <div className="h-2 w-full rounded-full bg-ui-bg-base overflow-hidden">
@@ -69,13 +72,13 @@ const MembershipTier = async ({
           </div>
         ) : (
           <p className="text-small-regular text-ui-fg-interactive mt-5">
-            최고 등급입니다. 감사합니다!
+            {t("tier.highest")}
           </p>
         )}
       </div>
 
       {/* 등급 기준표 */}
-      <h2 className="text-large-semi mb-4">등급별 혜택</h2>
+      <h2 className="text-large-semi mb-4">{t("tier.benefitsTitle")}</h2>
       <ul className="flex flex-col divide-y divide-ui-border-base">
         {tiers.map((tier) => {
           const isCurrent = tier.tier === membership.current_tier
@@ -89,24 +92,24 @@ const MembershipTier = async ({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-x-2">
-                  <span className="text-base-semi">{tier.tier}</span>
+                  <span className="text-base-semi">{t(TIER_NAME_KEY[tier.tier])}</span>
                   {isCurrent && (
                     <span className="text-small-regular rounded-rounded bg-ui-tag-green-bg text-ui-tag-green-text px-2 py-0.5">
-                      현재 등급
+                      {t("tier.currentBadge")}
                     </span>
                   )}
                 </div>
                 <span className="text-small-regular text-ui-fg-subtle">
-                  누적{" "}
+                  {t("tier.threshold")}{" "}
                   {convertToLocale({
                     amount: tier.min_amount,
                     currency_code: currencyCode,
                   })}{" "}
-                  이상 · 적립 {tier.earn_rate}%
+                  {t("tier.thresholdSuffix", { rate: tier.earn_rate })}
                 </span>
               </div>
               <span className="text-small-regular text-ui-fg-muted">
-                {tier.benefits.join(" · ")}
+                {tier.benefits.map((b) => t(b)).join(" · ")}
               </span>
             </li>
           )

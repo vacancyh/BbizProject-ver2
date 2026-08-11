@@ -142,6 +142,8 @@ export default async function preflightCheck({ container }: ExecArgs) {
         }
         const html = await r.text()
         // 화면에 남아 있으면 안 되는 예시값들
+        // 영어 화면도 같은 자리에 **언어별 예시값**을 쓴다(2026-08-11 다국어 전환).
+        // 한국어 문자열만 찾으면 영어로 열어 봤을 때 통과해 버린다.
         const leftovers = [
           "1600-0000",
           "000-00-00000",
@@ -149,6 +151,9 @@ export default async function preflightCheck({ container }: ExecArgs) {
           "help@shop.example",
           "privacy@shop.example",
           "테헤란로 000",
+          "Jane Doe",
+          "2026-Seoul Gangnam-00000",
+          "Teheran-ro, Gangnam-gu",
         ].filter((v) => html.includes(v))
         if (leftovers.length) {
           add(

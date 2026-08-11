@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { FREE_SHIPPING_THRESHOLD } from "@lib/constants"
 import { convertToLocale } from "@lib/util/money"
 
@@ -14,6 +15,7 @@ const FreeShippingProgress = ({
   amountSubtotal: number
   currencyCode: string
 }) => {
+  const t = useT()
   const threshold = FREE_SHIPPING_THRESHOLD
   const remaining = Math.max(0, threshold - amountSubtotal)
   const qualified = remaining <= 0
@@ -26,13 +28,13 @@ const FreeShippingProgress = ({
     >
       <p className="text-small-regular text-ui-fg-base mb-2">
         {qualified ? (
-          <span className="font-medium">🎉 무료배송 대상입니다!</span>
+          <span className="font-medium">{t("cart.freeShippingReached")}</span>
         ) : (
           <>
             <span className="font-medium text-ui-fg-base">
               {convertToLocale({ amount: remaining, currency_code: currencyCode })}
             </span>
-            <span className="text-ui-fg-subtle"> 더 담으면 무료배송!</span>
+            <span className="text-ui-fg-subtle">{t("cart.freeShippingRemain")}</span>
           </>
         )}
       </p>

@@ -95,7 +95,10 @@ test.describe("QA-001 d1_대시보드 연계 검증", () => {
     await targetCard.click();
 
     // 10. URL이 /orders 또는 /shipping으로 이동했는지 단언
-    await expect(page).toHaveURL(expectedUrlPattern, { timeout: 10000 }); // ★ URL 이동 단언 라인
+    // 대기 시간은 설정(playwright.config.ts 의 expect.timeout = 15s)을 따른다.
+    // 여기에 10초를 박아 두면 전체 실행 중 부하가 걸릴 때만 터진다
+    // (단독 실행 6.3초 · 전체 실행 시 10초 초과 — 2026-08-11 실측).
+    await expect(page).toHaveURL(expectedUrlPattern); // ★ URL 이동 단언 라인
 
     // 11. 목록 화면 핵심 요소 도달 확인 (h1 존재)
     await waitForLoad(page, 8000);

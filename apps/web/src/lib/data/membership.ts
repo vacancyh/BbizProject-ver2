@@ -6,8 +6,21 @@
 
 import { sdk } from "@lib/config"
 import { getAuthHeaders } from "./cookies"
+import type { MessageKey } from "@lib/i18n/messages"
 
+/**
+ * 등급 코드. 백엔드 `current_tier` 와 같은 값을 쓴다.
+ * 화면에 찍을 이름은 `tier.name.*` 번역 키로 따로 관리한다(2026-08-10).
+ */
 export type MembershipTier = "일반" | "실버" | "골드" | "VIP"
+
+/** 등급 코드 → 표시 이름 번역 키 */
+export const TIER_NAME_KEY: Record<MembershipTier, MessageKey> = {
+  일반: "tier.name.basic",
+  실버: "tier.name.silver",
+  골드: "tier.name.gold",
+  VIP: "tier.name.vip",
+}
 
 export type TierPolicy = {
   tier: MembershipTier
@@ -15,8 +28,8 @@ export type TierPolicy = {
   min_amount: number
   /** 구매 적립률(%) */
   earn_rate: number
-  /** 등급 혜택 요약 */
-  benefits: string[]
+  /** 등급 혜택 요약 — 값은 번역 키다(화면에서 t() 로 푼다) */
+  benefits: MessageKey[]
 }
 
 export type CustomerMembership = {
@@ -45,30 +58,39 @@ export const TIER_POLICIES: TierPolicy[] = [
     tier: "일반",
     min_amount: 0,
     earn_rate: 1,
-    benefits: ["기본 적립 1%", "신규회원 쿠폰"],
+    benefits: ["tier.benefit.earn1", "tier.benefit.newCoupon"],
   },
   {
     tier: "실버",
     min_amount: 300_000,
     earn_rate: 2,
-    benefits: ["적립 2%", "생일 쿠폰", "무료배송 월 1회"],
+    benefits: [
+      "tier.benefit.earn2",
+      "tier.benefit.birthdayCoupon",
+      "tier.benefit.freeShip1",
+    ],
   },
   {
     tier: "골드",
     min_amount: 1_000_000,
     earn_rate: 3,
-    benefits: ["적립 3%", "생일 쿠폰", "무료배송 무제한", "전용 특가"],
+    benefits: [
+      "tier.benefit.earn3",
+      "tier.benefit.birthdayCoupon",
+      "tier.benefit.freeShipUnlimited",
+      "tier.benefit.exclusiveDeals",
+    ],
   },
   {
     tier: "VIP",
     min_amount: 3_000_000,
     earn_rate: 5,
     benefits: [
-      "적립 5%",
-      "생일 VIP 쿠폰",
-      "무료배송 무제한",
-      "전용 특가",
-      "우선 고객상담",
+      "tier.benefit.earn5",
+      "tier.benefit.birthdayVipCoupon",
+      "tier.benefit.freeShipUnlimited",
+      "tier.benefit.exclusiveDeals",
+      "tier.benefit.prioritySupport",
     ],
   },
 ]

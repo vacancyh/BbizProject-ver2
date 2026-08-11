@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import Back from "@modules/common/icons/back"
 import FastDelivery from "@modules/common/icons/fast-delivery"
 import Refresh from "@modules/common/icons/refresh"
@@ -12,13 +13,14 @@ type ProductTabsProps = {
 }
 
 const ProductTabs = ({ product }: ProductTabsProps) => {
+  const t = useT()
   const tabs = [
     {
-      label: "상품 정보",
+      label: t("product.tabInfo"),
       component: <ProductInfoTab product={product} />,
     },
     {
-      label: "배송 / 교환·반품",
+      label: t("product.tabShipping"),
       component: <ShippingInfoTab />,
     },
   ]
@@ -42,30 +44,31 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 }
 
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
+  const t = useT()
   return (
     <div className="text-small-regular py-8">
       <div className="grid grid-cols-2 gap-x-8">
         <div className="flex flex-col gap-y-4">
           <div>
-            <span className="font-semibold">소재</span>
+            <span className="font-semibold">{t("product.material")}</span>
             <p>{product.material ? product.material : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">원산지</span>
+            <span className="font-semibold">{t("product.origin")}</span>
             <p>{product.origin_country ? product.origin_country : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">종류</span>
+            <span className="font-semibold">{t("product.type")}</span>
             <p>{product.type ? product.type.value : "-"}</p>
           </div>
         </div>
         <div className="flex flex-col gap-y-4">
           <div>
-            <span className="font-semibold">무게</span>
+            <span className="font-semibold">{t("product.weight")}</span>
             <p>{product.weight ? `${product.weight} g` : "-"}</p>
           </div>
           <div>
-            <span className="font-semibold">크기</span>
+            <span className="font-semibold">{t("product.dimensions")}</span>
             <p>
               {product.length && product.width && product.height
                 ? `${product.length}L x ${product.width}W x ${product.height}H`
@@ -79,36 +82,34 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
 }
 
 const ShippingInfoTab = () => {
+  const t = useT()
   return (
     <div className="text-small-regular py-8">
       <div className="grid grid-cols-1 gap-y-8">
         <div className="flex items-start gap-x-2">
           <FastDelivery />
           <div>
-            <span className="font-semibold">빠른 배송</span>
+            <span className="font-semibold">{t("product.fastShipping")}</span>
             <p className="max-w-sm">
-              결제 확인 후 영업일 기준 2~3일 내 출고되며, 도서·산간 지역은
-              추가 1~2일이 소요될 수 있습니다.
+              {t("product.fastShippingBody")}
             </p>
           </div>
         </div>
         <div className="flex items-start gap-x-2">
           <Refresh />
           <div>
-            <span className="font-semibold">간편 교환</span>
+            <span className="font-semibold">{t("product.easyExchange")}</span>
             <p className="max-w-sm">
-              사이즈나 색상이 맞지 않으면 수령 후 7일 이내 교환 신청이
-              가능합니다. (단순 변심 시 왕복 배송비 부담)
+              {t("product.easyExchangeBody")}
             </p>
           </div>
         </div>
         <div className="flex items-start gap-x-2">
           <Back />
           <div>
-            <span className="font-semibold">안심 반품</span>
+            <span className="font-semibold">{t("product.safeReturn")}</span>
             <p className="max-w-sm">
-              수령 후 7일 이내 반품 신청 시 환불해 드립니다. 전자상거래법에
-              따른 청약철회 기준을 따릅니다.
+              {t("product.safeReturnBody")}
             </p>
           </div>
         </div>

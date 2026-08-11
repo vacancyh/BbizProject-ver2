@@ -48,7 +48,7 @@ export default async function Nav() {
               className="txt-compact-xlarge-plus hover:text-ui-fg-base"
               data-testid="nav-store-link"
             >
-              {BIZ.name}
+              {BIZ.name || t("biz.nameSample")}
             </LocalizedClientLink>
           </div>
 

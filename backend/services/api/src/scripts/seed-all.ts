@@ -23,6 +23,9 @@ import localizeShopData from "./localize-shop-data"
 import seedTestData from "./seed-test-data"
 import seedProductTypes from "./seed-product-types"
 import seedHomeCollections from "./seed-home-collections"
+import seedProductDetails from "./seed-product-details"
+import seedContentEn from "./seed-content-en"
+import seedLegalEn from "./seed-legal-en"
 import seedInventory from "./seed-inventory"
 import seedScreenData from "./seed-screen-data"
 import seedCsLegal from "./seed-cs-legal"
@@ -122,12 +125,20 @@ export default async function seedAll({ container }: ExecArgs) {
   await step("테스트 데이터(상품/고객/주문/리뷰/적립금)", () => seedTestData({ container } as any))
   await step("상품군/분류/고시필드", () => seedProductTypes({ container } as any))
   await step("홈 컬렉션(베스트/신상품)", () => seedHomeCollections({ container } as any))
+  await step("상품 상세값(부제/설명/소재/유형/태그/카테고리/고시)", () => seedProductDetails({ container } as any))
   await step("재고 수량", () => seedInventory({ container } as any))
 
   // 3) 화면 보강
   await step("코어 화면 데이터(태그/쿠폰/캠페인)", () => seedScreenData({ container } as any))
   await step("CS/약관(이용약관·개인정보·문의)", () => seedCsLegal({ container } as any))
   await step("스토어프론트 콘텐츠(배너/공지/FAQ/큐레이션/타임세일)", () => seedStorefrontContent({ container } as any))
+
+  // 3-1) 콘텐츠 영어 번역
+  // 번역 기능만 켜 두고 **번역 데이터가 없으면** 언어를 바꿔도 상품·카테고리가 한국어로 나온다.
+  // 콘텐츠(배너·공지·FAQ)가 다 만들어진 뒤에 돌려야 대상이 전부 잡힌다.
+  await step("콘텐츠 영어 번역(상품/카테고리/배너/공지/FAQ)", () => seedContentEn({ container } as any))
+  // 약관 영문본은 본문이 길어 별도 스크립트 — **참고용 번역**이며 법적 효력은 한국어 원문에 있다.
+  await step("약관·개인정보처리방침 영문본", () => seedLegalEn({ container } as any))
 
   // 4) 정책 모듈
   await step("상태머신 설정", () => seedStateMachine({ container } as any))

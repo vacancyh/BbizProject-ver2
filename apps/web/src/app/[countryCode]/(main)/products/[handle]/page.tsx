@@ -1,4 +1,6 @@
 import { Metadata } from "next"
+import { BIZ } from "@lib/business-info"
+import { getT } from "@lib/i18n"
 import { ProductJsonLd } from "@modules/common/components/structured-data"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
@@ -89,10 +91,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${product.title} | 쇼핑몰`,
+    title: `${product.title} | ${BIZ.name || (await getT())("biz.nameSample")}`,
     description: `${product.title}`,
     openGraph: {
-      title: `${product.title} | 쇼핑몰`,
+      title: `${product.title} | ${BIZ.name || (await getT())("biz.nameSample")}`,
       description: `${product.title}`,
       images: product.thumbnail ? [product.thumbnail] : [],
     },

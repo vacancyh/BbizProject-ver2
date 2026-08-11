@@ -5,6 +5,7 @@
  * 어디에 들어가는가). 구간이 겹치거나 비면 상품이 두 번 나오거나 사라진다.
  * E2E 로는 이런 경계를 다 훑을 수 없어 유닛으로 고정한다.
  */
+import { ko, en } from "@lib/i18n/messages"
 import { describe, it, expect } from "vitest"
 import { PRICE_RANGES } from "./filter-config"
 
@@ -24,9 +25,12 @@ describe("PRICE_RANGES — 가격대 프리셋", () => {
     expect(PRICE_RANGES[0].max).toBeUndefined()
   })
 
-  it("모든 구간에 사람이 읽을 라벨이 있다", () => {
+  it("모든 구간의 라벨 키가 한국어·영어 사전에 모두 있다", () => {
+    // 라벨을 문자열로 들고 있으면 언어를 바꿔도 한국어가 나온다(2026-08-10 전환).
+    // 이제 키만 갖고 있으므로, 그 키가 **양 언어 모두**에 실제 문구로 존재하는지 본다.
     for (const r of PRICE_RANGES) {
-      expect(r.label.trim().length).toBeGreaterThan(0)
+      expect(ko[r.labelKey]?.trim().length ?? 0).toBeGreaterThan(0)
+      expect(en[r.labelKey]?.trim().length ?? 0).toBeGreaterThan(0)
     }
   })
 

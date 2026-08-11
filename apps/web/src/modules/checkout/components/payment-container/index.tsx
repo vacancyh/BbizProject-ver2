@@ -1,4 +1,6 @@
 import { Radio as RadioGroupOption } from "@headlessui/react"
+import { useT } from "@lib/i18n/client"
+import { payTitle } from "@lib/constants"
 import { Text, clx } from "@modules/common/components/ui"
 import React, { useContext, useMemo, type JSX } from "react"
 
@@ -26,6 +28,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   disabled = false,
   children,
 }) => {
+  const t = useT()
   const isDevelopment = process.env.NODE_ENV === "development"
 
   return (
@@ -45,7 +48,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
         <div className="flex items-center gap-x-4">
           <Radio checked={selectedPaymentOptionId === paymentProviderId} />
           <Text className="text-base-regular">
-            {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+            {payTitle(t, paymentProviderId) || paymentProviderId}
           </Text>
           {isManual(paymentProviderId) && isDevelopment && (
             <PaymentTest className="hidden small:block" />

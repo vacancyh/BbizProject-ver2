@@ -1,4 +1,5 @@
 "use client"
+import { useT } from "@lib/i18n/client"
 import { createTransferRequest } from "@lib/data/orders"
 import { CheckCircleMiniSolid, XCircleSolid } from "@medusajs/icons"
 import { Heading, IconButton, Input, Text } from "@modules/common/components/ui"
@@ -7,6 +8,7 @@ import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { useEffect, useState } from "react"
 
 export default function TransferRequestForm() {
+  const t = useT()
   const [showSuccess, setShowSuccess] = useState(false)
 
   const [state, formAction] = useActionState(createTransferRequest, {
@@ -26,11 +28,11 @@ export default function TransferRequestForm() {
       <div className="grid sm:grid-cols-2 items-center gap-x-8 gap-y-4 w-full">
         <div className="flex flex-col gap-y-1">
           <Heading level="h3" className="!text-sm font-semibold text-neutral-950">
-            주문 가져오기
+            {t("account.transferOrder")}
           </Heading>
           <p className="text-small-regular text-neutral-500">
-            찾으시는 주문이 없으신가요?
-            <br /> 주문번호로 내 계정에 주문을 연결하세요.
+            {t("account.transferHint")}
+            <br /> {t("page.transferHelp")}
           </p>
         </div>
         <form
@@ -38,13 +40,13 @@ export default function TransferRequestForm() {
           className="flex flex-col gap-y-1 sm:items-end"
         >
           <div className="flex flex-col gap-y-2 w-full">
-            <Input className="w-full" name="order_id" placeholder="주문번호" />
+            <Input className="w-full" name="order_id" placeholder={t("checkout.orderNumber")} />
             <SubmitButton
               variant="secondary"
               size="small"
               className="w-fit whitespace-nowrap self-end"
             >
-              가져오기 요청
+              {t("transfer.submit")}
             </SubmitButton>
           </div>
         </form>
@@ -60,10 +62,10 @@ export default function TransferRequestForm() {
             <CheckCircleMiniSolid className="w-4 h-4 text-emerald-500" />
             <div className="flex flex-col gap-y-1">
               <Text className="text-medim-pl text-neutral-950">
-                주문 {state.order?.id} 가져오기 요청 완료
+                {t("transfer.done", { id: state.order?.id ?? "" })}
               </Text>
               <Text className="text-base-regular text-neutral-600">
-                {state.order?.email} 주소로 확인 이메일을 보냈습니다
+                {t("transfer.emailSent", { email: state.order?.email ?? "" })}
               </Text>
             </div>
           </div>

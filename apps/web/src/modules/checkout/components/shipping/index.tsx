@@ -1,4 +1,5 @@
 "use client"
+import { useT } from "@lib/i18n/client"
 import { Radio, RadioGroup } from "@headlessui/react"
 import { setShippingMethod } from "@lib/data/cart"
 import { calculatePriceForShippingOption } from "@lib/data/fulfillment"
@@ -50,6 +51,7 @@ const Shipping: React.FC<ShippingProps> = ({
   cart,
   availableShippingMethods,
 }) => {
+  const t = useT()
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingPrices, setIsLoadingPrices] = useState(true)
 
@@ -167,7 +169,7 @@ const Shipping: React.FC<ShippingProps> = ({
             }
           )}
         >
-          배송
+          {t("checkout.shipping")}
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
             <CheckCircleSolid />
           )}
@@ -182,7 +184,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
                 data-testid="edit-delivery-button"
               >
-                수정
+                {t("common.edit")}
               </button>
             </Text>
           )}
@@ -192,10 +194,10 @@ const Shipping: React.FC<ShippingProps> = ({
           <div className="grid">
             <div className="flex flex-col">
               <span className="font-medium txt-medium text-ui-fg-base">
-                배송 방법
+                {t("checkout.deliveryMethod")}
               </span>
               <span className="mb-4 text-ui-fg-muted txt-medium">
-                주문하신 상품을 어떻게 받으시겠어요?
+                {t("checkout.shippingHow")}
               </span>
             </div>
             <div data-testid="delivery-options-container">
@@ -229,7 +231,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           checked={showPickupOptions === PICKUP_OPTION_ON}
                         />
                         <span className="text-base-regular">
-                          매장에서 픽업
+                          {t("checkout.storePickup")}
                         </span>
                       </div>
                       <span className="justify-self-end text-ui-fg-base">
@@ -305,10 +307,10 @@ const Shipping: React.FC<ShippingProps> = ({
             <div className="grid">
               <div className="flex flex-col">
                 <span className="font-medium txt-medium text-ui-fg-base">
-                  매장
+                  {t("checkout.store")}
                 </span>
                 <span className="mb-4 text-ui-fg-muted txt-medium">
-                  가까운 매장을 선택하세요
+                  {t("checkout.pickStore")}
                 </span>
               </div>
               <div data-testid="delivery-options-container">
@@ -382,7 +384,7 @@ const Shipping: React.FC<ShippingProps> = ({
               disabled={!cart.shipping_methods?.[0]}
               data-testid="submit-delivery-option-button"
             >
-              결제 단계로
+              {t("checkout.toPaymentStep")}
             </Button>
           </div>
         </>
@@ -392,7 +394,7 @@ const Shipping: React.FC<ShippingProps> = ({
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  배송 방법
+                  {t("checkout.deliveryMethod")}
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
                   {cart.shipping_methods!.at(-1)!.name}{" "}

@@ -1,11 +1,13 @@
+import { getT } from "@lib/i18n"
 import { Metadata } from "next"
 
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 
-export const metadata: Metadata = {
-  title: "전체 상품",
-  description: "쇼핑몰의 모든 상품을 만나보세요.",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("store.title"), description: t("store.metaDescription") }
 }
 
 type Params = {

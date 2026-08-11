@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { useEffect, useState } from "react"
 import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
@@ -22,6 +23,7 @@ type ImageGalleryProps = {
  * - 키보드 접근: 썸네일이 button 이라 Tab/Enter 로 전환 가능.
  */
 const ImageGallery = ({ images }: ImageGalleryProps) => {
+  const t = useT()
   // URL 없는 이미지 레코드는 빈 회색 박스로 렌더되어 큰 공백을 만드므로 제외.
   const validImages = images.filter((img) => !!img.url)
   const [active, setActive] = useState(0)
@@ -35,7 +37,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   if (!validImages.length) {
     return (
       <div className="w-full aspect-[4/5] bg-ui-bg-subtle rounded-rounded flex items-center justify-center">
-        <span className="text-ui-fg-muted text-small-regular">이미지 준비 중</span>
+        <span className="text-ui-fg-muted text-small-regular">{t("product.imagePending")}</span>
       </div>
     )
   }
@@ -50,7 +52,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
           key={current.id}
           src={current.url}
           priority
-          alt={`상품 이미지 ${active + 1}`}
+          alt={t("product.imageAlt", { n: active + 1 })}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
           className="object-cover"
@@ -68,7 +70,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
               <button
                 type="button"
                 onClick={() => setActive(index)}
-                aria-label={`상품 이미지 ${index + 1} 보기`}
+                aria-label={t("product.imageViewAria", { n: index + 1 })}
                 aria-current={index === active}
                 className={clx(
                   "relative block w-16 h-20 small:w-20 small:h-24 overflow-hidden rounded-md transition-all",

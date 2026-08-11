@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Metadata } from "next"
 
 import FeaturedProducts from "@modules/home/components/featured-products"
@@ -12,10 +13,10 @@ import { listBanners } from "@lib/data/banners"
 import { getRegion } from "@lib/data/regions"
 import { SiteJsonLd } from "@modules/common/components/structured-data"
 
-export const metadata: Metadata = {
-  title: "쇼핑몰 — 오늘의 발견",
-  description:
-    "엄선한 상품을 합리적인 가격으로. 베스트·신상품을 한눈에 만나보세요.",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("home.metaTitle"), description: t("home.metaDescription") }
 }
 
 export default async function Home(props: {

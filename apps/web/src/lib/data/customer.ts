@@ -1,5 +1,6 @@
 "use server"
 
+import { getT } from "@lib/i18n"
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
@@ -387,7 +388,7 @@ export async function changeEmail(
       ok: false,
       error:
         (e as { message?: string })?.message ??
-        "이메일 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+        (await getT())("err.emailChange"),
     }
   }
 }

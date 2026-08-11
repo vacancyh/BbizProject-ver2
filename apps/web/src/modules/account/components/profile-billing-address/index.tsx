@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import React, { useActionState, useEffect, useMemo } from "react"
 
 import Input from "@modules/common/components/input"
@@ -18,6 +19,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
   customer,
   regions,
 }) => {
+  const t = useT()
   const regionOptions = useMemo(() => {
     return (
       regions
@@ -63,7 +65,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   const currentInfo = useMemo(() => {
     if (!billingAddress) {
-      return "등록된 청구지가 없습니다"
+      return t("address.noBilling")
     }
 
     const country =
@@ -93,7 +95,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
     <form action={formAction} onReset={() => clearState()} className="w-full">
       <input type="hidden" name="addressId" value={billingAddress?.id} />
       <AccountInfo
-        label="청구지"
+        label={t("checkout.billingAddress")}
         currentInfo={currentInfo}
         isSuccess={successState}
         isError={!!state.error}
@@ -103,14 +105,14 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
         <div className="grid grid-cols-1 gap-y-2">
           <div className="grid grid-cols-2 gap-x-2">
             <Input
-              label="이름"
+              label={t("address.firstName")}
               name="first_name"
               defaultValue={billingAddress?.first_name || undefined}
               required
               data-testid="billing-first-name-input"
             />
             <Input
-              label="성"
+              label={t("address.lastName")}
               name="last_name"
               defaultValue={billingAddress?.last_name || undefined}
               required
@@ -118,13 +120,13 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             />
           </div>
           <Input
-            label="회사 (선택)"
+            label={t("address.company")}
             name="company"
             defaultValue={billingAddress?.company || undefined}
             data-testid="billing-company-input"
           />
           <Input
-            label="휴대폰"
+            label={t("address.phone")}
             name="phone"
             type="phone"
             autoComplete="phone"
@@ -133,28 +135,28 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             data-testid="billing-phone-input"
           />
           <Input
-            label="주소"
+            label={t("address.address")}
             name="address_1"
             defaultValue={billingAddress?.address_1 || undefined}
             required
             data-testid="billing-address-1-input"
           />
           <Input
-            label="상세주소"
+            label={t("address.detail")}
             name="address_2"
             defaultValue={billingAddress?.address_2 || undefined}
             data-testid="billing-address-2-input"
           />
           <div className="grid grid-cols-[144px_1fr] gap-x-2">
             <Input
-              label="우편번호"
+              label={t("address.postalCode")}
               name="postal_code"
               defaultValue={billingAddress?.postal_code || undefined}
               required
               data-testid="billing-postcal-code-input"
             />
             <Input
-              label="도시"
+              label={t("address.city")}
               name="city"
               defaultValue={billingAddress?.city || undefined}
               required
@@ -162,7 +164,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             />
           </div>
           <Input
-            label="도/광역시"
+            label={t("address.province")}
             name="province"
             defaultValue={billingAddress?.province || undefined}
             data-testid="billing-province-input"

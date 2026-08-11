@@ -8,13 +8,17 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { Text, clx } from "@modules/common/components/ui"
 import { Fragment } from "react"
 import CountrySelect from "../country-select"
+import { useT } from "@lib/i18n/client"
+import type { MessageKey } from "@lib/i18n/messages"
+import { BIZ } from "@lib/business-info"
 
 
-const SideMenuItems: { label: string; href: string; testid: string }[] = [
-  { label: "홈", href: "/", testid: "home-link" },
-  { label: "스토어", href: "/store", testid: "store-link" },
-  { label: "내 계정", href: "/account", testid: "account-link" },
-  { label: "장바구니", href: "/cart", testid: "cart-link" },
+/** 메뉴 항목. 라벨은 번역 키로 두고 그릴 때 번역한다(항목 순서·주소는 언어와 무관). */
+const SideMenuItems: { key: MessageKey; href: string; testid: string }[] = [
+  { key: "nav.home", href: "/", testid: "home-link" },
+  { key: "nav.shop", href: "/store", testid: "store-link" },
+  { key: "nav.account", href: "/account", testid: "account-link" },
+  { key: "nav.cart", href: "/cart", testid: "cart-link" },
 ]
 
 type SideMenuProps = {
@@ -27,6 +31,7 @@ const SideMenu = ({
   categories = [],
 }: SideMenuProps) => {
   const countryToggleState = useToggleState()
+  const t = useT()
 
   return (
     <div className="h-full">
@@ -39,7 +44,7 @@ const SideMenu = ({
                   data-testid="nav-menu-button"
                   className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
                 >
-                  메뉴
+                  {t("nav.menu")}
                 </Popover.Button>
               </div>
 
@@ -81,7 +86,7 @@ const SideMenu = ({
                               onClick={close}
                               data-testid={item.testid}
                             >
-                              {item.label}
+                              {t(item.key)}
                             </LocalizedClientLink>
                           </li>
                         )
@@ -90,7 +95,7 @@ const SideMenu = ({
                     {categories.length > 0 && (
                       <div className="flex flex-col gap-y-3">
                         <span className="text-sm uppercase tracking-wide text-ui-fg-on-color/60">
-                          카테고리
+                          {t("nav.categories")}
                         </span>
                         <ul className="flex flex-col gap-y-2">
                           {categories.map((c) => (
@@ -131,7 +136,8 @@ const SideMenu = ({
                         />
                       </div>
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} 쇼핑몰. All rights reserved.
+                        © {new Date().getFullYear()} {BIZ.name || t("biz.nameSample")}.{" "}
+                        {t("footer.rights")}
                       </Text>
                     </div>
                   </div>

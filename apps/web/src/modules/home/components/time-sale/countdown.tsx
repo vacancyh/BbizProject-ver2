@@ -1,18 +1,20 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { useEffect, useState } from "react"
 
 const pad = (n: number) => String(n).padStart(2, "0")
 
 const Countdown = ({ endsAt }: { endsAt: string }) => {
+  const t = useT()
   const [remaining, setRemaining] = useState<number | null>(null)
 
   useEffect(() => {
     const end = new Date(endsAt).getTime()
     const tick = () => setRemaining(Math.max(0, end - Date.now()))
     tick()
-    const t = setInterval(tick, 1000)
-    return () => clearInterval(t)
+    const timer = setInterval(tick, 1000)
+    return () => clearInterval(timer)
   }, [endsAt])
 
   if (remaining === null) {
@@ -26,17 +28,18 @@ const Countdown = ({ endsAt }: { endsAt: string }) => {
   const ss = totalSec % 60
 
   if (remaining === 0) {
-    return <span className="text-small-regular text-ui-fg-muted">종료됨</span>
+    return <span className="text-small-regular text-ui-fg-muted">{t("home.countdownEnded")}</span>
   }
 
   return (
     <span
       className="text-small-regular tabular-nums text-ui-fg-base"
       data-testid="timesale-countdown"
-      aria-label="남은 시간"
+      aria-label={t("home.countdownAria")}
     >
-      {d > 0 ? `${d}일 ` : ""}
-      {pad(hh)}:{pad(mm)}:{pad(ss)} 남음
+      {d > 0 ? t("home.countdownDays", { d }) : ""}
+      {pad(hh)}:{pad(mm)}:{pad(ss)}
+      {t("home.countdownLeft")}
     </span>
   )
 }

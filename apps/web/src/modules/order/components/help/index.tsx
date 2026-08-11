@@ -1,21 +1,23 @@
+import { getT } from "@lib/i18n"
 import { Heading } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import React from "react"
 
-const Help = () => {
+const Help = async () => {
+  const t = await getT()
   return (
     <div className="mt-6">
-      <Heading className="text-base-semi">도움이 필요하신가요?</Heading>
+      <Heading className="text-base-semi">{t("order.helpTitle")}</Heading>
       <div className="text-base-regular my-2">
         <ul className="gap-y-2 flex flex-col">
           <li>
             <LocalizedClientLink href="/customer-service">
-              고객센터 문의
+              {t("order.helpContact")}
             </LocalizedClientLink>
           </li>
           <li>
             <LocalizedClientLink href="/customer-service">
-              반품 및 교환
+              {t("order.helpReturn")}
             </LocalizedClientLink>
           </li>
         </ul>

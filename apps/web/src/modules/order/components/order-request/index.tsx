@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button, clx } from "@modules/common/components/ui"
 import {
   requestOrderAction,
@@ -7,32 +8,61 @@ import {
 } from "@lib/data/order-requests"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
+import type { MessageKey } from "@lib/i18n/messages"
 
-const TYPES: { value: OrderRequestType; label: string }[] = [
-  { value: "cancel", label: "취소" },
-  { value: "return", label: "반품" },
-  { value: "exchange", label: "교환" },
+const TYPES: { value: OrderRequestType; labelKey: MessageKey }[] = [
+  { value: "cancel", labelKey: "request.cancel" },
+  { value: "return", labelKey: "request.return" },
+  { value: "exchange", labelKey: "request.exchange" },
 ]
 
-const REASONS: Record<OrderRequestType, string[]> = {
-  cancel: ["단순 변심", "주문 실수", "배송 지연", "기타"],
-  return: ["단순 변심", "상품 불량/파손", "오배송", "사이즈/색상 불만", "기타"],
-  exchange: ["사이즈 변경", "색상 변경", "상품 불량/파손", "기타"],
+/**
+ * 신청 사유.
+ *
+ * `value` 는 **백엔드로 보내는 한국어 원문**이다 — 관리자 화면과 기존 신청 이력이
+ * 이 문자열을 그대로 쓰고 있어서 바꾸면 과거 데이터와 어긋난다.
+ * 화면에 보이는 글자만 `labelKey` 로 번역한다.
+ */
+const REASONS: Record<
+  OrderRequestType,
+  { value: string; labelKey: MessageKey }[]
+> = {
+  cancel: [
+    { value: "단순 변심", labelKey: "request.reason.changeOfMind" },
+    { value: "주문 실수", labelKey: "request.reason.orderMistake" },
+    { value: "배송 지연", labelKey: "request.reason.shippingDelay" },
+    { value: "기타", labelKey: "request.reason.etc" },
+  ],
+  return: [
+    { value: "단순 변심", labelKey: "request.reason.changeOfMind" },
+    { value: "상품 불량/파손", labelKey: "request.reason.defect" },
+    { value: "오배송", labelKey: "request.reason.wrongItem" },
+    { value: "사이즈/색상 불만", labelKey: "request.reason.sizeColor" },
+    { value: "기타", labelKey: "request.reason.etc" },
+  ],
+  exchange: [
+    { value: "사이즈 변경", labelKey: "request.reason.sizeChange" },
+    { value: "색상 변경", labelKey: "request.reason.colorChange" },
+    { value: "상품 불량/파손", labelKey: "request.reason.defect" },
+    { value: "기타", labelKey: "request.reason.etc" },
+  ],
 }
 
 const OrderRequest = ({ orderId }: { orderId: string }) => {
+  const t = useT()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<OrderRequestType>("cancel")
-  const [reason, setReason] = useState(REASONS.cancel[0])
+  const [reason, setReason] = useState(REASONS.cancel[0].value)
   const [comment, setComment] = useState("")
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const onTypeChange = (t: OrderRequestType) => {
-    setType(t)
-    setReason(REASONS[t][0])
+  // 인자 이름을 t 로 두면 번역 함수 t 를 가린다(2026-08-10 전환 중 발견)
+  const onTypeChange = (next: OrderRequestType) => {
+    setType(next)
+    setReason(REASONS[next][0].value)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,7 +74,7 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
         setDone(true)
         router.refresh()
       } else {
-        setError(res.error ?? "신청 실패")
+        setError(res.error ?? t("request.failed"))
       }
     })
   }
@@ -53,8 +83,7 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
     return (
       <div className="mt-6 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-5 text-center">
         <p className="text-base-regular text-ui-fg-base">
-          신청이 접수되었습니다. 운영자 확인 후 처리되며, 진행 상황은 주문 상태로
-          안내드립니다.
+          {t("request.done")}
         </p>
       </div>
     )
@@ -69,7 +98,7 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
           onClick={() => setOpen(true)}
           data-testid="open-order-request"
         >
-          취소·반품·교환 신청
+          {t("request.open")}
         </Button>
       </div>
     )
@@ -81,30 +110,30 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
       className="mt-6 rounded-rounded border border-ui-border-base p-6 flex flex-col gap-y-4"
       data-testid="order-request-form"
     >
-      <h3 className="text-large-semi">취소·반품·교환 신청</h3>
+      <h3 className="text-large-semi">{t("request.title")}</h3>
 
       {/* 유형 */}
       <div className="flex gap-x-2">
-        {TYPES.map((t) => (
+        {TYPES.map((opt) => (
           <button
-            key={t.value}
+            key={opt.value}
             type="button"
-            onClick={() => onTypeChange(t.value)}
+            onClick={() => onTypeChange(opt.value)}
             className={clx(
               "flex-1 h-10 border text-small-regular transition-colors",
-              type === t.value
+              type === opt.value
                 ? "border-ui-fg-base text-ui-fg-base font-medium"
                 : "border-ui-border-base text-ui-fg-subtle hover:border-ui-fg-muted"
             )}
           >
-            {t.label}
+            {t(opt.labelKey)}
           </button>
         ))}
       </div>
 
       {/* 사유 */}
       <div className="flex flex-col gap-y-1">
-        <label className="text-small-regular text-ui-fg-subtle">사유</label>
+        <label className="text-small-regular text-ui-fg-subtle">{t("request.reason")}</label>
         <select
           value={reason}
           onChange={(e) => setReason(e.target.value)}
@@ -112,8 +141,8 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
           data-testid="request-reason"
         >
           {REASONS[type].map((r) => (
-            <option key={r} value={r}>
-              {r}
+            <option key={r.value} value={r.value}>
+              {t(r.labelKey)}
             </option>
           ))}
         </select>
@@ -122,7 +151,7 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="상세 내용 (선택)"
+        placeholder={t("request.detailPlaceholder")}
         rows={3}
         className="border border-ui-border-base rounded-rounded bg-transparent p-3 text-base-regular outline-none focus:border-ui-fg-base resize-none"
         data-testid="request-comment"
@@ -139,7 +168,7 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
           className="rounded-none"
           onClick={() => setOpen(false)}
         >
-          닫기
+          {t("common.close")}
         </Button>
         <Button
           type="submit"
@@ -147,7 +176,7 @@ const OrderRequest = ({ orderId }: { orderId: string }) => {
           isLoading={isPending}
           data-testid="submit-order-request"
         >
-          신청
+          {t("request.submit")}
         </Button>
       </div>
     </form>

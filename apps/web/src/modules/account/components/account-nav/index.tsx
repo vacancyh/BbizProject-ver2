@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { ArrowRightOnRectangle, CurrencyDollar, Heart, ShieldCheck, Star, Tag } from "@medusajs/icons"
 import { clx } from "@modules/common/components/ui"
 import { useParams, usePathname } from "next/navigation"
@@ -17,6 +18,7 @@ const AccountNav = ({
 }: {
   customer: HttpTypes.StoreCustomer | null
 }) => {
+  const t = useT()
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
 
@@ -35,13 +37,13 @@ const AccountNav = ({
           >
             <>
               <ChevronDown className="transform rotate-90" />
-              <span>내 계정</span>
+              <span>{t("nav.account")}</span>
             </>
           </LocalizedClientLink>
         ) : (
           <>
             <div className="text-xl-semi mb-4 px-8">
-              {customer?.first_name}님 안녕하세요
+              {t("account.greeting", { name: customer?.first_name ?? "" })}
             </div>
             <div className="text-base-regular">
               <ul>
@@ -54,7 +56,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <User size={20} />
-                        <span>프로필</span>
+                        <span>{t("account.navProfile")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -69,7 +71,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <MapPin size={20} />
-                        <span>배송지</span>
+                        <span>{t("account.navAddresses")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -83,7 +85,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <Package size={20} />
-                      <span>주문 내역</span>
+                      <span>{t("account.orders")}</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </LocalizedClientLink>
@@ -97,7 +99,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <CurrencyDollar />
-                        <span>적립금</span>
+                        <span>{t("account.points")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -112,7 +114,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <Star />
-                        <span>등급</span>
+                        <span>{t("account.membership")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -127,7 +129,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <Heart />
-                        <span>위시리스트</span>
+                        <span>{t("nav.wishlist")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -142,7 +144,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <Tag />
-                        <span>쿠폰함</span>
+                        <span>{t("account.navCoupons")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -157,7 +159,7 @@ const AccountNav = ({
                     <>
                       <div className="flex items-center gap-x-2">
                         <ShieldCheck />
-                        <span>동의 관리</span>
+                        <span>{t("account.navConsents")}</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -172,7 +174,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <ArrowRightOnRectangle />
-                      <span>로그아웃</span>
+                      <span>{t("nav.logout")}</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </button>
@@ -185,7 +187,7 @@ const AccountNav = ({
       <div className="hidden small:block" data-testid="account-nav">
         <div>
           <div className="pb-4">
-            <h3 className="text-base-semi">내 계정</h3>
+            <h3 className="text-base-semi">{t("nav.account")}</h3>
           </div>
           <div className="text-base-regular">
             <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
@@ -195,7 +197,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="overview-link"
                 >
-                  개요
+                  {t("account.overview")}
                 </AccountNavLink>
               </li>
               <li>
@@ -204,7 +206,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="profile-link"
                 >
-                  프로필
+                  {t("account.navProfile")}
                 </AccountNavLink>
               </li>
               <li>
@@ -213,7 +215,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="addresses-link"
                 >
-                  배송지
+                  {t("account.navAddresses")}
                 </AccountNavLink>
               </li>
               <li>
@@ -222,7 +224,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="orders-link"
                 >
-                  주문 내역
+                  {t("account.orders")}
                 </AccountNavLink>
               </li>
               <li>
@@ -231,7 +233,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="points-link"
                 >
-                  적립금
+                  {t("account.points")}
                 </AccountNavLink>
               </li>
               <li>
@@ -240,7 +242,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="membership-link"
                 >
-                  등급
+                  {t("account.membership")}
                 </AccountNavLink>
               </li>
               <li>
@@ -249,7 +251,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="wishlist-link"
                 >
-                  위시리스트
+                  {t("nav.wishlist")}
                 </AccountNavLink>
               </li>
               <li>
@@ -258,7 +260,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="coupons-link"
                 >
-                  쿠폰함
+                  {t("account.navCoupons")}
                 </AccountNavLink>
               </li>
               <li>
@@ -267,7 +269,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="consents-link"
                 >
-                  동의 관리
+                  {t("account.navConsents")}
                 </AccountNavLink>
               </li>
               <li className="text-grey-700">
@@ -276,7 +278,7 @@ const AccountNav = ({
                   onClick={handleLogout}
                   data-testid="logout-button"
                 >
-                  로그아웃
+                  {t("nav.logout")}
                 </button>
               </li>
             </ul>

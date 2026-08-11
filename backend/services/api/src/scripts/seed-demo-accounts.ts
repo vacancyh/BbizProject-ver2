@@ -145,9 +145,11 @@ export default async function seedDemoAccounts({ container }: ExecArgs) {
       const exLedger = await points.listPointLedgers({ customer_id: customer.id })
       if (exLedger.length) await points.deletePointLedgers(exLedger.map((r: any) => r.id))
       for (const amt of a.earn) {
-        await points.earnPoints(customer.id, amt, { validDays: 365, earnedAtIso: nowIso, reason: "시드적립" })
+        await points.earnPoints(customer.id, amt, { validDays: 365, earnedAtIso: nowIso, // 사유는 **코드**로 남긴다 — 스토어프론트가 언어에 맞는 문구로 바꿔 보여 준다
+          // (자유 문장을 넣으면 영어 화면에도 한국어가 그대로 나온다)
+          reason: "purchase" })
       }
-      if (a.redeem > 0) await points.redeemPoints(customer.id, a.redeem, "시드사용")
+      if (a.redeem > 0) await points.redeemPoints(customer.id, a.redeem, "redeem")
 
       // ── ⑥ 동의(고객 이력 삭제 후 재기록) ─────────────────
       const exConsent = await consent.listConsentLogs({ customer_id: customer.id })

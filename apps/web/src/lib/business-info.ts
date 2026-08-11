@@ -16,18 +16,30 @@
  * ⚠️ NEXT_PUBLIC_* 는 빌드 시점에 번들에 박힌다 — 값을 바꾸면 **재빌드**해야 반영된다.
  */
 
+/**
+ * ⚠️ 미설정 기본값을 여기에 한국어로 박아 두지 말 것.
+ * 예시값도 화면에 보이는 문구다 — 영어 화면에 "홍길동 · 서울특별시…" 가 그대로 나간다.
+ * 비워 두고 화면에서 `t("biz.*Sample")` 로 채운다(2026-08-10).
+ * 값이 설정돼 있으면 **그 값이 이긴다** — 사업자의 실제 정보이므로 번역 대상이 아니다.
+ */
 export const BIZ = {
-  name: process.env.NEXT_PUBLIC_BIZ_NAME ?? "쇼핑몰",
-  ceo: process.env.NEXT_PUBLIC_BIZ_CEO ?? "홍길동",
+  name: process.env.NEXT_PUBLIC_BIZ_NAME ?? "",
+  ceo: process.env.NEXT_PUBLIC_BIZ_CEO ?? "",
   regNo: process.env.NEXT_PUBLIC_BIZ_REG_NO ?? "000-00-00000",
-  mailOrderNo: process.env.NEXT_PUBLIC_BIZ_MAIL_ORDER_NO ?? "2026-서울강남-00000",
-  address: process.env.NEXT_PUBLIC_BIZ_ADDRESS ?? "서울특별시 강남구 테헤란로 000",
-  privacyOfficer:
-    process.env.NEXT_PUBLIC_BIZ_PRIVACY_OFFICER ?? "홍길동(privacy@shop.example)",
+  mailOrderNo: process.env.NEXT_PUBLIC_BIZ_MAIL_ORDER_NO ?? "",
+  address: process.env.NEXT_PUBLIC_BIZ_ADDRESS ?? "",
+  privacyOfficer: process.env.NEXT_PUBLIC_BIZ_PRIVACY_OFFICER ?? "",
   csPhone: process.env.NEXT_PUBLIC_CS_PHONE ?? "1600-0000",
-  csHours: process.env.NEXT_PUBLIC_CS_HOURS ?? "평일 10:00–18:00 (점심 12:00–13:00)",
   csEmail: process.env.NEXT_PUBLIC_CS_EMAIL ?? "help@shop.example",
-  csClosed: process.env.NEXT_PUBLIC_CS_CLOSED ?? "주말·공휴일 휴무",
+  /**
+   * 운영시간·휴무 안내는 **문장**이라 언어마다 달라야 한다.
+   * 여기서 한국어 기본값을 박아 두면 영어 화면에도 한국어가 그대로 나간다.
+   * 그래서 미설정 시 빈 문자열을 주고, 화면에서 언어별 기본 문구
+   * (`biz.csHoursDefault` / `biz.csClosedDefault`)로 채운다.
+   * 환경변수가 설정돼 있으면 **그 값이 이긴다** — 사업자가 정한 실제 운영시간이다.
+   */
+  csHours: process.env.NEXT_PUBLIC_CS_HOURS ?? "",
+  csClosed: process.env.NEXT_PUBLIC_CS_CLOSED ?? "",
   /** 필수 항목이 하나라도 비어 있으면 예시값으로 간주해 화면에 경고를 띄운다. */
   isPlaceholder: !process.env.NEXT_PUBLIC_BIZ_REG_NO,
 } as const

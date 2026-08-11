@@ -1,4 +1,9 @@
+"use client"
+
+// 이미 useState(비밀번호 보기 토글)를 쓰므로 클라이언트 전용이다.
+// 경계를 명시해 두면 서버 컴포넌트에서 실수로 렌더해도 바로 드러난다.
 import { Label } from "@modules/common/components/ui"
+import { useT } from "@lib/i18n/client"
 import React, { useEffect, useImperativeHandle, useState } from "react"
 
 import Eye from "@modules/common/icons/eye"
@@ -17,6 +22,7 @@ type InputProps = Omit<
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ type, name, label, touched: _touched, required, topLabel, ...props }, ref) => {
+    const t = useT()
     const inputRef = React.useRef<HTMLInputElement>(null)
     const [showPassword, setShowPassword] = useState(false)
     const [inputType, setInputType] = useState(type)
@@ -61,7 +67,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {type === "password" && (
             <button
               type="button"
-              aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 표시"}
+              aria-label={showPassword ? t("account.hidePassword") : t("account.showPassword")}
               aria-pressed={showPassword}
               onClick={() => setShowPassword(!showPassword)}
               className="text-ui-fg-subtle px-4 focus:outline-none transition-all duration-150 outline-none focus:text-ui-fg-base absolute right-0 top-3"

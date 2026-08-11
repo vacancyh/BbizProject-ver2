@@ -20,6 +20,7 @@
 import { useEffect, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 
+import { useT } from "@lib/i18n/client"
 import { updateLocale } from "@lib/data/locale-actions"
 import type { Locale } from "@lib/data/locales"
 
@@ -44,6 +45,7 @@ function shortCode(code: string): string {
 }
 
 export default function LanguageSwitcher({ locales, currentLocale }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
@@ -93,7 +95,7 @@ export default function LanguageSwitcher({ locales, currentLocale }: Props) {
         disabled={pending}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label="언어 선택"
+        aria-label={t("nav.languageSelect")}
         className="flex h-6 items-center gap-x-1 px-1 hover:text-ui-fg-base disabled:opacity-50"
         data-testid="language-switcher-button"
       >
@@ -106,7 +108,7 @@ export default function LanguageSwitcher({ locales, currentLocale }: Props) {
       {open && (
         <ul
           role="listbox"
-          aria-label="언어 목록"
+          aria-label={t("nav.languageSelect")}
           className="absolute right-0 top-full z-[900] mt-1 min-w-[9rem] rounded-rounded border border-ui-border-base bg-white py-1 text-small-regular shadow-elevation-flyout"
           data-testid="language-switcher-list"
         >

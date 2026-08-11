@@ -2,11 +2,12 @@ import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import CartTemplate from "@modules/cart/templates"
 import { Metadata } from "next"
+import { getT } from "@lib/i18n"
 import { notFound } from "next/navigation"
 
-export const metadata: Metadata = {
-  title: "장바구니",
-  description: "내 장바구니를 확인하세요.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("cart.title"), description: t("cart.metaDescription") }
 }
 
 export default async function Cart() {

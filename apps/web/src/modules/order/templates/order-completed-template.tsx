@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Heading } from "@modules/common/components/ui"
 import { cookies as nextCookies } from "next/headers"
 
@@ -17,6 +18,7 @@ type OrderCompletedTemplateProps = {
 export default async function OrderCompletedTemplate({
   order,
 }: OrderCompletedTemplateProps) {
+  const t = await getT()
   const cookies = await nextCookies()
 
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
@@ -33,12 +35,12 @@ export default async function OrderCompletedTemplate({
             level="h1"
             className="flex flex-col gap-y-3 text-ui-fg-base text-3xl mb-4"
           >
-            <span>감사합니다!</span>
-            <span>주문이 정상적으로 접수되었습니다.</span>
+            <span>{t("order.thanks")}</span>
+            <span>{t("order.received")}</span>
           </Heading>
           <OrderDetails order={order} />
           <Heading level="h2" className="flex flex-row text-3xl-regular">
-            주문 요약
+            {t("order.summary")}
           </Heading>
           <Items order={order} />
           <CartTotals totals={order} />

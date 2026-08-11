@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
@@ -6,8 +7,10 @@ import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-export const metadata: Metadata = {
-  title: "주문/결제",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("checkout.title"), description: t("checkout.title") }
 }
 
 export default async function Checkout() {

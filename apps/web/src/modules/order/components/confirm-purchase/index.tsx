@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button } from "@modules/common/components/ui"
 import { confirmPurchase } from "@lib/data/order-requests"
 import { useRouter } from "next/navigation"
@@ -15,6 +16,7 @@ const ConfirmPurchase = ({
   orderId: string
   fulfillmentStatus?: string
 }) => {
+  const t = useT()
   const router = useRouter()
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +30,7 @@ const ConfirmPurchase = ({
     return (
       <div className="mt-6 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-4 text-center">
         <p className="text-base-regular text-ui-fg-base">
-          구매가 확정되었습니다. 이용해 주셔서 감사합니다!
+          {t("confirm.done")}
         </p>
       </div>
     )
@@ -42,7 +44,7 @@ const ConfirmPurchase = ({
         setDone(true)
         router.refresh()
       } else {
-        setError(res.error ?? "처리 실패")
+        setError(res.error ?? t("confirm.failed"))
       }
     })
   }
@@ -55,11 +57,10 @@ const ConfirmPurchase = ({
         isLoading={isPending}
         data-testid="confirm-purchase"
       >
-        구매확정
+        {t("confirm.title")}
       </Button>
       <p className="text-small-regular text-ui-fg-muted">
-        상품을 정상적으로 받으셨다면 구매확정해 주세요. 확정 시 교환·반품
-        기간이 종료됩니다.
+        {t("confirm.body")}
       </p>
       {error && (
         <p className="text-small-regular text-ui-tag-red-text">{error}</p>

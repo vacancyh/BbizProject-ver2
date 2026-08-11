@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { reportError } from "@lib/util/monitoring"
+import { DEFAULT_UI_LOCALE, makeT, toUiLocale } from "@lib/i18n/messages"
 
 /**
  * 전역 에러 바운더리 — 렌더 중 처리되지 않은 예외를 잡아 모니터링으로 보고 + 안내 화면.
@@ -18,8 +19,18 @@ export default function GlobalError({
     reportError(error, { digest: error.digest, scope: "global-error" })
   }, [error])
 
+  // ⚠️ 이 화면은 root layout 을 **대체**하므로 I18nProvider 가 없다 → useT() 를 못 쓴다.
+  //    언어 쿠키를 직접 읽어 사전을 고른다. 못 읽으면 기본(한국어).
+  const locale =
+    typeof document !== "undefined"
+      ? toUiLocale(
+          document.cookie.match(/(?:^|;\s*)_medusa_locale=([^;]+)/)?.[1]
+        )
+      : DEFAULT_UI_LOCALE
+  const t = makeT(locale)
+
   return (
-    <html lang="ko">
+    <html lang={locale}>
       <body>
         <div
           style={{
@@ -35,10 +46,10 @@ export default function GlobalError({
           }}
         >
           <h1 style={{ fontSize: 20, fontWeight: 600 }}>
-            일시적인 오류가 발생했습니다
+            {t("error.globalTitle")}
           </h1>
           <p style={{ color: "#666", fontSize: 14 }}>
-            잠시 후 다시 시도해 주세요. 문제가 계속되면 고객센터로 문의해 주세요.
+            {t("error.globalBody")}
           </p>
           <button
             onClick={() => reset()}
@@ -52,7 +63,7 @@ export default function GlobalError({
               cursor: "pointer",
             }}
           >
-            다시 시도
+            {t("common.retry")}
           </button>
         </div>
       </body>

@@ -4,8 +4,10 @@ import { Button } from "@modules/common/components/ui"
 import { lookupGuestOrder } from "@lib/data/order-lookup"
 import { useParams, useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
+import { useT } from "@lib/i18n/client"
 
 const OrderLookupForm = () => {
+  const t = useT()
   const router = useRouter()
   const { countryCode } = useParams() as { countryCode: string }
   const [displayId, setDisplayId] = useState("")
@@ -17,7 +19,7 @@ const OrderLookupForm = () => {
     e.preventDefault()
     setError(null)
     if (!displayId.trim() || !email.trim()) {
-      setError("주문번호와 이메일을 입력해 주세요.")
+      setError(t("lookup.missingFields"))
       return
     }
     startTransition(async () => {
@@ -37,19 +39,19 @@ const OrderLookupForm = () => {
       data-testid="order-lookup-form"
     >
       <div className="flex flex-col gap-y-1">
-        <label className="text-small-regular text-ui-fg-subtle">주문번호</label>
+        <label className="text-small-regular text-ui-fg-subtle">{t("lookup.orderNo")}</label>
         <input
           type="text"
           value={displayId}
           onChange={(e) => setDisplayId(e.target.value)}
-          placeholder="예: 45"
+          placeholder={t("lookup.orderNoPlaceholder")}
           className="border border-ui-border-base rounded-rounded bg-transparent p-3 text-base-regular outline-none focus:border-ui-fg-base"
           data-testid="lookup-display-id"
         />
       </div>
       <div className="flex flex-col gap-y-1">
         <label className="text-small-regular text-ui-fg-subtle">
-          주문 시 입력한 이메일
+          {t("lookup.emailLabel")}
         </label>
         <input
           type="email"
@@ -69,7 +71,7 @@ const OrderLookupForm = () => {
         isLoading={isPending}
         data-testid="lookup-submit"
       >
-        주문 조회
+        {t("lookup.submit")}
       </Button>
     </form>
   )

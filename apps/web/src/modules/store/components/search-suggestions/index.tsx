@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { useT } from "@lib/i18n/client"
 
 const KEY = "_recent_searches"
 const MAX = 8
@@ -27,6 +28,7 @@ const SearchSuggestions = ({
   currentQuery?: string
   popularTerms?: string[]
 }) => {
+  const t = useT()
   const [recent, setRecent] = useState<string[]>([])
   const popular =
     popularTerms && popularTerms.length > 0 ? popularTerms : POPULAR_FALLBACK
@@ -69,7 +71,7 @@ const SearchSuggestions = ({
       {recent.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-small-regular text-ui-fg-muted mr-1">
-            최근 검색어
+            {t("store.recentSearches")}
           </span>
           {recent.map((t) => (
             <Chip key={"r-" + t} term={t} />
@@ -80,13 +82,13 @@ const SearchSuggestions = ({
             className="text-xsmall-regular text-ui-fg-muted underline ml-1"
             data-testid="clear-recent-searches"
           >
-            지우기
+            {t("store.clearRecent")}
           </button>
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-small-regular text-ui-fg-muted mr-1">
-          인기 검색어
+          {t("store.popularSearches")}
         </span>
         {popular.map((t) => (
           <Chip key={"p-" + t} term={t} />

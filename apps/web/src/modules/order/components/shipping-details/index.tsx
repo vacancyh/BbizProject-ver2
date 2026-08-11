@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@modules/common/components/ui"
@@ -8,11 +9,12 @@ type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
 }
 
-const ShippingDetails = ({ order }: ShippingDetailsProps) => {
+const ShippingDetails = async ({ order }: ShippingDetailsProps) => {
+  const t = await getT()
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        배송 정보
+        {t("order.shippingInfo")}
       </Heading>
       <div className="flex items-start gap-x-8">
         <div
@@ -20,7 +22,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
-            배송지
+            {t("checkout.shippingAddress")}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.first_name}{" "}
@@ -43,7 +45,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           className="flex flex-col w-1/3 "
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">연락처</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">{t("checkout.contact")}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.phone}
           </Text>
@@ -54,7 +56,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           className="flex flex-col w-1/3"
           data-testid="shipping-method-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">배송 방법</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">{t("checkout.deliveryMethod")}</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {(order.shipping_methods?.[0] as { name?: string })?.name} (
             {convertToLocale({

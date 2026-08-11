@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -5,14 +6,16 @@ import CouponList from "@modules/account/components/coupon-list"
 import { getRegion } from "@lib/data/regions"
 import { retrieveCustomer } from "@lib/data/customer"
 
-export const metadata: Metadata = {
-  title: "쿠폰함",
-  description: "보유하신 쿠폰을 확인하세요.",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("account.navCoupons"), description: t("page.couponsMeta") }
 }
 
 export default async function CouponsPage(props: {
   params: Promise<{ countryCode: string }>
 }) {
+  const t = await getT()
   const { countryCode } = await props.params
   const customer = await retrieveCustomer()
   const region = await getRegion(countryCode)
@@ -24,9 +27,9 @@ export default async function CouponsPage(props: {
   return (
     <div className="w-full" data-testid="coupons-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">쿠폰함</h1>
+        <h1 className="text-2xl-semi">{t("account.navCoupons")}</h1>
         <p className="text-base-regular">
-          보유하신 쿠폰을 확인하고 결제 시 사용하실 수 있습니다.
+          {t("page.couponsDesc")}
         </p>
       </div>
       <CouponList customerId={customer.id} currencyCode={region.currency_code} />

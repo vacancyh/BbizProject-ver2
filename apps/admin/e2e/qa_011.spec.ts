@@ -422,7 +422,15 @@ test.describe("QA-011 d11_쇼핑몰설정", () => {
 
     // 7. 폼 데이터 입력
     const testVersion = `qa008-${Date.now().toString().slice(-8)}`;
-    await typeSelect.selectOption("terms_of_service");
+    // ⚠️ **terms_of_service 를 쓰면 안 된다.**
+    // 이 테스트는 아래에서 문서를 **게시**까지 하는데, 약관은 게시하는 순간
+    // 기존 게시본을 밀어내고 **고객 화면(/content/terms-of-use)의 현행 약관**이 된다.
+    // 실제로 QA 테스트 약관 10건이 published 로 쌓여 진짜 약관을 가리고 있었다
+    // ("QA-008 자동화 테스트 약관 본문입니다"가 고객에게 보였다 — 2026-08-11 발견).
+    //
+    // marketing_consent 는 store 라우트의 slug 매핑에 없어 고객 화면에 노출되지 않는다.
+    // 문서 작성·게시 API 왕복 검증은 그대로 하면서 부작용만 없앤다.
+    await typeSelect.selectOption("marketing_consent");
     await versionInput.fill(testVersion);
 
     // 시행일 = 내일

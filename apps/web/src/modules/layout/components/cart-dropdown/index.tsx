@@ -172,7 +172,7 @@ const CartDropdown = ({
                             className="mt-1"
                             data-testid="cart-item-remove-button"
                           >
-                            삭제
+                            {t("cart.remove")}
                           </DeleteButton>
                         </div>
                       </div>
@@ -181,8 +181,8 @@ const CartDropdown = ({
                 <div className="p-4 flex flex-col gap-y-4 text-small-regular">
                   <div className="flex items-center justify-between">
                     <span className="text-ui-fg-base font-semibold">
-                      상품 합계{" "}
-                      <span className="font-normal">(세금 제외)</span>
+                      {t("cart.subtotal")}{" "}
+                      <span className="font-normal">{t("cart.exclTax")}</span>
                     </span>
                     <span
                       className="text-large-semi"
@@ -216,8 +216,8 @@ const CartDropdown = ({
                   <div>
                     <LocalizedClientLink href="/store">
                       <>
-                        <span className="sr-only">전체 상품 보기</span>
-                        <Button onClick={close}>상품 둘러보기</Button>
+                        <span className="sr-only">{t("cart.browseAll")}</span>
+                        <Button onClick={close}>{t("cart.browseProducts")}</Button>
                       </>
                     </LocalizedClientLink>
                   </div>

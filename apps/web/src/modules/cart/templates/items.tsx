@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Table } from "@modules/common/components/ui"
@@ -9,24 +10,25 @@ type ItemsTemplateProps = {
   cart?: HttpTypes.StoreCart
 }
 
-const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
+const ItemsTemplate = async ({ cart }: ItemsTemplateProps) => {
+  const t = await getT()
   const items = cart?.items
   return (
     <div>
       <div className="pb-3 flex items-center">
-        <Heading className="text-[2rem] leading-[2.75rem]">장바구니</Heading>
+        <Heading className="text-[2rem] leading-[2.75rem]">{t("cart.title")}</Heading>
       </div>
       <Table>
         <Table.Header className="border-t-0">
           <Table.Row className="text-ui-fg-subtle txt-medium-plus">
-            <Table.HeaderCell className="!pl-0">상품</Table.HeaderCell>
+            <Table.HeaderCell className="!pl-0">{t("cart.item")}</Table.HeaderCell>
             <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell>수량</Table.HeaderCell>
+            <Table.HeaderCell>{t("cart.quantity")}</Table.HeaderCell>
             <Table.HeaderCell className="hidden small:table-cell">
-              가격
+              {t("cart.price")}
             </Table.HeaderCell>
             <Table.HeaderCell className="!pr-0 text-right">
-              합계
+              {t("cart.lineTotal")}
             </Table.HeaderCell>
           </Table.Row>
         </Table.Header>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { useEffect, useState } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import type { Banner } from "@lib/data/banners"
@@ -8,6 +9,7 @@ const dismissKey = (id: string) => `popup_dismiss_${id}`
 
 /** 홈 진입 팝업 — 첫 팝업 배너 1건 노출. "오늘 하루 보지 않기" 시 당일 자정까지 숨김(localStorage). */
 const HomePopup = ({ banners }: { banners: Banner[] }) => {
+  const t = useT()
   const banner = banners[0]
   const [open, setOpen] = useState(false)
 
@@ -62,7 +64,7 @@ const HomePopup = ({ banners }: { banners: Banner[] }) => {
             onClick={dismissToday}
             data-testid="popup-dismiss-today"
           >
-            오늘 하루 보지 않기
+            {t("home.popupDismissToday")}
           </button>
           <button
             type="button"
@@ -70,7 +72,7 @@ const HomePopup = ({ banners }: { banners: Banner[] }) => {
             onClick={() => setOpen(false)}
             data-testid="popup-close"
           >
-            닫기
+            {t("common.close")}
           </button>
         </div>
       </div>

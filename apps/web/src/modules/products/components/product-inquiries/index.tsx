@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { listProductInquiries } from "@lib/data/inquiries"
 import InquiryForm from "./inquiry-form"
 
@@ -9,18 +10,19 @@ const formatDate = (iso: string) => {
 }
 
 const ProductInquiries = async ({ productId }: { productId: string }) => {
+  const t = await getT()
   const inquiries = await listProductInquiries(productId)
 
   return (
     <div className="w-full" data-testid="product-inquiries">
       <div className="flex items-baseline gap-x-3 mb-6">
-        <h2 className="text-2xl-semi">상품 문의</h2>
+        <h2 className="text-2xl-semi">{t("inquiry.sectionTitle")}</h2>
         <span className="txt-medium text-ui-fg-muted">({inquiries.length})</span>
       </div>
 
       {inquiries.length === 0 ? (
         <p className="txt-medium text-ui-fg-muted py-10 text-center">
-          등록된 문의가 없습니다. 궁금한 점을 문의해 보세요.
+          {t("inquiry.empty")}
         </p>
       ) : (
         <ul className="flex flex-col">
@@ -48,7 +50,7 @@ const ProductInquiries = async ({ productId }: { productId: string }) => {
                       : "txt-small text-ui-fg-muted shrink-0"
                   }
                 >
-                  {q.answered ? "답변완료" : "답변대기"}
+                  {q.answered ? t("inquiry.answered") : t("inquiry.pending")}
                 </span>
               </div>
               {q.answered && q.reply && (

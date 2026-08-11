@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Metadata } from "next"
 
 import OrderOverview from "@modules/account/components/order-overview"
@@ -6,12 +7,14 @@ import { listOrders } from "@lib/data/orders"
 import Divider from "@modules/common/components/divider"
 import TransferRequestForm from "@modules/account/components/transfer-request-form"
 
-export const metadata: Metadata = {
-  title: "주문 내역",
-  description: "지난 주문 내역을 확인합니다.",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("account.orders"), description: t("page.ordersMeta") }
 }
 
 export default async function Orders() {
+  const t = await getT()
   const orders = await listOrders()
 
   if (!orders) {
@@ -21,10 +24,9 @@ export default async function Orders() {
   return (
     <div className="w-full" data-testid="orders-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">주문 내역</h1>
+        <h1 className="text-2xl-semi">{t("account.orders")}</h1>
         <p className="text-base-regular">
-          지난 주문과 주문 상태를 확인하실 수 있습니다. 필요 시 반품·교환도
-          신청하실 수 있습니다.
+          {t("page.ordersDesc")}
         </p>
       </div>
       <div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Heading, Text, clx } from "@modules/common/components/ui"
 
 import PaymentButton from "../payment-button"
@@ -7,6 +8,7 @@ import { useSearchParams } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 
 const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
+  const t = useT()
   const searchParams = useSearchParams()
 
   const isOpen = searchParams.get("step") === "review"
@@ -32,7 +34,7 @@ const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
             }
           )}
         >
-          주문 검토
+          {t("checkout.reviewTitle")}
         </Heading>
       </div>
       {isOpen && previousStepsCompleted && (
@@ -40,9 +42,7 @@ const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
           <div className="flex items-start gap-x-1 w-full mb-6">
             <div className="w-full">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                &apos;주문하기&apos; 버튼을 누르시면 이용약관·판매약관·교환/반품
-                정책을 읽고 동의하며, 개인정보처리방침을 확인하신 것으로
-                간주됩니다.
+                {t("checkout.agreeNotice")}
               </Text>
             </div>
           </div>

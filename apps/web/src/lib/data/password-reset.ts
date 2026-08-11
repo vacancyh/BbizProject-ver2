@@ -5,6 +5,7 @@
 //  - 재설정: POST /auth/customer/emailpass/update (Bearer 토큰) { email, password }
 // ※ 이메일 발송은 notification provider 필요(운영). dev 에선 토큰이 auth.password_reset 이벤트로 emit.
 
+import { getT } from "@lib/i18n"
 import { sdk } from "@lib/config"
 import { getAuthHeaders } from "./cookies"
 
@@ -37,7 +38,7 @@ export async function resetPassword(
   } catch {
     return {
       ok: false,
-      error: "재설정에 실패했습니다. 링크가 만료되었거나 올바르지 않습니다.",
+      error: (await getT())("err.resetLinkInvalid"),
     }
   }
 }
@@ -55,10 +56,10 @@ export async function changePassword(
   newPassword: string
 ): Promise<{ ok: boolean; error?: string }> {
   if (!newPassword || newPassword.length < 8) {
-    return { ok: false, error: "새 비밀번호는 8자 이상이어야 합니다." }
+    return { ok: false, error: (await getT())("err.passwordTooShort") }
   }
   if (currentPassword === newPassword) {
-    return { ok: false, error: "현재 비밀번호와 다른 비밀번호를 사용해 주세요." }
+    return { ok: false, error: (await getT())("err.passwordSame") }
   }
 
   try {
@@ -71,7 +72,7 @@ export async function changePassword(
   } catch (e: unknown) {
     const message =
       (e as { message?: string })?.message ??
-      "비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해 주세요."
+      (await getT())("err.passwordChangeFailed")
     return { ok: false, error: message }
   }
 }

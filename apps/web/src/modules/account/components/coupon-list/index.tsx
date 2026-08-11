@@ -1,15 +1,8 @@
+import { getT, getUiLocale } from "@lib/i18n"
+import { formatDate } from "@lib/util/format-date"
 import { clx } from "@modules/common/components/ui"
 import { listMyCoupons } from "@lib/data/coupons"
 import { convertToLocale } from "@lib/util/money"
-
-const formatDate = (iso: string | null) =>
-  iso
-    ? new Intl.DateTimeFormat("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date(iso))
-    : "무기한"
 
 const CouponList = async ({
   customerId,
@@ -18,24 +11,38 @@ const CouponList = async ({
   customerId: string
   currencyCode: string
 }) => {
+  const t = await getT()
+  const locale = await getUiLocale()
   const { coupons, availableCount } = await listMyCoupons(customerId)
 
   return (
     <div className="w-full" data-testid="coupon-list">
       <div className="rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 mb-8">
         <span className="text-base-regular text-ui-fg-muted">
-          사용 가능한 쿠폰
+          {t("coupon.availableTitle")}
         </span>
-        <div className="text-3xl-semi mt-1">{availableCount}장</div>
+        <div className="text-3xl-semi mt-1">{t("coupon.countUnit", { n: availableCount })}</div>
       </div>
 
       {coupons.length === 0 ? (
         <p className="text-ui-fg-muted py-10 text-center text-base-regular">
-          보유하신 쿠폰이 없습니다.
+          {t("coupon.empty")}
         </p>
       ) : (
         <ul className="flex flex-col gap-y-3">
-          {coupons.map((c) => (
+          {coupons.map((c) => {
+            // 할인 표기는 **여기서** 만든다 — 백엔드가 완성된 한국어 문장을 주면
+            // 영어 화면에서 바꿀 수가 없다(2026-08-11 수정).
+            const benefit =
+              c.discount_type === "percentage"
+                ? t("coupon.percentOff", { value: c.discount_value })
+                : convertToLocale({
+                    amount: c.discount_value,
+                    currency_code: c.currency_code ?? currencyCode,
+                  })
+            // 운영자가 캠페인 이름을 붙였으면 그 이름이 이긴다(운영자 의도 존중).
+            const name = c.name ?? t("coupon.defaultName", { benefit })
+            return (
             <li
               key={c.id}
               className={clx(
@@ -48,15 +55,11 @@ const CouponList = async ({
             >
               <div className="flex flex-col gap-y-1">
                 <div className="flex items-center gap-x-2">
-                  <span className="text-xl-semi text-ui-fg-base">
-                    {c.benefit}
-                  </span>
-                  <span className="text-base-regular text-ui-fg-subtle">
-                    {c.name}
-                  </span>
+                  <span className="text-xl-semi text-ui-fg-base">{benefit}</span>
+                  <span className="text-base-regular text-ui-fg-subtle">{name}</span>
                   {c.used && (
                     <span className="text-small-regular rounded-rounded bg-ui-bg-base text-ui-fg-muted px-2 py-0.5 border border-ui-border-base">
-                      사용 완료
+                      {t("coupon.used")}
                     </span>
                   )}
                 </div>
@@ -65,22 +68,24 @@ const CouponList = async ({
                     ? `${convertToLocale({
                         amount: c.min_order_amount,
                         currency_code: currencyCode,
-                      })} 이상 · `
+                      })} `
                     : ""}
-                  {c.expires_at ? `${formatDate(c.expires_at)}까지` : "기간 제한 없음"}
+                  {c.expires_at
+                    ? t("coupon.until", { date: formatDate(locale, c.expires_at) })
+                    : t("coupon.noExpiry")}
                 </span>
               </div>
               <span className="text-small-regular text-ui-fg-subtle font-mono shrink-0">
                 {c.code}
               </span>
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
 
       <p className="text-small-regular text-ui-fg-muted mt-6">
-        쿠폰 코드는 결제 단계의 &apos;프로모션 코드 입력&apos;에서 사용하실 수
-        있습니다.
+        {t("coupon.howTo")}
       </p>
       {/* TODO(backend): store 쿠폰함 API 연동 시 발급/다운로드 흐름 추가 */}
     </div>

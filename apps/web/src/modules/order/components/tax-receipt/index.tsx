@@ -1,10 +1,12 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button, clx } from "@modules/common/components/ui"
 import { requestTaxReceipt } from "@lib/data/order-requests"
 import { useState, useTransition } from "react"
 
 const TaxReceipt = ({ orderId }: { orderId: string }) => {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<"cash_receipt" | "tax_invoice">("cash_receipt")
   const [identifier, setIdentifier] = useState("")
@@ -24,7 +26,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
           : { biz_no: bizNo.trim(), company_name: company.trim() }
       const res = await requestTaxReceipt(orderId, type, payload)
       if (res.ok) setDone(true)
-      else setError(res.error ?? "신청 실패")
+      else setError(res.error ?? t("receipt.failed"))
     })
   }
 
@@ -32,8 +34,9 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
     return (
       <div className="mt-6 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-4 text-center">
         <p className="text-base-regular text-ui-fg-base">
-          {type === "cash_receipt" ? "현금영수증" : "세금계산서"} 발급 신청이
-          접수되었습니다. 운영자 확인 후 발급됩니다.
+          {t("receipt.done", {
+            type: type === "cash_receipt" ? t("receipt.cash") : t("receipt.taxInvoice"),
+          })}
         </p>
       </div>
     )
@@ -48,7 +51,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
           onClick={() => setOpen(true)}
           data-testid="open-tax-receipt"
         >
-          현금영수증·세금계산서 신청
+          {t("receipt.open")}
         </Button>
       </div>
     )
@@ -60,11 +63,11 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
       className="mt-6 rounded-rounded border border-ui-border-base p-6 flex flex-col gap-y-4"
       data-testid="tax-receipt-form"
     >
-      <h3 className="text-large-semi">현금영수증·세금계산서 신청</h3>
+      <h3 className="text-large-semi">{t("receipt.title")}</h3>
       <div className="flex gap-x-2">
         {([
-          { v: "cash_receipt", l: "현금영수증" },
-          { v: "tax_invoice", l: "세금계산서" },
+          { v: "cash_receipt", l: t("receipt.cash") },
+          { v: "tax_invoice", l: t("receipt.taxInvoice") },
         ] as const).map((t) => (
           <button
             key={t.v}
@@ -87,7 +90,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
           type="text"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="휴대폰 번호 또는 현금영수증 카드번호"
+          placeholder={t("receipt.idPlaceholder")}
           className="border border-ui-border-base rounded-none bg-transparent px-3 h-11 text-base-regular outline-none focus:border-ui-fg-base"
           data-testid="cash-receipt-id"
         />
@@ -97,7 +100,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
             type="text"
             value={bizNo}
             onChange={(e) => setBizNo(e.target.value)}
-            placeholder="사업자등록번호 (000-00-00000)"
+            placeholder={t("receipt.bizNoPlaceholder")}
             className="border border-ui-border-base rounded-none bg-transparent px-3 h-11 text-base-regular outline-none focus:border-ui-fg-base"
             data-testid="tax-biz-no"
           />
@@ -105,7 +108,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
             type="text"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            placeholder="상호명 (선택)"
+            placeholder={t("receipt.bizNamePlaceholder")}
             className="border border-ui-border-base rounded-none bg-transparent px-3 h-11 text-base-regular outline-none focus:border-ui-fg-base"
             data-testid="tax-company"
           />
@@ -121,7 +124,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
           className="rounded-none"
           onClick={() => setOpen(false)}
         >
-          닫기
+          {t("common.close")}
         </Button>
         <Button
           type="submit"
@@ -129,7 +132,7 @@ const TaxReceipt = ({ orderId }: { orderId: string }) => {
           isLoading={isPending}
           data-testid="submit-tax-receipt"
         >
-          신청
+          {t("receipt.submit")}
         </Button>
       </div>
     </form>

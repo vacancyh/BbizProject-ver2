@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 /**
@@ -99,12 +100,13 @@ function loadPostcodeScript(): Promise<void> {
 const PostcodeSearch = ({
   onComplete,
   className,
-  label = "우편번호 찾기",
+  label,
 }: {
   onComplete: (r: PostcodeResult) => void
   className?: string
   label?: string
 }) => {
+  const t = useT()
   const [loading, setLoading] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [open, setOpen] = useState(false)
@@ -180,12 +182,12 @@ const PostcodeSearch = ({
         }
         data-testid="postcode-search-button"
       >
-        {loading ? "여는 중…" : label}
+        {loading ? t("address.postcodeOpening") : label ?? t("address.postcodeSearch")}
       </button>
 
       {unavailable && (
         <span className="text-xsmall-regular text-ui-fg-muted" role="status">
-          우편번호 검색을 열 수 없어요. 주소를 직접 입력해 주세요.
+          {t("address.postcodeFailed")}
         </span>
       )}
 
@@ -194,7 +196,7 @@ const PostcodeSearch = ({
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="우편번호 검색"
+          aria-label={t("address.postcodeSearchTitle")}
           data-testid="postcode-modal"
           onClick={(e) => {
             // 바깥 영역 클릭으로 닫기
@@ -203,11 +205,11 @@ const PostcodeSearch = ({
         >
           <div className="w-full max-w-[500px] bg-white rounded-rounded overflow-hidden shadow-elevation-modal">
             <div className="flex items-center justify-between px-4 h-12 border-b border-ui-border-base">
-              <span className="text-base-semi">우편번호 검색</span>
+              <span className="text-base-semi">{t("address.postcodeSearchTitle")}</span>
               <button
                 type="button"
                 onClick={close}
-                aria-label="닫기"
+                aria-label={t("common.close")}
                 className="text-ui-fg-subtle hover:text-ui-fg-base px-2 text-large-regular"
                 data-testid="postcode-modal-close"
               >

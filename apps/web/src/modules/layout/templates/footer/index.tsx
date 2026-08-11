@@ -8,8 +8,10 @@ import MedusaCTA from "@modules/layout/components/medusa-cta";
 // 표기 정보는 @lib/business-info 한 곳에서만 정의한다 —
 // 화면마다 따로 두면 한 곳을 고치고 다른 곳을 빠뜨린다(2026-08-04 고객센터 페이지에서 실제로 발생).
 import { BIZ } from "@lib/business-info"
+import { getT } from "@lib/i18n"
 
 export default async function Footer() {
+  const t = await getT()
   const { collections } = await listCollections({
     fields: "*products",
   });
@@ -24,14 +26,14 @@ export default async function Footer() {
               href="/"
               className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base"
             >
-              쇼핑몰
+              {BIZ.name || t("biz.nameSample")}
             </LocalizedClientLink>
           </div>
           <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {productCategories && productCategories?.length > 0 && (
               <div className="flex flex-col gap-y-2">
                 <span className="txt-small-plus txt-ui-fg-base">
-                  카테고리
+                  {t("nav.categories")}
                 </span>
                 <ul
                   className="grid grid-cols-1 gap-2"
@@ -89,7 +91,7 @@ export default async function Footer() {
             {collections && collections.length > 0 && (
               <div className="flex flex-col gap-y-2">
                 <span className="txt-small-plus txt-ui-fg-base">
-                  컬렉션
+                  {t("nav.collections")}
                 </span>
                 <ul
                   className={clx(
@@ -113,17 +115,25 @@ export default async function Footer() {
               </div>
             )}
             <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">고객센터</span>
+              <span className="txt-small-plus txt-ui-fg-base">
+                {t("nav.customerService")}
+              </span>
               <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>전화 {BIZ.csPhone}</li>
-                <li>{BIZ.csHours}</li>
-                <li>주말·공휴일 휴무 · {BIZ.csEmail}</li>
+                <li>
+                  {t("footer.phone")} {BIZ.csPhone}
+                </li>
+                {/* 운영 환경변수가 설정돼 있으면 그 값을 그대로 쓴다(사업자가 정한 실제 운영시간).
+                    미설정일 때만 언어별 기본 문구로 채운다. */}
+                <li>{BIZ.csHours || t("biz.csHoursDefault")}</li>
+                <li>
+                  {BIZ.csClosed || t("biz.csClosedDefault")} · {BIZ.csEmail}
+                </li>
                 <li className="pt-1">
                   <LocalizedClientLink
                     className="hover:text-ui-fg-base"
                     href="/customer-service"
                   >
-                    공지·FAQ·1:1 문의
+                    {t("footer.csLinks")}
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -131,7 +141,7 @@ export default async function Footer() {
                     className="hover:text-ui-fg-base"
                     href="/order/lookup"
                   >
-                    비회원 주문조회
+                    {t("nav.orderLookup")}
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -139,7 +149,7 @@ export default async function Footer() {
                     className="hover:text-ui-fg-base"
                     href="/content/terms-of-use"
                   >
-                    이용약관
+                    {t("account.termsOfUse")}
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -147,7 +157,7 @@ export default async function Footer() {
                     className="hover:text-ui-fg-base"
                     href="/content/privacy-policy"
                   >
-                    개인정보처리방침
+                    {t("account.privacyPolicy")}
                   </LocalizedClientLink>
                 </li>
               </ul>
@@ -158,21 +168,26 @@ export default async function Footer() {
           {/* 전자상거래법 필수 표기 — 값은 env 로 주입한다(코드 수정 불필요).
               미설정 시 예시값이 보이며, 운영 배포 전 반드시 채워야 한다. */}
           <Text className="txt-compact-small leading-relaxed">
-            상호: {BIZ.name} · 대표: {BIZ.ceo} · 사업자등록번호: {BIZ.regNo} · 통신판매업신고: {BIZ.mailOrderNo}
+            {t("biz.name")}: {BIZ.name || t("biz.nameSample")} · {t("biz.ceo")}:{" "}
+            {BIZ.ceo || t("biz.ceoSample")} · {t("biz.regNo")}: {BIZ.regNo} ·{" "}
+            {t("biz.mailOrderNo")}: {BIZ.mailOrderNo || t("biz.mailOrderNoSample")}
             <br />
-            주소: {BIZ.address} · 개인정보보호책임자: {BIZ.privacyOfficer}
+            {t("biz.address")}: {BIZ.address || t("biz.addressSample")} ·{" "}
+            {t("biz.privacyOfficer")}:{" "}
+            {BIZ.privacyOfficer || t("biz.privacyOfficerSample")}
             {BIZ.isPlaceholder && (
               <>
                 <br />
                 <span className="text-rose-600">
-                  ⚠️ 사업자 정보가 설정되지 않았습니다(예시값 표시 중) — 운영 배포 전 환경변수를 채우세요.
+                  {t("biz.placeholderWarning")}
                 </span>
               </>
             )}
           </Text>
           <div className="flex justify-between items-center">
             <Text className="txt-compact-small">
-              © {new Date().getFullYear()} 쇼핑몰. All rights reserved.
+              © {new Date().getFullYear()} {BIZ.name || t("biz.nameSample")}.{" "}
+              {t("footer.rights")}
             </Text>
             <MedusaCTA />
           </div>

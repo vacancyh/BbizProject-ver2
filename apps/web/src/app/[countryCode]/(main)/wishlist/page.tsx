@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { getT } from "@lib/i18n"
 import { notFound } from "next/navigation"
 
 import { listWishlistProducts } from "@lib/data/wishlist"
@@ -6,14 +7,15 @@ import { getRegion } from "@lib/data/regions"
 import ProductPreview from "@modules/products/components/product-preview"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
-export const metadata: Metadata = {
-  title: "위시리스트",
-  description: "찜한 상품을 모아보세요.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("wishlist.title"), description: t("wishlist.metaDescription") }
 }
 
 export default async function WishlistPage(props: {
   params: Promise<{ countryCode: string }>
 }) {
+  const t = await getT()
   const { countryCode } = await props.params
   const region = await getRegion(countryCode)
 
@@ -26,22 +28,22 @@ export default async function WishlistPage(props: {
   return (
     <div className="content-container py-12 small:py-20" data-testid="wishlist-page-wrapper">
       <h1 className="text-2xl small:text-3xl font-semibold tracking-tight text-ui-fg-base mb-2">
-        위시리스트
+        {t("wishlist.title")}
       </h1>
       <p className="text-base-regular text-ui-fg-subtle mb-10">
-        찜한 상품 {products.length}개
+        {t("wishlist.count", { count: products.length })}
       </p>
 
       {products.length === 0 ? (
         <div className="py-20 flex flex-col items-center gap-y-4 text-center">
           <p className="text-ui-fg-muted text-base-regular">
-            아직 찜한 상품이 없습니다. 마음에 드는 상품에 하트를 눌러보세요.
+            {t("wishlist.empty")}
           </p>
           <LocalizedClientLink
             href="/store"
             className="underline text-ui-fg-base hover:text-ui-fg-interactive"
           >
-            상품 둘러보기
+            {t("cart.browseProducts")}
           </LocalizedClientLink>
         </div>
       ) : (

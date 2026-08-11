@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button } from "@modules/common/components/ui"
 import { useState } from "react"
 
@@ -25,6 +26,7 @@ const DEMO_VERIFY_ALLOWED =
   process.env.NEXT_PUBLIC_ALLOW_DEMO_PHONE_VERIFY === "true"
 
 const PhoneVerify = () => {
+  const t = useT()
   const [phone, setPhone] = useState("")
   const [sent, setSent] = useState<string | null>(null)
   const [code, setCode] = useState("")
@@ -37,7 +39,7 @@ const PhoneVerify = () => {
   const sendCode = () => {
     setError(null)
     if (!/^01[0-9]-?\d{3,4}-?\d{4}$/.test(phone.trim())) {
-      setError("올바른 휴대폰 번호를 입력해 주세요.")
+      setError(t("phone.invalid"))
       return
     }
     // 데모용 고정 인증번호
@@ -49,7 +51,7 @@ const PhoneVerify = () => {
     if (code.trim() === sent) {
       setVerified(true)
     } else {
-      setError("인증번호가 일치하지 않습니다.")
+      setError(t("phone.codeMismatch"))
     }
   }
 
@@ -59,7 +61,7 @@ const PhoneVerify = () => {
         className="text-small-regular text-ui-fg-interactive"
         data-testid="phone-verified"
       >
-        ✓ 휴대폰 본인인증이 완료되었습니다.
+        {t("phone.verified")}
       </p>
     )
   }
@@ -67,7 +69,7 @@ const PhoneVerify = () => {
   return (
     <div className="flex flex-col gap-y-2" data-testid="phone-verify">
       <span className="text-small-regular text-ui-fg-subtle">
-        휴대폰 본인인증 (선택 · 데모)
+        {t("phone.title")}
       </span>
       {/* 데모라는 사실을 입력창 위에 둔다. 아래 각주만으로는 읽히지 않는다. */}
       <div
@@ -76,8 +78,7 @@ const PhoneVerify = () => {
         data-testid="phone-verify-demo-warning"
       >
         <p className="text-xsmall-regular text-ui-fg-error">
-          ⚠️ 실제 본인인증이 아닙니다. 인증 결과는 저장되지 않으며,
-          운영 배포 시 이 영역은 표시되지 않습니다.
+          {t("phone.demoWarning")}
         </p>
       </div>
       <div className="flex gap-x-2">
@@ -95,7 +96,7 @@ const PhoneVerify = () => {
           className="rounded-none h-11 whitespace-nowrap"
           onClick={sendCode}
         >
-          인증번호 발송
+          {t("phone.sendCode")}
         </Button>
       </div>
       {sent && (
@@ -105,7 +106,7 @@ const PhoneVerify = () => {
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="인증번호 6자리"
+              placeholder={t("phone.codePlaceholder")}
               className="flex-1 border border-ui-border-base rounded-none bg-transparent px-3 h-11 text-base-regular outline-none focus:border-ui-fg-base"
               data-testid="verify-code"
             />
@@ -114,11 +115,11 @@ const PhoneVerify = () => {
               className="rounded-none h-11"
               onClick={verify}
             >
-              확인
+              {t("phone.verify")}
             </Button>
           </div>
           <p className="text-xsmall-regular text-ui-fg-muted">
-            ※ 데모: 인증번호는 {sent} 입니다 (실제 운영 시 PASS/NICE 연동)
+            {t("phone.demoCode", { code: sent })}
           </p>
         </>
       )}

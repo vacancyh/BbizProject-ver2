@@ -4,7 +4,10 @@ import { MagnifyingGlass } from "@medusajs/icons"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
+import { useT } from "@lib/i18n/client"
+
 const SearchBar = () => {
+  const t = useT()
   const router = useRouter()
   const { countryCode } = useParams() as { countryCode: string }
   const searchParams = useSearchParams()
@@ -28,8 +31,8 @@ const SearchBar = () => {
         type="search"
         value={term}
         onChange={(e) => setTerm(e.target.value)}
-        placeholder="상품 검색"
-        aria-label="상품 검색"
+        placeholder={t("nav.searchPlaceholder")}
+        aria-label={t("nav.searchPlaceholder")}
         className="bg-transparent outline-none text-small-regular w-40 placeholder:text-ui-fg-muted"
         data-testid="search-input"
       />

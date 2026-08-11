@@ -11,6 +11,7 @@ export type RecentItem = {
 }
 
 const KEY = "_recently_viewed"
+import { useT } from "@lib/i18n/client"
 const MAX = 12
 
 function read(): RecentItem[] {
@@ -38,12 +39,15 @@ function write(items: RecentItem[]) {
  */
 const RecentlyViewed = ({
   current,
-  title = "최근 본 상품",
+  title,
 }: {
   current?: RecentItem
   title?: string
 }) => {
+  const t = useT()
   const [items, setItems] = useState<RecentItem[]>([])
+  // 호출부가 제목을 안 주면 언어에 맞는 기본 제목을 쓴다
+  const heading = title ?? t("product.recentlyViewed")
 
   useEffect(() => {
     let list = read()
@@ -61,7 +65,7 @@ const RecentlyViewed = ({
 
   return (
     <div className="content-container my-12" data-testid="recently-viewed">
-      <h3 className="text-large-semi mb-4">{title}</h3>
+      <h3 className="text-large-semi mb-4">{heading}</h3>
       <div className="flex gap-4 overflow-x-auto pb-2">
         {items.map((it) => (
           <LocalizedClientLink

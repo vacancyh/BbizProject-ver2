@@ -1,11 +1,13 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button, clx } from "@modules/common/components/ui"
 import { createProductReview } from "@lib/data/reviews"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 
 const ReviewForm = ({ productId }: { productId: string }) => {
+  const t = useT()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [rating, setRating] = useState(5)
@@ -20,13 +22,13 @@ const ReviewForm = ({ productId }: { productId: string }) => {
     e.preventDefault()
     setError(null)
     if (content.trim().length < 5) {
-      setError("리뷰 내용을 5자 이상 입력해 주세요.")
+      setError(t("review.tooShort"))
       return
     }
     startTransition(async () => {
       try {
         await createProductReview(productId, {
-          author_name: author.trim() || "익명",
+          author_name: author.trim() || t("product.anonymous"),
           rating,
           title: title.trim() || undefined,
           content: content.trim(),
@@ -36,7 +38,7 @@ const ReviewForm = ({ productId }: { productId: string }) => {
         setContent("")
         router.refresh()
       } catch {
-        setError("리뷰 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+        setError(t("review.failed"))
       }
     })
   }
@@ -45,7 +47,7 @@ const ReviewForm = ({ productId }: { productId: string }) => {
     return (
       <div className="mt-8 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 text-center">
         <p className="text-base-regular text-ui-fg-base">
-          리뷰가 등록되었습니다. 운영자 검수 후 게시됩니다. 감사합니다!
+          {t("review.done")}
         </p>
       </div>
     )
@@ -60,7 +62,7 @@ const ReviewForm = ({ productId }: { productId: string }) => {
           onClick={() => setOpen(true)}
           data-testid="open-review-form"
         >
-          리뷰 작성하기
+          {t("review.openForm")}
         </Button>
       </div>
     )
@@ -72,18 +74,18 @@ const ReviewForm = ({ productId }: { productId: string }) => {
       className="mt-8 rounded-rounded border border-ui-border-base p-6 flex flex-col gap-y-4"
       data-testid="review-form"
     >
-      <h3 className="text-large-semi">리뷰 작성</h3>
+      <h3 className="text-large-semi">{t("review.formTitle")}</h3>
 
       {/* 별점 */}
       <div className="flex items-center gap-x-2">
-        <span className="text-small-regular text-ui-fg-subtle">별점</span>
+        <span className="text-small-regular text-ui-fg-subtle">{t("review.rating")}</span>
         <div className="flex">
           {[1, 2, 3, 4, 5].map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setRating(s)}
-              aria-label={`${s}점`}
+              aria-label={t("review.starPointAria", { n: s })}
               className={clx(
                 "text-2xl leading-none",
                 s <= rating ? "text-ui-tag-orange-icon" : "text-ui-fg-muted"
@@ -100,7 +102,7 @@ const ReviewForm = ({ productId }: { productId: string }) => {
         type="text"
         value={author}
         onChange={(e) => setAuthor(e.target.value)}
-        placeholder="작성자명 (선택)"
+        placeholder={t("review.authorPlaceholder")}
         className="border-b border-ui-border-base bg-transparent py-2 text-base-regular outline-none focus:border-ui-fg-base"
         data-testid="review-author"
       />
@@ -108,14 +110,14 @@ const ReviewForm = ({ productId }: { productId: string }) => {
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="제목 (선택)"
+        placeholder={t("review.titlePlaceholder")}
         className="border-b border-ui-border-base bg-transparent py-2 text-base-regular outline-none focus:border-ui-fg-base"
         data-testid="review-title"
       />
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="상품은 어떠셨나요? 솔직한 후기를 남겨주세요. (5자 이상)"
+        placeholder={t("review.bodyPlaceholder")}
         rows={4}
         required
         className="border border-ui-border-base rounded-rounded bg-transparent p-3 text-base-regular outline-none focus:border-ui-fg-base resize-none"
@@ -133,7 +135,7 @@ const ReviewForm = ({ productId }: { productId: string }) => {
           className="rounded-none"
           onClick={() => setOpen(false)}
         >
-          취소
+          {t("common.cancel")}
         </Button>
         <Button
           type="submit"
@@ -141,7 +143,7 @@ const ReviewForm = ({ productId }: { productId: string }) => {
           isLoading={isPending}
           data-testid="submit-review"
         >
-          등록
+          {t("review.submit")}
         </Button>
       </div>
     </form>

@@ -3,14 +3,20 @@ import Bancontact from "@modules/common/icons/bancontact"
 import Ideal from "@modules/common/icons/ideal"
 import PayPal from "@modules/common/icons/paypal"
 import React from "react"
+import type { MessageKey } from "@lib/i18n/messages"
 
 /** 무료배송 기준 금액(원). 상품 소계가 이 금액 이상이면 무료배송 안내. */
 export const FREE_SHIPPING_THRESHOLD = 50000
 
-/* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
+/*
+ * Map of payment provider_id to their title and icon.
+ *
+ * `title` 은 브랜드명(PayPal·Bancontact 등)이라 번역하지 않는다.
+ * 브랜드가 아닌 일반 명칭(무통장입금 등)만 `titleKey` 로 언어를 따라가게 한다.
+ */
 export const paymentInfoMap: Record<
   string,
-  { title: string; icon: React.JSX.Element }
+  { title: string; titleKey?: MessageKey; icon: React.JSX.Element }
 > = {
   pp_stripe_stripe: {
     title: "Credit card",
@@ -34,6 +40,7 @@ export const paymentInfoMap: Record<
   },
   pp_system_default: {
     title: "무통장입금",
+    titleKey: "payment.bankTransfer",
     icon: <CreditCard />,
   },
   // Add more payment providers here
@@ -75,3 +82,19 @@ export const noDivisionCurrencies = [
   "xdr",
   "xau",
 ]
+
+/**
+ * 결제수단 표시명.
+ *
+ * 브랜드명(PayPal 등)은 그대로 두고, 일반 명칭만 언어에 맞게 바꾼다.
+ * 등록되지 않은 provider 는 빈 문자열 — 호출부에서 provider_id 를 대신 보여 준다.
+ */
+export function payTitle(
+  t: (k: MessageKey) => string,
+  providerId?: string | null
+): string {
+  if (!providerId) return ""
+  const info = paymentInfoMap[providerId]
+  if (!info) return ""
+  return info.titleKey ? t(info.titleKey) : info.title
+}

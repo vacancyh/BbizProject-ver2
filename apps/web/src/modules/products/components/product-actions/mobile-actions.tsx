@@ -5,6 +5,7 @@ import React, { Fragment, useMemo } from "react"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import X from "@modules/common/icons/x"
+import { useT } from "@lib/i18n/client"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
@@ -34,6 +35,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   show,
   optionsDisabled,
 }) => {
+  const t = useT()
   const { state, open, close } = useToggleState()
 
   const price = getProductPrice({
@@ -111,7 +113,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <span>
                     {variant
                       ? Object.values(options).join(" / ")
-                      : "옵션 선택"}
+                      : t("product.optionSelect")}
                   </span>
                   <ChevronDown />
                 </div>
@@ -124,10 +126,10 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 data-testid="mobile-cart-button"
               >
                 {!variant
-                  ? "옵션을 선택하세요"
+                  ? t("product.selectOption")
                   : !inStock
-                  ? "품절"
-                  : "장바구니 담기"}
+                  ? t("product.soldOut")
+                  : t("product.addToCart")}
               </Button>
             </div>
           </div>

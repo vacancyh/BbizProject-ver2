@@ -70,9 +70,20 @@ test.describe("다국어 화면", () => {
     //   · 아직 전환하지 않은 UI 영역(사이드메뉴 등)
     //   · **운영자가 관리하는 콘텐츠**(카테고리명 "상의" 등) — 관리자에서 영어를 넣어야 바뀐다
     // 그래서 "전환을 끝낸 영역"만 지목해서 본다. 전환할 때마다 여기에 추가한다.
+    // 2026-08-11: UI 라벨 전환을 끝내고 화면 단위로 넓혔다.
+    // 여전히 **화면 전체**를 검사하지는 않는다 — 아래는 언어와 무관하게 한글이 정상인 것들이다:
+    //   · 고객이 입력한 값(이름·주소·리뷰 본문)
+    //   · 상품정보고시 값(전자상거래법 고시 — 한국어 원문이 기준)
+    //   · 실제 고객이 검색한 인기 검색어
     const converted: { path: string; region: string }[] = [
+      { path: `/${CC}`, region: "header" },
+      { path: `/${CC}`, region: "footer" },
       { path: `/${CC}/cart`, region: '[data-testid="empty-cart-message"]' },
       { path: `/${CC}/account`, region: '[data-testid="login-page"]' },
+      { path: `/${CC}/store`, region: '[data-testid="store-page-title"]' },
+      { path: `/${CC}/wishlist`, region: '[data-testid="wishlist-page-wrapper"]' },
+      { path: `/${CC}/order/lookup`, region: '[data-testid="order-lookup-form"]' },
+      { path: `/${CC}/customer-service`, region: '[data-testid="cs-faqs"]' },
     ]
 
     for (const { path, region } of converted) {

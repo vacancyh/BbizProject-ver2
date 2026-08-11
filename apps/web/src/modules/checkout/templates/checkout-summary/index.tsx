@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Heading } from "@modules/common/components/ui"
 
 import ItemsPreviewTemplate from "@modules/cart/templates/preview"
@@ -6,7 +7,8 @@ import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
 import { HttpTypes } from "@medusajs/types"
 
-const CheckoutSummary = ({ cart }: { cart: HttpTypes.StoreCart }) => {
+const CheckoutSummary = async ({ cart }: { cart: HttpTypes.StoreCart }) => {
+  const t = await getT()
   return (
     <div className="sticky top-0 flex flex-col-reverse small:flex-col gap-y-8 py-8 small:py-0 ">
       <div className="w-full bg-white flex flex-col">
@@ -15,7 +17,7 @@ const CheckoutSummary = ({ cart }: { cart: HttpTypes.StoreCart }) => {
           level="h2"
           className="flex flex-row text-3xl-regular items-baseline"
         >
-          장바구니 상품
+          {t("checkout.cartItems")}
         </Heading>
         <Divider className="my-6" />
         <CartTotals totals={cart} />

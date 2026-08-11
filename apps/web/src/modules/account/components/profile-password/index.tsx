@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import React from "react"
 import Input from "@modules/common/components/input"
 import AccountInfo from "../account-info"
@@ -20,6 +21,7 @@ type MyInformationProps = {
  *  - 결과는 인라인 상태 + 토스트로 함께 알린다
  */
 const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
+  const t = useT()
   const [successState, setSuccessState] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | undefined>()
   const { showToast } = useToast()
@@ -33,7 +35,7 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
     const confirm = String(formData.get("confirm_password") ?? "")
 
     if (next !== confirm) {
-      const msg = "새 비밀번호가 서로 일치하지 않습니다."
+      const msg = t("profile.passwordMismatch")
       setErrorMessage(msg)
       showToast(msg, "error")
       return
@@ -41,7 +43,7 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
 
     const email = customer?.email
     if (!email) {
-      const msg = "로그인 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
+      const msg = t("profile.sessionLost")
       setErrorMessage(msg)
       showToast(msg, "error")
       return
@@ -50,10 +52,10 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
     const res = await changePassword(email, current, next)
     if (res.ok) {
       setSuccessState(true)
-      showToast("비밀번호가 변경되었습니다.", "success")
+      showToast(t("profile.passwordChanged"), "success")
     } else {
       setErrorMessage(res.error)
-      showToast(res.error ?? "비밀번호 변경에 실패했습니다.", "error")
+      showToast(res.error ?? t("profile.passwordFailed"), "error")
     }
   }
 
@@ -65,8 +67,8 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={updatePassword} onReset={() => clearState()} className="w-full">
       <AccountInfo
-        label="비밀번호"
-        currentInfo={<span>보안을 위해 비밀번호는 표시되지 않습니다</span>}
+        label={t("account.password")}
+        currentInfo={<span>{t("profile.passwordHidden")}</span>}
         isSuccess={successState}
         isError={!!errorMessage}
         errorMessage={errorMessage}
@@ -75,14 +77,14 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
       >
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="현재 비밀번호"
+            label={t("profile.currentPassword")}
             name="old_password"
             required
             type="password"
             data-testid="old-password-input"
           />
           <Input
-            label="새 비밀번호 (8자 이상)"
+            label={t("profile.newPassword")}
             type="password"
             name="new_password"
             required
@@ -90,7 +92,7 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
             data-testid="new-password-input"
           />
           <Input
-            label="비밀번호 확인"
+            label={t("account.passwordConfirm")}
             type="password"
             name="confirm_password"
             required

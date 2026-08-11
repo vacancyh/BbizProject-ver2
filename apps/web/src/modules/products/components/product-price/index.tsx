@@ -1,3 +1,9 @@
+"use client"
+
+// 서버·클라이언트 양쪽 트리에서 쓰이므로 **클라이언트로 고정**한다(2026-08-10).
+// 서버 전용 getT() 를 쓰면 product-actions(클라이언트) 트리에서 터지고,
+// 훅을 그냥 쓰면 product-preview(서버) 트리에서 터진다. 한쪽으로 고정하는 게 유일한 답이다.
+import { useT } from "@lib/i18n/client"
 import { clx } from "@modules/common/components/ui"
 
 import { getProductPrice } from "@lib/util/get-product-price"
@@ -10,6 +16,7 @@ export default function ProductPrice({
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
 }) {
+  const t = useT()
   const { cheapestPrice, variantPrice } = getProductPrice({
     product,
     variantId: variant?.id,
@@ -28,7 +35,7 @@ export default function ProductPrice({
           "text-ui-fg-interactive": selectedPrice.price_type === "sale",
         })}
       >
-        {!variant && "최저 "}
+        {!variant && t("product.fromPrice")}
         <span
           data-testid="product-price"
           data-value={selectedPrice.calculated_price_number}
@@ -39,7 +46,7 @@ export default function ProductPrice({
       {selectedPrice.price_type === "sale" && (
         <>
           <p>
-            <span className="text-ui-fg-subtle">정상가: </span>
+            <span className="text-ui-fg-subtle">{t("product.listPrice")}</span>
             <span
               className="line-through"
               data-testid="original-product-price"

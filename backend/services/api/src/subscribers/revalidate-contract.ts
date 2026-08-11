@@ -63,3 +63,47 @@ export function resolveRevalidateTarget(
   const url = `${base.replace(/\/$/, "")}${REVALIDATE_PATH}`
   return { enabled: true, url, secret: env[ENV.revalidateSecret] }
 }
+
+/**
+ * 스토어프론트 revalidate 호출 — 구독자와 관리자 라우트가 함께 쓴다.
+ *
+ * 이벤트가 없는 변경(예: **번역 저장**)도 캐시를 지워야 하는데, 번역 모듈은
+ * 이벤트를 발행하지 않는다. 그래서 저장 라우트가 이 함수를 직접 부른다.
+ * 실패해도 예외를 던지지 않는다 — 캐시 무효화 실패가 저장을 막으면 안 된다.
+ */
+export async function callRevalidate(
+  payload: RevalidatePayload,
+  logger?: { error?: (m: string) => void; info?: (m: string) => void }
+): Promise<{ ok: boolean; reason?: string }> {
+  const target = resolveRevalidateTarget()
+  if (!target.enabled || !target.url) {
+    logger?.info?.("[revalidate] STOREFRONT_URL 미설정 — 건너뜀")
+    return { ok: false, reason: "disabled" }
+  }
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" }
+  if (target.secret) headers["Authorization"] = `Bearer ${target.secret}`
+
+  try {
+    const res = await fetch(target.url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) {
+      const text = await res.text().catch(() => "")
+      logger?.error?.(`[revalidate] 실패 (${res.status}): ${text.slice(0, 200)}`)
+      return { ok: false, reason: `http_${res.status}` }
+    }
+    logger?.info?.(
+      `[revalidate] 완료 — type=${payload.type} handle=${payload.handle ?? "-"}`
+    )
+    return { ok: true }
+  } catch (e: any) {
+    // 원인을 함께 돌려준다 — "exception" 만 보면 네트워크인지 설정인지 알 수 없다.
+    const msg = String(e?.message ?? e)
+    logger?.error?.(`[revalidate] 호출 예외: ${msg}`)
+    return { ok: false, reason: `exception: ${msg}` }
+  }
+}

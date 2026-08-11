@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { clx } from "@modules/common/components/ui"
 
+import { useT } from "@lib/i18n/client"
 import { PRICE_RANGES, type FilterCategory } from "./filter-config"
 
 export type { FilterCategory }
@@ -13,7 +14,20 @@ export type { FilterCategory }
  * 이전에는 사이드바에 '정렬'만 있어, 상품이 늘어나면 원하는 상품을 찾을 방법이 없었다.
  * 카테고리(서버 필터)와 가격대(계산가 기준)를 URL 쿼리로 관리해 새로고침·공유에도 유지되게 한다.
  */
+/**
+ * 필터 버튼 공통 클래스.
+ *
+ * 글자만 있는 버튼이라 높이가 **20px** 밖에 안 됐다. 한국어("전체")일 때는 폭이 넓어
+ * 넘어갔지만 영어("All")로 바꾸니 **15×20** 이 되어 모바일에서 사실상 못 누른다
+ * (WCAG 2.5.8 최소 24×24). 글자 크기는 그대로 두고 **누르는 영역만** 24px 로 넓힌다.
+ * — 2026-08-11, 영어 전환 후 레이아웃 검사에서 잡힘
+ */
+const FILTER_BTN =
+  "txt-compact-small text-left hover:text-ui-fg-base transition-colors " +
+  "inline-flex items-center min-h-6 min-w-6"
+
 const ProductFilters = ({ categories }: { categories: FilterCategory[] }) => {
+  const t = useT()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -36,18 +50,18 @@ const ProductFilters = ({ categories }: { categories: FilterCategory[] }) => {
     <div className="flex flex-col gap-y-8" data-testid="product-filters">
       {categories.length > 0 && (
         <div className="flex flex-col gap-y-3">
-          <span className="txt-compact-small-plus text-ui-fg-base">카테고리</span>
+          <span className="txt-compact-small-plus text-ui-fg-base">{t("nav.categories")}</span>
           <ul className="flex small:flex-col gap-2 small:gap-1 flex-wrap">
             <li>
               <button
                 type="button"
                 onClick={() => apply("category", "")}
                 className={clx(
-                  "txt-compact-small text-left hover:text-ui-fg-base transition-colors",
+                  FILTER_BTN,
                   !currentCategory ? "text-ui-fg-base font-medium" : "text-ui-fg-subtle"
                 )}
               >
-                전체
+                {t("store.filterAll")}
               </button>
             </li>
             {categories.map((c) => (
@@ -56,7 +70,7 @@ const ProductFilters = ({ categories }: { categories: FilterCategory[] }) => {
                   type="button"
                   onClick={() => apply("category", c.handle)}
                   className={clx(
-                    "txt-compact-small text-left hover:text-ui-fg-base transition-colors",
+                    FILTER_BTN,
                     currentCategory === c.handle
                       ? "text-ui-fg-base font-medium"
                       : "text-ui-fg-subtle"
@@ -71,7 +85,7 @@ const ProductFilters = ({ categories }: { categories: FilterCategory[] }) => {
       )}
 
       <div className="flex flex-col gap-y-3">
-        <span className="txt-compact-small-plus text-ui-fg-base">가격</span>
+        <span className="txt-compact-small-plus text-ui-fg-base">{t("store.filter.price")}</span>
         <ul className="flex small:flex-col gap-2 small:gap-1 flex-wrap">
           {PRICE_RANGES.map((r) => (
             <li key={r.key}>
@@ -79,13 +93,13 @@ const ProductFilters = ({ categories }: { categories: FilterCategory[] }) => {
                 type="button"
                 onClick={() => apply("price", r.key)}
                 className={clx(
-                  "txt-compact-small text-left hover:text-ui-fg-base transition-colors",
+                  FILTER_BTN,
                   currentPrice === r.key
                     ? "text-ui-fg-base font-medium"
                     : "text-ui-fg-subtle"
                 )}
               >
-                {r.label}
+                {t(r.labelKey)}
               </button>
             </li>
           ))}
@@ -106,7 +120,7 @@ const ProductFilters = ({ categories }: { categories: FilterCategory[] }) => {
           className="txt-compact-small text-ui-fg-subtle underline underline-offset-4 hover:text-ui-fg-base self-start"
           data-testid="clear-filters"
         >
-          필터 초기화
+          {t("store.filterReset")}
         </button>
       )}
     </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -18,13 +19,14 @@ import type { Banner } from "@lib/data/banners"
  *    없는 호스트를 관리자에서 등록하면 히어로가 깨진다 — 운영 스토리지 확정 시 함께 등록할 것.
  */
 const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
+  const t = useT()
   const [idx, setIdx] = useState(0)
   const count = banners.length
 
   useEffect(() => {
     if (count <= 1) return
-    const t = setInterval(() => setIdx((i) => (i + 1) % count), 5000)
-    return () => clearInterval(t)
+    const timer = setInterval(() => setIdx((i) => (i + 1) % count), 5000)
+    return () => clearInterval(timer)
   }, [count])
 
   if (!count) return null
@@ -52,7 +54,7 @@ const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
           {b.title}
         </Heading>
         <Button className="rounded-none px-8 h-12 text-base pointer-events-none">
-          지금 쇼핑하기
+          {t("home.shopNow")}
         </Button>
       </div>
     </div>
@@ -80,7 +82,7 @@ const HeroCarousel = ({ banners }: { banners: Banner[] }) => {
             <button
               key={i}
               type="button"
-              aria-label={`배너 ${i + 1}`}
+              aria-label={t("home.bannerAria", { n: i + 1 })}
               aria-current={i === idx ? "true" : undefined}
               onClick={() => setIdx(i)}
               className="grid h-6 w-6 place-items-center"

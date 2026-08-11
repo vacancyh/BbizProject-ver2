@@ -1,13 +1,23 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useT } from "@lib/i18n/client"
+import type { MessageKey } from "@lib/i18n/messages"
 import { Button } from "@modules/common/components/ui"
 import { submitSupportInquiry } from "@lib/data/support"
 
-const CATEGORIES = ["주문/결제", "배송", "교환/반품", "회원/적립금", "기타"]
+/** 문의 분류 — 값은 번역 키다. 백엔드에는 **한국어 원문**을 보낸다(관리자 화면 기준). */
+const CATEGORIES: { key: MessageKey; value: string }[] = [
+  { key: "cs.category.order", value: "주문/결제" },
+  { key: "cs.category.shipping", value: "배송" },
+  { key: "cs.category.return", value: "교환/반품" },
+  { key: "cs.category.member", value: "회원/적립금" },
+  { key: "cs.category.etc", value: "기타" },
+]
 
 /** 1:1 문의(상품무관) 작성 폼 — 고객센터 페이지. */
 const SupportInquiryForm = () => {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -15,7 +25,7 @@ const SupportInquiryForm = () => {
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
-  const [category, setCategory] = useState(CATEGORIES[0])
+  const [category, setCategory] = useState(CATEGORIES[0].value)
   const [subject, setSubject] = useState("")
   const [content, setContent] = useState("")
 
@@ -23,7 +33,7 @@ const SupportInquiryForm = () => {
     e.preventDefault()
     setError(null)
     if (content.trim().length < 5) {
-      setError("문의 내용을 5자 이상 입력해 주세요.")
+      setError(t("cs.formTooShort"))
       return
     }
     startTransition(async () => {
@@ -35,7 +45,7 @@ const SupportInquiryForm = () => {
         content: content.trim(),
       })
       if (res.ok) setDone(true)
-      else setError(res.error ?? "접수 실패")
+      else setError(res.error ?? t("cs.formFailed"))
     })
   }
 
@@ -46,7 +56,7 @@ const SupportInquiryForm = () => {
         data-testid="support-done"
       >
         <p className="text-base-regular text-ui-fg-base">
-          문의가 접수되었습니다. 입력하신 이메일로 답변드리겠습니다.
+          {t("cs.formDone")}
         </p>
       </div>
     )
@@ -60,7 +70,7 @@ const SupportInquiryForm = () => {
         onClick={() => setOpen(true)}
         data-testid="open-support-form"
       >
-        1:1 문의하기
+        {t("cs.openInquiryForm")}
       </Button>
     )
   }
@@ -71,18 +81,18 @@ const SupportInquiryForm = () => {
       className="rounded-rounded border border-ui-border-base p-6 flex flex-col gap-y-4"
       data-testid="support-form"
     >
-      <h3 className="text-large-semi">1:1 문의 작성</h3>
+      <h3 className="text-large-semi">{t("cs.formTitle")}</h3>
       <div className="grid grid-cols-1 small:grid-cols-2 gap-3">
         <input
           className="border border-ui-border-base rounded-rounded p-3 text-base-regular"
-          placeholder="이름 (선택)"
+          placeholder={t("cs.formName")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           data-testid="support-name"
         />
         <input
           className="border border-ui-border-base rounded-rounded p-3 text-base-regular"
-          placeholder="답변 받을 이메일"
+          placeholder={t("cs.formEmail")}
           type="email"
           required
           value={email}
@@ -98,14 +108,14 @@ const SupportInquiryForm = () => {
           data-testid="support-category"
         >
           {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
+            <option key={c.value} value={c.value}>
+              {t(c.key)}
             </option>
           ))}
         </select>
         <input
           className="border border-ui-border-base rounded-rounded p-3 text-base-regular"
-          placeholder="제목 (선택)"
+          placeholder={t("cs.formSubject")}
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           data-testid="support-subject"
@@ -114,7 +124,7 @@ const SupportInquiryForm = () => {
       <textarea
         className="border border-ui-border-base rounded-rounded p-3 text-base-regular resize-none"
         rows={4}
-        placeholder="문의 내용을 입력해 주세요. (5자 이상)"
+        placeholder={t("cs.formBody")}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         data-testid="support-content"
@@ -129,7 +139,7 @@ const SupportInquiryForm = () => {
           className="rounded-none"
           onClick={() => setOpen(false)}
         >
-          닫기
+          {t("common.close")}
         </Button>
         <Button
           type="submit"
@@ -137,7 +147,7 @@ const SupportInquiryForm = () => {
           isLoading={isPending}
           data-testid="submit-support"
         >
-          접수
+          {t("cs.formSubmit")}
         </Button>
       </div>
     </form>

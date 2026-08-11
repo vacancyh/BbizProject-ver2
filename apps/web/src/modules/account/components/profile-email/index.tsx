@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import React from "react"
 
 import Input from "@modules/common/components/input"
@@ -22,6 +23,7 @@ type MyInformationProps = {
  * 이메일은 곧 로그인 아이디이므로 **현재 비밀번호로 본인 확인**을 받는다.
  */
 const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
+  const t = useT()
   const [successState, setSuccessState] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | undefined>()
   const { showToast } = useToast()
@@ -34,7 +36,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
     const password = String(formData.get("current_password") ?? "")
 
     if (!newEmail || newEmail.toLowerCase() === (customer.email ?? "").toLowerCase()) {
-      const msg = "현재 이메일과 다른 주소를 입력해 주세요."
+      const msg = t("profile.emailSame")
       setErrorMessage(msg)
       showToast(msg, "error")
       return
@@ -43,10 +45,10 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
     const res = await changeEmail(newEmail, password)
     if (res.ok) {
       setSuccessState(true)
-      showToast("이메일이 변경되었습니다. 다음 로그인부터 새 이메일을 사용하세요.", "success")
+      showToast(t("profile.emailChanged"), "success")
     } else {
       setErrorMessage(res.error)
-      showToast(res.error ?? "이메일 변경에 실패했습니다.", "error")
+      showToast(res.error ?? t("profile.emailFailed"), "error")
     }
   }
 
@@ -58,7 +60,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={submit} className="w-full">
       <AccountInfo
-        label="이메일"
+        label={t("account.email")}
         currentInfo={`${customer.email}`}
         isSuccess={successState}
         isError={!!errorMessage}
@@ -68,7 +70,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
       >
         <div className="grid grid-cols-1 gap-y-2">
           <Input
-            label="새 이메일"
+            label={t("profile.newEmail")}
             name="email"
             type="email"
             autoComplete="email"
@@ -77,7 +79,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
             data-testid="email-input"
           />
           <Input
-            label="현재 비밀번호 (본인 확인)"
+            label={t("profile.currentPasswordForCheck")}
             name="current_password"
             type="password"
             autoComplete="current-password"
@@ -85,7 +87,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
             data-testid="email-current-password-input"
           />
           <p className="text-ui-fg-subtle txt-compact-small">
-            이메일은 로그인 아이디로도 사용됩니다. 변경 후에는 새 이메일로 로그인해 주세요.
+            {t("profile.emailNote")}
           </p>
         </div>
       </AccountInfo>

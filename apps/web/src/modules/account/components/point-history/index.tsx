@@ -1,20 +1,32 @@
+import { getT, getUiLocale } from "@lib/i18n"
+import type { MessageKey } from "@lib/i18n/messages"
+import { formatDate } from "@lib/util/format-date"
 import { clx } from "@modules/common/components/ui"
 
 import { listCustomerPoints, type PointEntry } from "@lib/data/points"
 import { convertToLocale } from "@lib/util/money"
 
-const ENTRY_LABEL: Record<PointEntry["entry_type"], string> = {
-  earn: "적립",
-  redeem: "사용",
-  expire: "만료",
+const ENTRY_LABEL: Record<PointEntry["entry_type"], MessageKey> = {
+  earn: "points.earn",
+  redeem: "points.redeem",
+  expire: "points.expire",
 }
 
-const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(iso))
+/**
+ * 적립/사용 사유 → 표시 문구.
+ *
+ * 사유는 **시스템이 코드로 기록**한다(`purchase`·`signup`·`redeem`). 예전 데이터에는
+ * 한국어 문장으로 들어간 것도 섞여 있어 둘 다 받는다.
+ * 목록에 없는 값은 **원문 그대로** 보여 준다 — 운영자가 손으로 남긴 메모일 수 있다.
+ */
+const REASON_KEY: Record<string, MessageKey> = {
+  purchase: "points.reason.purchase",
+  signup: "points.reason.signup",
+  redeem: "points.reason.redeem",
+  "주문 적립금 사용": "points.reason.orderUse",
+  "적립금 사용 취소": "points.reason.useCanceled",
+  "환불 적립금 회수": "points.reason.refundClawback",
+}
 
 type PointHistoryProps = {
   customerId: string
@@ -25,6 +37,8 @@ const PointHistory = async ({
   customerId,
   currencyCode,
 }: PointHistoryProps) => {
+  const t = await getT()
+  const locale = await getUiLocale()
   const { entries, summary } = await listCustomerPoints(customerId)
 
   return (
@@ -32,28 +46,28 @@ const PointHistory = async ({
       {/* 보유 적립금 요약 */}
       <div className="rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 mb-8">
         <span className="text-base-regular text-ui-fg-muted">
-          보유 적립금
+          {t("points.balance")}
         </span>
         <div className="text-3xl-semi mt-1" data-testid="point-balance">
           {convertToLocale({ amount: summary.balance, currency_code: currencyCode })}
         </div>
         <div className="flex gap-x-6 mt-4 text-small-regular text-ui-fg-subtle">
           <span>
-            누적 적립{" "}
+            {t("points.totalEarned")}{" "}
             {convertToLocale({ amount: summary.total_earned, currency_code: currencyCode })}
           </span>
           <span>
-            누적 사용{" "}
+            {t("points.totalUsed")}{" "}
             {convertToLocale({ amount: summary.total_used, currency_code: currencyCode })}
           </span>
         </div>
       </div>
 
       {/* 적립/사용 내역 */}
-      <h2 className="text-large-semi mb-4">적립/사용 내역</h2>
+      <h2 className="text-large-semi mb-4">{t("points.historyTitle")}</h2>
       {entries.length === 0 ? (
         <p className="text-ui-fg-muted py-10 text-center text-base-regular">
-          아직 적립금 내역이 없습니다. 상품을 구매하시면 적립금이 쌓입니다.
+          {t("points.empty")}
         </p>
       ) : (
         <ul className="flex flex-col divide-y divide-ui-border-base">
@@ -80,14 +94,18 @@ const PointHistory = async ({
                         }
                       )}
                     >
-                      {ENTRY_LABEL[entry.entry_type]}
+                      {t(ENTRY_LABEL[entry.entry_type])}
                     </span>
-                    <span className="text-base-regular">{entry.reason}</span>
+                    <span className="text-base-regular">
+                      {entry.reason && REASON_KEY[entry.reason]
+                        ? t(REASON_KEY[entry.reason])
+                        : entry.reason}
+                    </span>
                   </div>
                   <span className="text-small-regular text-ui-fg-muted">
-                    {formatDate(entry.created_at)}
+                    {formatDate(locale, entry.created_at)}
                     {entry.expires_at
-                      ? ` · ${formatDate(entry.expires_at)} 만료`
+                      ? t("points.expiresOn", { date: formatDate(locale, entry.expires_at) })
                       : ""}
                   </span>
                 </div>

@@ -1,11 +1,13 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button } from "@modules/common/components/ui"
 import { createProductInquiry } from "@lib/data/inquiries"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 
 const InquiryForm = ({ productId }: { productId: string }) => {
+  const t = useT()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [author, setAuthor] = useState("")
@@ -18,20 +20,20 @@ const InquiryForm = ({ productId }: { productId: string }) => {
     e.preventDefault()
     setError(null)
     if (content.trim().length < 5) {
-      setError("문의 내용을 5자 이상 입력해 주세요.")
+      setError(t("inquiry.tooShort"))
       return
     }
     startTransition(async () => {
       try {
         await createProductInquiry(productId, {
-          author_name: author.trim() || "익명",
+          author_name: author.trim() || t("product.anonymous"),
           content: content.trim(),
         })
         setDone(true)
         setContent("")
         router.refresh()
       } catch {
-        setError("문의 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+        setError(t("inquiry.failed"))
       }
     })
   }
@@ -40,7 +42,7 @@ const InquiryForm = ({ productId }: { productId: string }) => {
     return (
       <div className="mt-6 rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 text-center">
         <p className="text-base-regular text-ui-fg-base">
-          문의가 등록되었습니다. 운영자 확인 후 답변드리겠습니다.
+          {t("inquiry.done")}
         </p>
       </div>
     )
@@ -55,7 +57,7 @@ const InquiryForm = ({ productId }: { productId: string }) => {
           onClick={() => setOpen(true)}
           data-testid="open-inquiry-form"
         >
-          상품 문의하기
+          {t("inquiry.openForm")}
         </Button>
       </div>
     )
@@ -67,19 +69,19 @@ const InquiryForm = ({ productId }: { productId: string }) => {
       className="mt-6 rounded-rounded border border-ui-border-base p-6 flex flex-col gap-y-4"
       data-testid="inquiry-form"
     >
-      <h3 className="text-large-semi">상품 문의 작성</h3>
+      <h3 className="text-large-semi">{t("inquiry.formTitle")}</h3>
       <input
         type="text"
         value={author}
         onChange={(e) => setAuthor(e.target.value)}
-        placeholder="작성자명 (선택)"
+        placeholder={t("review.authorPlaceholder")}
         className="border-b border-ui-border-base bg-transparent py-2 text-base-regular outline-none focus:border-ui-fg-base"
         data-testid="inquiry-author"
       />
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="상품에 대해 궁금한 점을 남겨주세요. (5자 이상)"
+        placeholder={t("inquiry.bodyPlaceholder")}
         rows={4}
         required
         className="border border-ui-border-base rounded-rounded bg-transparent p-3 text-base-regular outline-none focus:border-ui-fg-base resize-none"
@@ -95,7 +97,7 @@ const InquiryForm = ({ productId }: { productId: string }) => {
           className="rounded-none"
           onClick={() => setOpen(false)}
         >
-          취소
+          {t("common.cancel")}
         </Button>
         <Button
           type="submit"
@@ -103,7 +105,7 @@ const InquiryForm = ({ productId }: { productId: string }) => {
           isLoading={isPending}
           data-testid="submit-inquiry"
         >
-          등록
+          {t("review.submit")}
         </Button>
       </div>
     </form>

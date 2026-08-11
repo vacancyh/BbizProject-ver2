@@ -4,6 +4,7 @@ import { clx } from "@modules/common/components/ui"
 import { toggleWishlist } from "@lib/data/wishlist"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
+import { useT } from "@lib/i18n/client"
 
 type WishlistButtonProps = {
   productId: string
@@ -33,6 +34,7 @@ const WishlistButton = ({
   initialActive,
   variant = "overlay",
 }: WishlistButtonProps) => {
+  const t = useT()
   const router = useRouter()
   const [active, setActive] = useState(initialActive)
   const [isPending, startTransition] = useTransition()
@@ -64,7 +66,7 @@ const WishlistButton = ({
         )}
       >
         <HeartIcon filled={active} />
-        <span className="text-base">{active ? "찜 완료" : "찜하기"}</span>
+        <span className="text-base">{active ? t("wishlist.added") : t("wishlist.add")}</span>
       </button>
     )
   }
@@ -75,7 +77,7 @@ const WishlistButton = ({
       onClick={handleClick}
       disabled={isPending}
       aria-pressed={active}
-      aria-label={active ? "찜 해제" : "찜하기"}
+      aria-label={active ? t("wishlist.remove") : t("wishlist.add")}
       data-testid="wishlist-button"
       className={clx(
         "absolute top-2 right-2 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-white/90 backdrop-blur transition-colors shadow-sm",

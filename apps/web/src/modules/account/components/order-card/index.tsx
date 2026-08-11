@@ -1,3 +1,6 @@
+import { useT } from "@lib/i18n/client"
+import { formatDate } from "@lib/util/format-date"
+import { useUiLocale } from "@lib/i18n/client"
 import { Button } from "@modules/common/components/ui"
 import { useMemo } from "react"
 
@@ -11,6 +14,8 @@ type OrderCardProps = {
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
+  const t = useT()
+  const locale = useUiLocale()
   const numberOfLines = useMemo(() => {
     return (
       order.items?.reduce((acc, item) => {
@@ -30,11 +35,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
       </div>
       <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ui-fg-base">
         <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+          {formatDate(locale, order.created_at)}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({
@@ -42,7 +43,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
             currency_code: order.currency_code,
           })}
         </span>
-        <span className="pl-2">{`${numberOfLines}개 상품`}</span>
+        <span className="pl-2">{t("account.itemCount", { n: numberOfLines })}</span>
       </div>
       <div className="grid grid-cols-2 small:grid-cols-4 gap-4 my-4">
         {order.items?.slice(0, 3).map((i) => {
@@ -71,14 +72,14 @@ const OrderCard = ({ order }: OrderCardProps) => {
             <span className="text-small-regular text-ui-fg-base">
               + {numberOfLines - 4}
             </span>
-            <span className="text-small-regular text-ui-fg-base">개 더</span>
+            <span className="text-small-regular text-ui-fg-base">{t("account.moreItems")}</span>
           </div>
         )}
       </div>
       <div className="flex justify-end">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
           <Button data-testid="order-details-link" variant="secondary">
-            상세 보기
+            {t("account.viewDetail")}
           </Button>
         </LocalizedClientLink>
       </div>

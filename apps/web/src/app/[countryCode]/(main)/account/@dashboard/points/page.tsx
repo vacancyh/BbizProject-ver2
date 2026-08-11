@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -6,14 +7,16 @@ import PointHistory from "@modules/account/components/point-history"
 import { getRegion } from "@lib/data/regions"
 import { retrieveCustomer } from "@lib/data/customer"
 
-export const metadata: Metadata = {
-  title: "적립금",
-  description: "보유 적립금과 적립/사용 내역을 확인하세요.",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("account.points"), description: t("page.pointsMeta") }
 }
 
 export default async function PointsPage(props: {
   params: Promise<{ countryCode: string }>
 }) {
+  const t = await getT()
   const { countryCode } = await props.params
   const customer = await retrieveCustomer()
   const region = await getRegion(countryCode)
@@ -25,9 +28,9 @@ export default async function PointsPage(props: {
   return (
     <div className="w-full" data-testid="points-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">적립금</h1>
+        <h1 className="text-2xl-semi">{t("account.points")}</h1>
         <p className="text-base-regular">
-          보유하신 적립금과 적립·사용 내역을 확인하실 수 있습니다.
+          {t("page.pointsDesc")}
         </p>
       </div>
       <PointHistory

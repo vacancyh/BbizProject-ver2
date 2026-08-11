@@ -5,6 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import Countdown from "./countdown"
+import { getT } from "@lib/i18n"
 
 const TimeSaleSection = async ({
   countryCode,
@@ -13,6 +14,7 @@ const TimeSaleSection = async ({
   countryCode: string
   region: HttpTypes.StoreRegion
 }) => {
+  const t = await getT()
   const allSales = await listActiveTimeSales(countryCode)
   // 2026-07-29 수정: 상품이 붙지 않은 세일(삭제·미게시 상품 등)을 렌더 단계에서 건너뛰다 보니
   // **헤더만 남고 내용이 빈 섹션**이 홈 한가운데 생겼다. 섹션을 그리기 전에 걸러낸다.
@@ -25,10 +27,10 @@ const TimeSaleSection = async ({
     <div className="content-container py-12 small:py-20" data-testid="time-sale-section">
       <div className="flex items-center gap-x-2 mb-8">
         <span className="text-2xl small:text-3xl font-semibold tracking-tight text-ui-fg-base">
-          ⏱ 타임세일
+          {t("home.timeSale")}
         </span>
         <span className="text-small-regular text-ui-tag-red-text">
-          한정 특가
+          {t("home.timeSaleSubtitle")}
         </span>
       </div>
 

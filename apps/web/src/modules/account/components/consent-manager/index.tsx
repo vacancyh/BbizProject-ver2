@@ -8,22 +8,25 @@ import {
 } from "@lib/data/consent"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
+import { useT } from "@lib/i18n/client"
+import type { MessageKey } from "@lib/i18n/messages"
 
+/** 채널별 문구 — 값은 **번역 키**다(문구 자체를 들고 있으면 영어 화면에도 한국어가 나간다). */
 const CONSENT_LABELS: Record<
   ConsentChannel,
-  { title: string; desc: string }
+  { titleKey: MessageKey; descKey: MessageKey }
 > = {
   marketing: {
-    title: "마케팅 정보 수신 동의 (선택)",
-    desc: "할인·이벤트·신상품 소식을 받아보실 수 있습니다.",
+    titleKey: "consent.marketingTitle",
+    descKey: "consent.marketingDesc",
   },
   sms: {
-    title: "SMS 수신 동의 (선택)",
-    desc: "주문/배송 외 광고성 문자 수신에 동의합니다.",
+    titleKey: "consent.smsTitle",
+    descKey: "consent.smsDesc",
   },
   email: {
-    title: "이메일 수신 동의 (선택)",
-    desc: "주문/배송 외 광고성 이메일 수신에 동의합니다.",
+    titleKey: "consent.emailTitle",
+    descKey: "consent.emailDesc",
   },
 }
 
@@ -59,6 +62,7 @@ const Toggle = ({
 )
 
 const ConsentManager = ({ initial }: { initial: ConsentState }) => {
+  const t = useT()
   const router = useRouter()
   const [state, setState] = useState<ConsentState>(initial)
   const [isPending, startTransition] = useTransition()
@@ -78,10 +82,10 @@ const ConsentManager = ({ initial }: { initial: ConsentState }) => {
         <li key={ch} className="flex items-center justify-between gap-x-4 py-5">
           <div className="flex flex-col gap-y-1">
             <span className="text-base-regular text-ui-fg-base">
-              {CONSENT_LABELS[ch].title}
+              {t(CONSENT_LABELS[ch].titleKey)}
             </span>
             <span className="text-small-regular text-ui-fg-muted">
-              {CONSENT_LABELS[ch].desc}
+              {t(CONSENT_LABELS[ch].descKey)}
             </span>
           </div>
           <Toggle

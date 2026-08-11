@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import {
   createContext,
   useCallback,
@@ -66,6 +67,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 }
 
 const Toast = ({ item, onDismiss }: { item: ToastItem; onDismiss: () => void }) => {
+  const t = useT()
   useEffect(() => {
     const timer = setTimeout(onDismiss, AUTO_DISMISS_MS)
     return () => clearTimeout(timer)
@@ -88,7 +90,7 @@ const Toast = ({ item, onDismiss }: { item: ToastItem; onDismiss: () => void }) 
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="알림 닫기"
+        aria-label={t("common.closeToast")}
         className="opacity-70 hover:opacity-100 transition-opacity"
       >
         ✕

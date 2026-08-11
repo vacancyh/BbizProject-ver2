@@ -4,6 +4,7 @@ import { Text } from "@modules/common/components/ui"
 
 import InteractiveLink from "@modules/common/components/interactive-link"
 import ProductPreview from "@modules/products/components/product-preview"
+import { getT } from "@lib/i18n"
 
 export default async function ProductRail({
   collection,
@@ -12,6 +13,7 @@ export default async function ProductRail({
   collection: HttpTypes.StoreCollection
   region: HttpTypes.StoreRegion
 }) {
+  const t = await getT()
   const {
     response: { products: pricedProducts },
   } = await listProducts({
@@ -33,7 +35,7 @@ export default async function ProductRail({
           {collection.title}
         </Text>
         <InteractiveLink href={`/collections/${collection.handle}`}>
-          전체 보기
+          {t("common.viewAll")}
         </InteractiveLink>
       </div>
       <ul className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-10 small:gap-y-12">

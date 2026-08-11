@@ -1,5 +1,6 @@
 "use client"
 
+import { useT } from "@lib/i18n/client"
 import { Button } from "@modules/common/components/ui"
 import {
   requestPasswordReset,
@@ -16,6 +17,7 @@ const PasswordReset = ({
   token?: string
   emailParam?: string
 }) => {
+  const t = useT()
   const isReset = !!token
   const [email, setEmail] = useState(emailParam ?? "")
   const [password, setPassword] = useState("")
@@ -28,7 +30,7 @@ const PasswordReset = ({
     e.preventDefault()
     setError(null)
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError("올바른 이메일 주소를 입력해 주세요.")
+      setError(t("reset.invalidEmail"))
       return
     }
     startTransition(async () => {
@@ -41,17 +43,17 @@ const PasswordReset = ({
     e.preventDefault()
     setError(null)
     if (password.length < 6) {
-      setError("비밀번호는 6자 이상이어야 합니다.")
+      setError(t("reset.tooShort"))
       return
     }
     if (password !== confirm) {
-      setError("비밀번호가 일치하지 않습니다.")
+      setError(t("reset.mismatch"))
       return
     }
     startTransition(async () => {
       const res = await resetPassword(email.trim(), token!, password)
       if (res.ok) setDone(true)
-      else setError(res.error ?? "재설정 실패")
+      else setError(res.error ?? t("reset.failed"))
     })
   }
 
@@ -60,15 +62,14 @@ const PasswordReset = ({
       <div className="rounded-rounded border border-ui-border-base bg-ui-bg-subtle p-6 max-w-md">
         {isReset ? (
           <p className="text-base-regular text-ui-fg-base">
-            비밀번호가 변경되었습니다.{" "}
+            {t("reset.changed")}{" "}
             <LocalizedClientLink href="/account" className="underline">
-              로그인하기
+              {t("reset.goLogin")}
             </LocalizedClientLink>
           </p>
         ) : (
           <p className="text-base-regular text-ui-fg-base">
-            입력하신 이메일로 비밀번호 재설정 링크를 보내드렸습니다. 메일함을
-            확인해 주세요.
+            {t("reset.linkSent")}
           </p>
         )}
       </div>
@@ -79,13 +80,13 @@ const PasswordReset = ({
     return (
       <form onSubmit={handleReset} className="flex flex-col gap-y-3 max-w-md" data-testid="reset-form">
         <p className="text-base-regular text-ui-fg-subtle mb-2">
-          새 비밀번호를 입력해 주세요.
+          {t("reset.enterNew")}
         </p>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="새 비밀번호 (6자 이상)"
+          placeholder={t("reset.newPlaceholder")}
           className="border border-ui-border-base rounded-none bg-transparent px-3 h-12 text-base-regular outline-none focus:border-ui-fg-base"
           data-testid="new-password"
         />
@@ -93,13 +94,13 @@ const PasswordReset = ({
           type="password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          placeholder="새 비밀번호 확인"
+          placeholder={t("reset.confirmPlaceholder")}
           className="border border-ui-border-base rounded-none bg-transparent px-3 h-12 text-base-regular outline-none focus:border-ui-fg-base"
           data-testid="confirm-password"
         />
         {error && <p className="text-small-regular text-ui-tag-red-text">{error}</p>}
         <Button type="submit" className="rounded-none h-12" isLoading={isPending}>
-          비밀번호 변경
+          {t("reset.submit")}
         </Button>
       </form>
     )
@@ -108,25 +109,25 @@ const PasswordReset = ({
   return (
     <form onSubmit={handleRequest} className="flex flex-col gap-y-3 max-w-md" data-testid="request-form">
       <p className="text-base-regular text-ui-fg-subtle mb-2">
-        가입하신 이메일을 입력하시면 비밀번호 재설정 링크를 보내드립니다.
+        {t("reset.requestHint")}
       </p>
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="이메일 주소"
+        placeholder={t("reset.emailPlaceholder")}
         className="border border-ui-border-base rounded-none bg-transparent px-3 h-12 text-base-regular outline-none focus:border-ui-fg-base"
         data-testid="reset-email"
       />
       {error && <p className="text-small-regular text-ui-tag-red-text">{error}</p>}
       <Button type="submit" className="rounded-none h-12" isLoading={isPending}>
-        재설정 링크 받기
+        {t("reset.requestSubmit")}
       </Button>
       <LocalizedClientLink
         href="/account"
         className="text-small-regular text-ui-fg-muted underline text-center mt-2"
       >
-        로그인으로 돌아가기
+        {t("reset.backToLogin")}
       </LocalizedClientLink>
     </form>
   )

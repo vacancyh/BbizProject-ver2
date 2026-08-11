@@ -1,3 +1,4 @@
+import { getT } from "@lib/i18n"
 import { Metadata } from "next"
 
 import ProfilePhone from "@modules/account//components/profile-phone"
@@ -10,12 +11,14 @@ import { notFound } from "next/navigation"
 import { listRegions } from "@lib/data/regions"
 import { retrieveCustomer } from "@lib/data/customer"
 
-export const metadata: Metadata = {
-  title: "프로필",
-  description: "내 프로필 정보를 확인하고 수정합니다.",
+// 정적 metadata 는 쿠키를 못 읽는다 → 언어별 제목을 내려면 generateMetadata 여야 한다.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT()
+  return { title: t("account.navProfile"), description: t("page.profileMeta") }
 }
 
 export default async function Profile() {
+  const t = await getT()
   const customer = await retrieveCustomer()
   const regions = await listRegions()
 
@@ -26,10 +29,9 @@ export default async function Profile() {
   return (
     <div className="w-full" data-testid="profile-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">프로필</h1>
+        <h1 className="text-2xl-semi">{t("account.navProfile")}</h1>
         <p className="text-base-regular">
-          이름·이메일·휴대폰 등 프로필 정보를 확인하고 수정하실 수 있습니다.
-          청구지 정보도 함께 관리하실 수 있습니다.
+          {t("page.profileDesc")}
         </p>
       </div>
       <div className="flex flex-col gap-y-8 w-full">

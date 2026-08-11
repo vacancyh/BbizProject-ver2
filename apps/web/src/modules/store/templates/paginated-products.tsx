@@ -7,6 +7,7 @@ import ProductPreview from "@modules/products/components/product-preview"
 import { Pagination } from "@modules/store/components/pagination"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getT } from "@lib/i18n"
 import { getPopularSearchTerms } from "@lib/data/search-terms"
 
 const PRODUCT_LIMIT = 12
@@ -43,6 +44,7 @@ export default async function PaginatedProducts({
   priceRange?: string
   countryCode: string
 }) {
+  const t = await getT()
   // 가격 필터는 서버가 "계산가 범위" 조건을 지원하지 않아 앱에서 걸러야 한다.
   // 페이지 단위로만 거르면 "2만원 이하" 상품이 2페이지에 있을 때 결과가 0건으로 보이므로,
   // 필터가 켜지면 넓게 조회(최대 100건)해서 전체에서 거른 뒤 직접 페이지네이션한다.
@@ -133,20 +135,22 @@ export default async function PaginatedProducts({
       <div className="py-20 text-center" data-testid="no-products-message">
         <p className="text-ui-fg-base txt-large">
           {searchQuery
-            ? `'${searchQuery}'에 대한 검색 결과가 없습니다.`
+            ? t("store.noResultsFor", { q: searchQuery })
             : priceRange && priceRange !== "all"
-            ? "선택한 조건에 맞는 상품이 없습니다."
-            : "표시할 상품이 없습니다."}
+            ? t("store.noResultsFilter")
+            : t("store.empty")}
         </p>
         <p className="mt-2 text-ui-fg-muted txt-medium">
           {searchQuery
-            ? "다른 검색어를 입력하시거나 아래에서 찾아보세요."
-            : "필터를 변경해 보세요."}
+            ? t("store.noResultsHintSearch")
+            : t("store.noResultsHintFilter")}
         </p>
 
         {suggestions.length > 0 && (
           <div className="mt-8">
-            <p className="text-ui-fg-subtle txt-compact-small mb-3">인기 검색어</p>
+            <p className="text-ui-fg-subtle txt-compact-small mb-3">
+              {t("store.popularSearches")}
+            </p>
             <ul className="flex flex-wrap justify-center gap-2" data-testid="search-suggestions">
               {suggestions.map((term) => (
                 <li key={term}>
@@ -168,7 +172,7 @@ export default async function PaginatedProducts({
             className="inline-block border border-ui-border-interactive px-6 py-2.5 txt-medium hover:bg-ui-bg-subtle"
             data-testid="browse-all-products"
           >
-            전체 상품 보기
+            {t("cart.browseAll")}
           </LocalizedClientLink>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { HttpTypes } from "@medusajs/types"
 import { Text } from "@modules/common/components/ui"
 import ProductPreview from "@modules/products/components/product-preview"
 import { getBestProducts } from "@lib/data/best"
+import { getT } from "@lib/i18n"
 
 /**
  * 베스트(인기) 상품 홈 섹션.
@@ -14,6 +15,7 @@ export default async function BestProducts({
 }: {
   region: HttpTypes.StoreRegion
 }) {
+  const t = await getT()
   const products = await getBestProducts(region, 8)
   if (!products.length) return null
 
@@ -21,9 +23,9 @@ export default async function BestProducts({
     <div className="content-container py-12 small:py-20" data-testid="best-products">
       <div className="flex items-end justify-between mb-8">
         <Text className="text-2xl small:text-3xl font-semibold tracking-tight text-ui-fg-base">
-          베스트
+          {t("home.best")}
           <span className="ml-2 text-base font-normal text-ui-fg-subtle">
-            지금 인기 있는 상품
+            {t("home.bestSubtitle")}
           </span>
         </Text>
       </div>
@@ -32,7 +34,7 @@ export default async function BestProducts({
           <li key={p.id} className="relative">
             <span
               className="absolute z-10 top-2 left-2 flex items-center justify-center w-7 h-7 rounded-full bg-ui-fg-base text-ui-bg-base text-sm font-bold"
-              aria-label={`베스트 ${i + 1}위`}
+              aria-label={t("home.bestRankAria", { n: i + 1 })}
             >
               {i + 1}
             </span>

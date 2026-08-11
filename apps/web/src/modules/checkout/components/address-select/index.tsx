@@ -1,3 +1,4 @@
+import { useT } from "@lib/i18n/client"
 import { Listbox, Transition } from "@headlessui/react"
 import { ChevronUpDown } from "@medusajs/icons"
 import { clx } from "@modules/common/components/ui"
@@ -21,6 +22,7 @@ const AddressSelect = ({
   addressInput,
   onSelect,
 }: AddressSelectProps) => {
+  const t = useT()
   const handleSelect = (id: string) => {
     const savedAddress = addresses.find((a) => a.id === id)
     if (savedAddress) {
@@ -44,7 +46,7 @@ const AddressSelect = ({
               <span className="block truncate">
                 {selectedAddress
                   ? selectedAddress.address_1
-                  : "배송지를 선택하세요"}
+                  : t("checkout.selectAddress")}
               </span>
               <ChevronUpDown
                 className={clx("transition-rotate duration-200", {

@@ -1,4 +1,5 @@
 import React from "react"
+import { getT } from "@lib/i18n"
 
 import UnderlineLink from "@modules/common/components/interactive-link"
 
@@ -10,10 +11,11 @@ interface AccountLayoutProps {
   children: React.ReactNode
 }
 
-const AccountLayout: React.FC<AccountLayoutProps> = ({
+const AccountLayout = async ({
   customer,
   children,
-}) => {
+}: AccountLayoutProps) => {
+  const t = await getT()
   return (
     <div className="flex-1 small:py-12" data-testid="account-page">
       <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-white flex flex-col">
@@ -23,14 +25,14 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
         </div>
         <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-gray-200 py-12 gap-8">
           <div>
-            <h3 className="text-xl-semi mb-4">궁금한 점이 있으신가요?</h3>
+            <h3 className="text-xl-semi mb-4">{t("cs.helpTitle")}</h3>
             <span className="txt-medium">
-              자주 묻는 질문과 답변은 고객센터 페이지에서 확인하실 수 있습니다.
+              {t("cs.helpBody")}
             </span>
           </div>
           <div>
             <UnderlineLink href="/customer-service">
-              고객센터
+              {t("nav.customerService")}
             </UnderlineLink>
           </div>
         </div>

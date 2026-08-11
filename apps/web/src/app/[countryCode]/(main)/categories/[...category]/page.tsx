@@ -1,4 +1,6 @@
 import { Metadata } from "next"
+import { BIZ } from "@lib/business-info"
+import { getT } from "@lib/i18n"
 import { notFound } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
@@ -47,10 +49,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   try {
     const productCategory = await getCategoryByHandle(params.category)
 
-    const title = productCategory.name + " | 쇼핑몰"
+    const title = `${productCategory.name} | ${BIZ.name || (await getT())("biz.nameSample")}`
 
     const description =
-      productCategory.description ?? `${productCategory.name} 카테고리`
+      productCategory.description ??
+    (await getT())("page.categoryMeta", { name: productCategory.name })
 
     return {
       title,

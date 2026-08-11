@@ -1,4 +1,6 @@
+import { getT } from "@lib/i18n"
 import { HttpTypes } from "@medusajs/types"
+import { BIZ } from "@lib/business-info"
 import { getBaseURL } from "@lib/util/env"
 import { getProductPrice } from "@lib/util/get-product-price"
 
@@ -35,7 +37,7 @@ function JsonLd({ data }: { data: Record<string, unknown> }) {
 }
 
 /** 상품 상세 — Product + Offer + Breadcrumb */
-export function ProductJsonLd({
+export async function ProductJsonLd({
   product,
   countryCode,
   currencyCode,
@@ -44,6 +46,7 @@ export function ProductJsonLd({
   countryCode: string
   currencyCode: string
 }) {
+  const t = await getT()
   const base = getBaseURL()
   const url = `${base}/${countryCode}/products/${product.handle}`
   const { cheapestPrice } = getProductPrice({ product })
@@ -84,8 +87,8 @@ export function ProductJsonLd({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "홈", item: `${base}/${countryCode}` },
-            { "@type": "ListItem", position: 2, name: "전체상품", item: `${base}/${countryCode}/store` },
+            { "@type": "ListItem", position: 1, name: t("nav.home"), item: `${base}/${countryCode}` },
+            { "@type": "ListItem", position: 2, name: t("store.title"), item: `${base}/${countryCode}/store` },
             { "@type": "ListItem", position: 3, name: product.title, item: url },
           ],
         }}
@@ -97,7 +100,11 @@ export function ProductJsonLd({
 /** 홈 — Organization + WebSite(사이트 검색) */
 export function SiteJsonLd({ countryCode }: { countryCode: string }) {
   const base = getBaseURL()
-  const name = process.env.NEXT_PUBLIC_APP_NAME_KO ?? process.env.NEXT_PUBLIC_APP_NAME ?? "쇼핑몰"
+  const name =
+    process.env.NEXT_PUBLIC_APP_NAME_KO ??
+    process.env.NEXT_PUBLIC_APP_NAME ??
+    BIZ.name ??
+    ""
 
   return (
     <>

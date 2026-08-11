@@ -24,49 +24,8 @@ import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import {
   EVENT_TYPE_MAP,
   SUBSCRIBED_EVENTS,
-  resolveRevalidateTarget,
-  type RevalidatePayload,
+  callRevalidate,
 } from "./revalidate-contract"
-
-/**
- * 스토어프론트 revalidate 호출 헬퍼
- * @param payload  타입 + 핸들 정보
- * @param logger   Medusa logger 인스턴스
- */
-async function callRevalidate(
-  payload: RevalidatePayload,
-  logger: { error?: (msg: string) => void; info?: (msg: string) => void }
-) {
-  const target = resolveRevalidateTarget()
-  if (!target.enabled || !target.url) {
-    logger.info?.("[storefront-revalidate] STOREFRONT_URL 미설정 — revalidate 건너뜀")
-    return
-  }
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  }
-  if (target.secret) {
-    headers["Authorization"] = `Bearer ${target.secret}`
-  }
-
-  const res = await fetch(target.url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-    // 5초 타임아웃 (AbortSignal — Node 18+)
-    signal: AbortSignal.timeout(5000),
-  })
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    logger.error?.(
-      `[storefront-revalidate] revalidate 실패 (${res.status}): ${text.slice(0, 200)}`
-    )
-  } else {
-    logger.info?.(`[storefront-revalidate] ISR purge 완료 — type=${payload.type} handle=${payload.handle ?? "-"}`)
-  }
-}
 
 /**
  * 통합 핸들러 — 모든 이벤트를 단일 default export 로 처리.

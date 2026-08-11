@@ -1,4 +1,6 @@
 "use client"
+import { useT } from "@lib/i18n/client"
+import { payTitle } from "@lib/constants"
 import { RadioGroup } from "@headlessui/react"
 import { isStripeLike, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
@@ -26,6 +28,7 @@ const Payment = ({
   cart: HttpTypes.StoreCart
   availablePaymentMethods: { id: string }[]
 }) => {
+  const t = useT()
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession) => paymentSession.status === "pending"
   )
@@ -124,7 +127,7 @@ const Payment = ({
             }
           )}
         >
-          결제
+          {t("checkout.payment")}
           {!isOpen && paymentReady && <CheckCircleSolid />}
         </Heading>
         {!isOpen && paymentReady && (
@@ -134,7 +137,7 @@ const Payment = ({
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-payment-button"
             >
-              수정
+              {t("common.edit")}
             </button>
           </Text>
         )}
@@ -174,13 +177,13 @@ const Payment = ({
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                결제수단
+                {t("checkout.paymentMethod")}
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                기프트카드
+                {t("checkout.giftCard")}
               </Text>
             </div>
           )}
@@ -202,8 +205,8 @@ const Payment = ({
             data-testid="submit-payment-button"
           >
             {!activeSession && isStripeLike(selectedPaymentMethod)
-              ? "카드 정보 입력"
-              : "검토 단계로"}
+              ? t("checkout.enterCardDetails")
+              : t("checkout.toReviewStep")}
           </Button>
         </div>
 
@@ -218,13 +221,13 @@ const Payment = ({
                   className="txt-medium text-ui-fg-subtle"
                   data-testid="payment-method-summary"
                 >
-                  {paymentInfoMap[activeSession?.provider_id]?.title ||
+                  {payTitle(t, activeSession?.provider_id) ||
                     activeSession?.provider_id}
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  결제 정보
+                  {t("checkout.paymentInfo")}
                 </Text>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
@@ -238,7 +241,7 @@ const Payment = ({
                   <Text>
                     {isStripeLike(selectedPaymentMethod) && cardBrand
                       ? cardBrand
-                      : "다음 단계에서 진행됩니다"}
+                      : t("checkout.paymentNextStep")}
                   </Text>
                 </div>
               </div>
@@ -246,13 +249,13 @@ const Payment = ({
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                결제수단
+                {t("checkout.paymentMethod")}
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                기프트카드
+                {t("checkout.giftCard")}
               </Text>
             </div>
           ) : null}

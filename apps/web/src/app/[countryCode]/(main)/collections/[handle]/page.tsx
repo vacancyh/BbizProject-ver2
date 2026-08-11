@@ -1,4 +1,6 @@
 import { Metadata } from "next"
+import { BIZ } from "@lib/business-info"
+import { getT } from "@lib/i18n"
 import { notFound } from "next/navigation"
 
 import { getCollectionByHandle, listCollections } from "@lib/data/collections"
@@ -59,8 +61,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const metadata = {
-    title: `${collection.title} | 쇼핑몰`,
-    description: `${collection.title} 컬렉션`,
+    title: `${collection.title} | ${BIZ.name || (await getT())("biz.nameSample")}`,
+    description: (await getT())("page.collectionMeta", { title: collection.title }),
   } as Metadata
 
   return metadata

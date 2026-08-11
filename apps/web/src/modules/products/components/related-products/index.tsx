@@ -2,6 +2,7 @@ import { listProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import { HttpTypes } from "@medusajs/types"
 import Product from "../product-preview"
+import { getT } from "@lib/i18n"
 
 type RelatedProductsProps = {
   product: HttpTypes.StoreProduct
@@ -12,6 +13,7 @@ export default async function RelatedProducts({
   product,
   countryCode,
 }: RelatedProductsProps) {
+  const t = await getT()
   const region = await getRegion(countryCode)
 
   if (!region) {
@@ -51,10 +53,10 @@ export default async function RelatedProducts({
     <div className="product-page-constraint">
       <div className="flex flex-col items-center text-center mb-16">
         <span className="text-base-regular text-gray-600 mb-6">
-          함께 보면 좋은 상품
+          {t("product.relatedTitle")}
         </span>
         <p className="text-2xl-regular text-ui-fg-base max-w-lg">
-          이런 상품은 어떠세요?
+          {t("product.relatedSubtitle")}
         </p>
       </div>
 

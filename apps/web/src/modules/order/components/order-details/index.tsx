@@ -1,4 +1,7 @@
+import { getT, getUiLocale } from "@lib/i18n"
+import { formatDate } from "@lib/util/format-date"
 import { HttpTypes } from "@medusajs/types"
+import type { MessageKey } from "@lib/i18n/messages"
 import { Text } from "@modules/common/components/ui"
 
 type OrderDetailsProps = {
@@ -6,77 +9,77 @@ type OrderDetailsProps = {
   showStatus?: boolean
 }
 
-// 관리자(백엔드)에서 변경되는 주문 상태를 한국어로 표기
-const FULFILLMENT_STATUS_KO: Record<string, string> = {
-  not_fulfilled: "배송 준비 중",
-  partially_fulfilled: "부분 처리",
-  fulfilled: "출고 준비 완료",
-  partially_shipped: "부분 출고",
-  shipped: "배송 중",
-  partially_delivered: "부분 배송 완료",
-  delivered: "배송 완료",
-  canceled: "취소됨",
+// 백엔드가 주는 상태 코드 → 번역 키.
+// 문구를 여기 두면 영어 화면에도 한국어가 그대로 나간다(2026-08-10 전환).
+// 모르는 코드가 오면 코드 원문을 그대로 보여 준다 — 빈칸보다 낫다.
+const FULFILLMENT_STATUS_KEY: Record<string, MessageKey> = {
+  not_fulfilled: "order.fulfillment.not_fulfilled",
+  partially_fulfilled: "order.fulfillment.partially_fulfilled",
+  fulfilled: "order.fulfillment.fulfilled",
+  partially_shipped: "order.fulfillment.partially_shipped",
+  shipped: "order.fulfillment.shipped",
+  partially_delivered: "order.fulfillment.partially_delivered",
+  delivered: "order.fulfillment.delivered",
+  canceled: "order.fulfillment.canceled",
 }
 
-const PAYMENT_STATUS_KO: Record<string, string> = {
-  not_paid: "미결제",
-  awaiting: "입금 대기",
-  authorized: "승인됨",
-  partially_authorized: "부분 승인",
-  captured: "결제 완료",
-  partially_captured: "부분 결제",
-  partially_refunded: "부분 환불",
-  refunded: "환불 완료",
-  canceled: "취소됨",
-  requires_action: "확인 필요",
+const PAYMENT_STATUS_KEY: Record<string, MessageKey> = {
+  not_paid: "order.payment.not_paid",
+  awaiting: "order.payment.awaiting",
+  authorized: "order.payment.authorized",
+  partially_authorized: "order.payment.partially_authorized",
+  captured: "order.payment.captured",
+  partially_captured: "order.payment.partially_captured",
+  partially_refunded: "order.payment.partially_refunded",
+  refunded: "order.payment.refunded",
+  canceled: "order.payment.canceled",
+  requires_action: "order.payment.requires_action",
 }
 
-const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const formatDate = (iso: string | Date) =>
-    new Intl.DateTimeFormat("ko-KR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(new Date(iso))
+const OrderDetails = async ({ order, showStatus }: OrderDetailsProps) => {
+  const t = await getT()
+  const locale = await getUiLocale()
 
   return (
     <div>
       <Text>
-        주문 확인 내역을{" "}
+        {t("order.confirmationSentPre")}{" "}
         <span
           className="text-ui-fg-medium-plus font-semibold"
           data-testid="order-email"
         >
           {order.email}
         </span>{" "}
-        (으)로 보내드렸습니다.
+        {t("order.confirmationSentPost")}
       </Text>
       <Text className="mt-2">
-        주문일:{" "}
-        <span data-testid="order-date">{formatDate(order.created_at)}</span>
+        {t("order.orderedAt")}{" "}
+        <span data-testid="order-date">{formatDate(locale, order.created_at)}</span>
       </Text>
       <Text className="mt-2 text-ui-fg-interactive">
-        주문번호: <span data-testid="order-id">{order.display_id}</span>
+        {t("order.orderNo")} <span data-testid="order-id">{order.display_id}</span>
       </Text>
 
       <div className="flex items-center text-compact-small gap-x-4 mt-4">
         {showStatus && (
           <>
             <Text>
-              배송 상태:{" "}
+              {t("order.fulfillmentStatus")}{" "}
               <span className="text-ui-fg-subtle " data-testid="order-status">
-                {FULFILLMENT_STATUS_KO[order.fulfillment_status] ??
-                  order.fulfillment_status}
+                {FULFILLMENT_STATUS_KEY[order.fulfillment_status]
+                  ? t(FULFILLMENT_STATUS_KEY[order.fulfillment_status])
+                  : order.fulfillment_status}
               </span>
             </Text>
             <Text>
-              결제 상태:{" "}
+              {t("order.paymentStatus")}{" "}
               <span
                 className="text-ui-fg-subtle "
                 data-testid="order-payment-status"
               >
-                {PAYMENT_STATUS_KO[order.payment_status] ??
-                  order.payment_status}
+                {PAYMENT_STATUS_KEY[order.payment_status]
+                  ? t(PAYMENT_STATUS_KEY[order.payment_status])
+                  : order.payment_status}
               </span>
             </Text>
           </>
