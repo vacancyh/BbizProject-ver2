@@ -88,7 +88,12 @@ const SocialLogin = () => {
           type="button"
           onClick={() => handle("naver")}
           disabled={!!pending}
-          className="w-full h-11 rounded-none bg-[#03C75A] text-white text-base font-medium disabled:opacity-60"
+          // 네이버 브랜드색(#03C75A)에 흰 글씨는 대비가 **2.25:1** 이라 WCAG AA(4.5:1)에 크게 못 미친다.
+          // 저시력 사용자에게 글자가 배경에 묻힌다(2026-08-12 axe 실측).
+          // 어둡게 낮춰 5.06:1 을 맞췄다 — 네이버 초록으로 알아볼 수 있는 범위다.
+          // ⚠️ 실제 OAuth 를 붙일 때 공식 브랜드 버튼 에셋을 쓰게 되면 브랜드 가이드와
+          //    접근성 중 무엇을 따를지 다시 정해야 한다(지금은 데모라 우리 판단으로 간다).
+          className="w-full h-11 rounded-none bg-[#02803B] text-white text-base font-medium disabled:opacity-60"
           data-testid="naver-login"
         >
           {pending === "naver" ? t("social.signingIn") : t("social.naver")}

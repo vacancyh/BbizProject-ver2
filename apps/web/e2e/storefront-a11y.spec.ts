@@ -6,6 +6,8 @@
  * moderate/minor 는 로그로 남겨 추이를 본다(회귀 방지 기준선).
  */
 import { test, expect } from "@playwright/test"
+
+import { localized } from "./_locale"
 import AxeBuilder from "@axe-core/playwright"
 
 const CC = process.env.STOREFRONT_REGION ?? "kr"
@@ -23,17 +25,27 @@ test.beforeEach(async ({ context }) => {
   }
 })
 
+/**
+ * 검사 대상 화면.
+ *
+ * ⚠️ **상품상세가 빠져 있었다**(2026-08-12 발견). 하필 거기에 CRITICAL 위반이 있었다 —
+ * 상세 탭 아코디언 버튼에 접근 가능한 이름이 없어 스크린리더가 "버튼, 접힘" 만 읽었다.
+ * 목록에 없는 화면은 영원히 안 잡힌다. 고객이 실제로 머무는 화면은 전부 넣는다.
+ */
 const PAGES: { path: string; label: string }[] = [
   { path: `/${CC}`, label: "홈" },
   { path: `/${CC}/store`, label: "전체상품" },
+  { path: `/${CC}/products/kr-test-p11`, label: "상품상세" },
   { path: `/${CC}/cart`, label: "장바구니" },
   { path: `/${CC}/account`, label: "로그인" },
   { path: `/${CC}/customer-service`, label: "고객센터" },
+  { path: `/${CC}/order/lookup`, label: "주문조회" },
+  { path: `/${CC}/wishlist`, label: "위시리스트" },
 ]
 
 for (const p of PAGES) {
   test(`a11y: ${p.label} (${p.path})`, async ({ page }) => {
-    await page.goto(p.path)
+    await page.goto(localized(p.path, E2E_LOCALE as never))
     await page.waitForLoadState("networkidle").catch(() => {})
 
     const results = await new AxeBuilder({ page })
@@ -43,9 +55,11 @@ for (const p of PAGES) {
       .analyze()
 
     const byImpact = (level: string) => results.violations.filter((v) => v.impact === level)
-    // color-contrast 는 디자인 토큰(ui-fg-interactive)·브랜드 색(네이버 #03C75A) 문제라
-    // 코드 수정이 아닌 디자인 결정이 필요 → 게이트에서 제외하고 로그로 추적한다.
-    const GATE_EXCLUDED = new Set(["color-contrast"])
+    // 예전에는 color-contrast 를 "브랜드 색이라 어쩔 수 없다"며 게이트에서 뺐다.
+    // 2026-08-12 에 네이버 버튼(#03C75A + 흰 글씨, 2.25:1)을 5.06:1 로 고쳐 해소했으므로
+    // 이제 게이트에 포함한다. 면제가 필요한 새 사례가 생기면 **이유와 함께** 여기에 적을 것 —
+    // 비워 두면 "왜 빠졌는지" 를 아무도 모르게 된다.
+    const GATE_EXCLUDED = new Set<string>()
     const critical = [...byImpact("critical"), ...byImpact("serious")].filter(
       (v) => !GATE_EXCLUDED.has(v.id)
     )

@@ -42,3 +42,6 @@ worklog/
 
 # DB 백업 산출물(로컬 리허설용)
 backups/
+
+# 로컬 개발 서버 로그 (scripts/restart-dev.ps1 가 남긴다)
+.dev-logs/

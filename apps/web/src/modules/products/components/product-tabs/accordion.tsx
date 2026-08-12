@@ -52,16 +52,21 @@ const Item: React.FC<AccordionItemProps> = ({
         className
       )}
     >
+      {/*
+        제목은 **Trigger 안**에 있어야 한다 (2026-08-12 수정).
+
+        예전에는 제목이 Trigger 밖에 있고 Trigger 안에는 +/− 아이콘만 있었다. 그래서:
+         · 스크린리더가 "버튼, 접힘" 만 읽고 **무엇을 여는 버튼인지 알 수 없었다**
+           (axe: button-name — CRITICAL)
+         · 제목을 눌러도 안 열리고 **작은 아이콘만** 눌러야 했다
+        제목을 안으로 넣으면 줄 전체가 눌리고 접근 가능한 이름도 생긴다.
+      */}
       <AccordionPrimitive.Header className="px-1">
         <div className="flex flex-col">
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Text className="text-ui-fg-subtle text-sm">{title}</Text>
-            </div>
-            <AccordionPrimitive.Trigger>
-              {customTrigger || <MorphingTrigger />}
-            </AccordionPrimitive.Trigger>
-          </div>
+          <AccordionPrimitive.Trigger className="flex w-full items-center justify-between gap-4 text-left">
+            <Text className="text-ui-fg-subtle text-sm">{title}</Text>
+            {customTrigger || <MorphingTrigger />}
+          </AccordionPrimitive.Trigger>
           {subtitle && (
             <Text as="span" className="mt-1 text-sm">
               {subtitle}

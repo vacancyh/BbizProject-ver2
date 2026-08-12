@@ -1,21 +1,18 @@
-import { getT } from "@lib/i18n"
-import InteractiveLink from "@modules/common/components/interactive-link"
 import { Metadata } from "next"
+
+import NotFoundView from "@modules/common/components/not-found-view"
 
 export const metadata: Metadata = {
   title: "404",
   description: "Page not found",
 }
 
-export default async function NotFound() {
-  const t = await getT()
-  return (
-    <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-64px)]">
-      <h1 className="text-2xl-semi text-ui-fg-base">{t("error.notFoundTitle")}</h1>
-      <p className="text-small-regular text-ui-fg-base">
-        {t("error.notFoundBody")}
-      </p>
-      <InteractiveLink href="/">{t("error.goHome")}</InteractiveLink>
-    </div>
-  )
+/**
+ * 주소가 아예 매칭되지 않았을 때의 404.
+ *
+ * 화면 자체는 `NotFoundView` 하나로 모았다 — 세그먼트마다 not-found.tsx 가
+ * 필요한 구조라(Next 가 상위로 올라가지 않는다) 문구가 흩어지면 금방 어긋난다.
+ */
+export default function NotFound() {
+  return <NotFoundView />
 }
