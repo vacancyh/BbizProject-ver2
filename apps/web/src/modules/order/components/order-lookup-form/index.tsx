@@ -4,10 +4,12 @@ import { Button } from "@modules/common/components/ui"
 import { lookupGuestOrder } from "@lib/data/order-lookup"
 import { useParams, useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-import { useT } from "@lib/i18n/client"
+import { useT, useUiLocale } from "@lib/i18n/client"
+import { withLocalePrefix } from "@lib/i18n/routing"
 
 const OrderLookupForm = () => {
   const t = useT()
+  const locale = useUiLocale()
   const router = useRouter()
   const { countryCode } = useParams() as { countryCode: string }
   const [displayId, setDisplayId] = useState("")
@@ -25,7 +27,9 @@ const OrderLookupForm = () => {
     startTransition(async () => {
       const res = await lookupGuestOrder(displayId.trim(), email.trim())
       if (res.ok) {
-        router.push(`/${countryCode}/order/${res.orderId}/confirmed`)
+        router.push(
+          withLocalePrefix(locale, `/${countryCode}/order/${res.orderId}/confirmed`)
+        )
       } else {
         setError(res.error)
       }

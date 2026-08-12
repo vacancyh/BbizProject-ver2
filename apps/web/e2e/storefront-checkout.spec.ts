@@ -12,6 +12,8 @@
  */
 import { test, expect, Page } from "@playwright/test"
 
+import { localized } from "./_locale"
+
 const CC = process.env.STOREFRONT_REGION ?? "kr"
 // 시드된 데모 계정(등급별 데모 고객) — seed-all 로 생성됨
 const MEMBER = {
@@ -37,7 +39,7 @@ test.beforeEach(async ({ context }) => {
 
 /** 목록 → 첫 상품 상세 → 옵션 선택 → 장바구니 담기 */
 async function addFirstProductToCart(page: Page) {
-  await page.goto(`/${CC}/store`)
+  await page.goto(localized(`/${CC}/store`, E2E_LOCALE as never))
   await page.locator('a[href*="/products/"]').first().click()
   await page.waitForURL(`**/${CC}/products/**`)
 
@@ -109,7 +111,7 @@ test("비회원: 장바구니 → 주소 → 배송 → 결제 → 주문완료"
 
   await addFirstProductToCart(page)
 
-  await page.goto(`/${CC}/cart`)
+  await page.goto(localized(`/${CC}/cart`, E2E_LOCALE as never))
   await page.getByTestId("checkout-button").click()
   await page.waitForURL(`**/${CC}/checkout**`)
 
@@ -121,14 +123,14 @@ test("비회원: 장바구니 → 주소 → 배송 → 결제 → 주문완료"
 
 test("회원: 로그인 → 적립금 사용 → 체크아웃 완료", async ({ page }) => {
   // 로그인
-  await page.goto(`/${CC}/account`)
+  await page.goto(localized(`/${CC}/account`, E2E_LOCALE as never))
   await page.getByTestId("email-input").fill(MEMBER.email)
   await page.getByTestId("password-input").fill(MEMBER.password)
   await page.getByTestId("sign-in-button").click()
   await expect(page.getByTestId("account-page")).toBeVisible({ timeout: 30_000 })
 
   await addFirstProductToCart(page)
-  await page.goto(`/${CC}/cart`)
+  await page.goto(localized(`/${CC}/cart`, E2E_LOCALE as never))
 
   // 적립금 사용(로그인 사용자에게만 노출) — 보유 적립금이 없으면 폼 자체가 없다
   const pointsInput = page.getByTestId("points-input")

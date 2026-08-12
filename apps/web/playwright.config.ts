@@ -102,6 +102,12 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      // 404·오류 화면 — 기본 404 로 되돌아가지 않았는지, 이동 링크가 살아 있는지
+      name: "error-pages",
+      testMatch: "e2e/storefront-error-pages.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       // 모바일 반응형 — 실제 모바일 뷰포트/터치 에뮬레이션
       name: "mobile",
       testMatch: "e2e/storefront-mobile.spec.ts",

@@ -13,6 +13,8 @@
  */
 import { test, expect, type Page } from "@playwright/test"
 
+import { localized } from "./_locale"
+
 const CC = process.env.E2E_COUNTRY ?? "kr"
 
 const LOCALES = [
@@ -20,21 +22,22 @@ const LOCALES = [
   { label: "영어", cookie: "en-US", addToCart: /Add to cart|Please select an option|Sold out/ },
 ]
 
-async function setLocale(page: Page, cookie: string | null) {
-  if (cookie) {
-    await page.context().addCookies([
-      { name: "_medusa_locale", value: cookie, url: "http://localhost:8000" },
-    ])
-  } else {
-    await page.context().clearCookies({ name: "_medusa_locale" })
-  }
+/**
+ * 언어 지정은 이제 **주소**로 한다(2026-08-12). 쿠키를 심어도 `/kr/...` 은 한국어다.
+ * 이 함수는 호출부를 덜 고치려고 남겨 뒀지만 하는 일이 없다 —
+ * 실제 지정은 `localized(path, cookie)` 가 한다.
+ */
+async function setLocale(_page: Page, _cookie: string | null) {
+  // 주소로 지정하므로 할 일 없음
 }
 
 for (const loc of LOCALES) {
   test.describe(`${loc.label} 조작`, () => {
     test("상품 목록 → 상세 이동 → 담기 버튼이 눌린다", async ({ page }) => {
       await setLocale(page, loc.cookie)
-      await page.goto(`/${CC}/store`, { waitUntil: "domcontentloaded" })
+      await page.goto(localized(`/${CC}/store`, loc.cookie as never), {
+        waitUntil: "domcontentloaded",
+      })
       await page.waitForLoadState("networkidle").catch(() => {})
 
       const firstProduct = page.locator('a[href*="/products/"]').first()
@@ -50,7 +53,9 @@ for (const loc of LOCALES) {
 
     test("정렬을 바꾸면 URL 과 목록이 실제로 바뀐다", async ({ page }) => {
       await setLocale(page, loc.cookie)
-      await page.goto(`/${CC}/store`, { waitUntil: "domcontentloaded" })
+      await page.goto(localized(`/${CC}/store`, loc.cookie as never), {
+        waitUntil: "domcontentloaded",
+      })
       await page.waitForLoadState("networkidle").catch(() => {})
 
       // 라벨은 언어마다 다르므로 **value(=id)** 로 고른다 —
@@ -67,7 +72,9 @@ for (const loc of LOCALES) {
 
     test("로그인 실패 메시지가 해당 언어로 나온다", async ({ page }) => {
       await setLocale(page, loc.cookie)
-      await page.goto(`/${CC}/account`, { waitUntil: "domcontentloaded" })
+      await page.goto(localized(`/${CC}/account`, loc.cookie as never), {
+        waitUntil: "domcontentloaded",
+      })
       await page.waitForLoadState("networkidle").catch(() => {})
 
       await page.getByTestId("email-input").fill("nobody@example.invalid")
@@ -80,7 +87,9 @@ for (const loc of LOCALES) {
 
     test("비회원 주문조회 폼이 동작한다", async ({ page }) => {
       await setLocale(page, loc.cookie)
-      await page.goto(`/${CC}/order/lookup`, { waitUntil: "domcontentloaded" })
+      await page.goto(localized(`/${CC}/order/lookup`, loc.cookie as never), {
+        waitUntil: "domcontentloaded",
+      })
       await page.waitForLoadState("networkidle").catch(() => {})
 
       await expect(page.getByTestId("order-lookup-form")).toBeVisible({ timeout: 30_000 })

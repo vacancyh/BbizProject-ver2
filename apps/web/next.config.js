@@ -60,6 +60,17 @@ const CSP = [
 ].join("; ")
 
 const securityHeaders = [
+  /*
+   * ⚠️ 화면 내용이 **언어 쿠키(_medusa_locale)에 따라 달라진다.**
+   * 그 사실을 알리지 않으면 앞단 캐시(CDN·리버스 프록시)가 한 언어로 만들어진
+   * 응답을 다른 언어 방문자에게 그대로 내보낸다 — 영어로 보던 사람이 한국어를
+   * 받거나 그 반대가 된다.
+   *
+   * 지금은 페이지가 대부분 `no-store` 라 드러나지 않지만, 운영에서 CDN 을 붙이거나
+   * 캐시 정책을 바꾸는 순간 조용히 터진다. 그래서 미리 명시해 둔다.
+   * (2026-08-12 — Vary 에 rsc/Accept-Encoding 만 있고 Cookie 가 없었다)
+   */
+  { key: "Vary", value: "Cookie" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

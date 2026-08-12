@@ -670,6 +670,9 @@ export const ko = {
   // ── 전체 오류 화면 ───────────────────────────────────────────────────────
   "error.globalTitle": "일시적인 오류가 발생했습니다",
   "error.globalBody": "잠시 후 다시 시도해 주세요. 문제가 계속되면 고객센터로 문의해 주세요.",
+  // 결제 단계 전용 — 고객이 가장 먼저 궁금해하는 건 "결제가 됐나?" 다.
+  "error.checkoutBody":
+    "주문 처리 중 문제가 생겼습니다. 결제가 이미 완료되었을 수 있으니 주문 내역을 먼저 확인해 주세요. 중복 결제가 걱정되시면 고객센터로 문의해 주세요.",
 
   // ── 회원 등급명(백엔드 값 → 표시) ────────────────────────────────────────
   "tier.name.basic": "일반",
@@ -1373,6 +1376,8 @@ export const en: Messages = {
   "error.globalTitle": "Something went wrong",
   "error.globalBody":
     "Please try again in a moment. If it keeps happening, contact customer service.",
+  "error.checkoutBody":
+    "Something went wrong while placing your order. Your payment may already have gone through — please check your orders first. If you are worried about a duplicate charge, contact customer service.",
 
   // ── membership tier names ───────────────────────────────────────────────
   "tier.name.basic": "Basic",

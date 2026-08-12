@@ -18,10 +18,12 @@
  * 버튼은 모바일에서도 누를 수 있게 최소 24px 높이를 확보한다.
  */
 import { useEffect, useRef, useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 
 import { useT } from "@lib/i18n/client"
 import { updateLocale } from "@lib/data/locale-actions"
+import { toUiLocale } from "@lib/i18n/messages"
+import { withLocalePrefix } from "@lib/i18n/routing"
 import type { Locale } from "@lib/data/locales"
 
 type Props = {
@@ -46,9 +48,10 @@ function shortCode(code: string): string {
 
 export default function LanguageSwitcher({ locales, currentLocale }: Props) {
   const t = useT()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
-  const router = useRouter()
   const boxRef = useRef<HTMLDivElement>(null)
 
   // 지원 언어가 1개 이하면 고를 게 없다 — 아예 렌더하지 않는다
@@ -75,15 +78,32 @@ export default function LanguageSwitcher({ locales, currentLocale }: Props) {
     locales.find((l) => l.code.toLowerCase() === (currentLocale ?? "").toLowerCase()) ??
     locales[0]
 
+  /**
+   * 언어를 바꾼다 — 지금 보던 페이지의 다른 언어 주소로 이동한다.
+   *
+   * ⚠️ **전체 페이지 로드여야 한다.** `router.push` 로 클라이언트 이동을 하면
+   * 주소는 바뀌지만 **루트 레이아웃이 다시 렌더되지 않는다.** 그러면
+   *   · `<html lang>` 이 이전 언어로 남고(스크린리더·검색엔진이 이걸 본다)
+   *   · `I18nProvider` 도 이전 언어라 버튼·안내문만 옛 언어로 남는다
+   * 서버 컴포넌트는 새 언어로 그려지므로 **한 화면에 두 언어가 섞인다**
+   * (2026-08-12 실측: 주소는 /en/kr/store 인데 lang=ko).
+   *
+   * 언어 전환은 자주 하는 동작이 아니므로 새로고침 비용을 감수하는 편이 맞다.
+   * 쿠키도 남긴다: 다음에 `/` 로 들어올 때 미들웨어가 이 값을 보고 보내 준다.
+   */
   const choose = (code: string) => {
     if (code.toLowerCase() === active?.code.toLowerCase()) {
       setOpen(false)
       return
     }
+    const next = toUiLocale(code)
+    const qs = searchParams?.toString()
+    const target = withLocalePrefix(next, pathname || "/") + (qs ? `?${qs}` : "")
+
     startTransition(async () => {
       await updateLocale(code)
       setOpen(false)
-      router.refresh()
+      window.location.assign(target)
     })
   }
 

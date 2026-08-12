@@ -17,6 +17,8 @@
  */
 import { test, expect, type Page } from "@playwright/test"
 
+import { localized } from "./_locale"
+
 const CC = process.env.E2E_COUNTRY ?? "kr"
 
 const VIEWPORTS = [
@@ -101,14 +103,13 @@ function auditTouchTargets(): string[] {
   return out
 }
 
-async function setLocale(page: Page, cookie: string | null) {
-  if (cookie) {
-    await page.context().addCookies([
-      { name: "_medusa_locale", value: cookie, url: "http://localhost:8000" },
-    ])
-  } else {
-    await page.context().clearCookies({ name: "_medusa_locale" })
-  }
+/**
+ * 언어 지정은 이제 **주소**로 한다(2026-08-12). 쿠키를 심어도 `/kr/...` 은 한국어다.
+ * 이 함수는 호출부를 덜 고치려고 남겨 뒀지만 하는 일이 없다 —
+ * 실제 지정은 `localized(path, cookie)` 가 한다.
+ */
+async function setLocale(_page: Page, _cookie: string | null) {
+  // 주소로 지정하므로 할 일 없음
 }
 
 for (const loc of LOCALES) {
@@ -119,7 +120,9 @@ for (const loc of LOCALES) {
       for (const pg of PAGES) {
         test(pg.label, async ({ page }) => {
           await setLocale(page, loc.cookie)
-          const res = await page.goto(pg.path, { waitUntil: "domcontentloaded" })
+          const res = await page.goto(localized(pg.path, loc.cookie as never), {
+            waitUntil: "domcontentloaded",
+          })
           expect(res?.status()).toBe(200)
           await page.waitForLoadState("networkidle").catch(() => {})
           await page.waitForTimeout(500)

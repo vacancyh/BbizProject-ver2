@@ -53,11 +53,14 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
+  // ⚠️ 여기서 notFound() 를 부르면 안 된다. metadata 생성은 세그먼트 렌더 트리
+  //    밖에서 일어나 not-found.tsx 가 아니라 **Next 기본 404**(헤더도 없는 맨 화면)가
+  //    그려진다. 404 판정은 아래 페이지 컴포넌트가 한다(2026-08-12 수정).
   const params = await props.params
-  const collection = await getCollectionByHandle(params.handle)
+  const collection = await getCollectionByHandle(params.handle).catch(() => null)
 
   if (!collection) {
-    notFound()
+    return { title: (await getT())("error.notFoundTitle") }
   }
 
   const metadata = {

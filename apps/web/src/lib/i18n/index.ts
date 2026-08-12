@@ -16,7 +16,9 @@
  *    `next/headers` 가 클라이언트 번들에 끌려 들어가 화면이 500 이 된다(2026-08-05 실제 발생).
  *    서버·클라이언트가 함께 쓰는 것(interpolate·makeT)은 `./messages` 에 있다.
  */
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
+
+import { UI_LOCALE_HEADER } from "./routing"
 
 import {
   DEFAULT_UI_LOCALE,
@@ -32,8 +34,24 @@ import {
 /** 콘텐츠 번역과 **같은 쿠키**를 쓴다 — 언어 선택 한 번으로 둘 다 바뀐다. */
 const LOCALE_COOKIE = "_medusa_locale"
 
-/** 현재 UI 언어. 쿠키가 없거나 모르는 값이면 기본(한국어). */
+/**
+ * 현재 UI 언어.
+ *
+ * **주소가 이긴다.** 미들웨어가 `/en/...` 접두사를 읽어 헤더로 넘겨 주므로 그걸 먼저 본다.
+ * 접두사가 없으면(= 기본 언어 주소) 쿠키를 본다 — 하지만 미들웨어가 이미 쿠키를 반영해
+ * 접두사 있는 주소로 보내므로, 실제로는 기본 언어로 떨어지는 경우가 대부분이다.
+ *
+ * 주소를 우선하지 않으면 같은 링크가 사람마다 다른 언어로 열려 공유가 깨진다
+ * (그리고 검색엔진은 쿠키가 없어 영어를 영영 못 본다 — 2026-08-12 이 구조로 바꾼 이유).
+ */
 export async function getUiLocale(): Promise<UiLocale> {
+  try {
+    const h = await headers()
+    const fromUrl = h.get(UI_LOCALE_HEADER)
+    if (fromUrl) return toUiLocale(fromUrl)
+  } catch {
+    // 헤더를 못 읽는 컨텍스트 — 아래 쿠키로 넘어간다
+  }
   try {
     const c = await cookies()
     return toUiLocale(c.get(LOCALE_COOKIE)?.value)

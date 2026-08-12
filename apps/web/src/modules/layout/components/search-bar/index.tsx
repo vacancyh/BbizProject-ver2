@@ -4,10 +4,12 @@ import { MagnifyingGlass } from "@medusajs/icons"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
-import { useT } from "@lib/i18n/client"
+import { useT, useUiLocale } from "@lib/i18n/client"
+import { withLocalePrefix } from "@lib/i18n/routing"
 
 const SearchBar = () => {
   const t = useT()
+  const locale = useUiLocale()
   const router = useRouter()
   const { countryCode } = useParams() as { countryCode: string }
   const searchParams = useSearchParams()
@@ -17,7 +19,10 @@ const SearchBar = () => {
     e.preventDefault()
     const q = term.trim()
     if (!q) return
-    router.push(`/${countryCode}/store?q=${encodeURIComponent(q)}`)
+    // 언어 접두사를 빠뜨리면 검색 한 번에 한국어로 되돌아간다(2026-08-12)
+    router.push(
+      withLocalePrefix(locale, `/${countryCode}/store?q=${encodeURIComponent(q)}`)
+    )
   }
 
   return (
