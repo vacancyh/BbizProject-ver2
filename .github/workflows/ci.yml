@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         # pnpm 11 은 node:sqlite 를 쓴다 → Node 22 미만에서는 pnpm 자체가 실행되지 않는다.
         # 로컬 개발/검증 환경과 같은 24 로 맞춘다.
         with: { node-version: 24 }
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
       - run: pnpm install --frozen-lockfile
       # 2026-07-28: integration-tests/playwright(독립 프로젝트) 를 tsconfig 에서 제외해
@@ -96,7 +96,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
       # 의존성 CVE — 정보성(전이 의존성 high 존재, 게이트는 통과). 추이 관찰용.
       - name: 의존성 audit (backend)
