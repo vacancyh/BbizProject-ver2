@@ -16,6 +16,12 @@ jobs:
     defaults:
       run:
         working-directory: apps/web
+    env:
+      # `next lint` 는 next.config.js 를 로드하고, 거기서 check-env-variables 가
+      # 발행키가 없으면 프로세스를 죽인다(앱이 키 없이 기동하는 것을 막는 가드).
+      # 린트·유닛에서는 백엔드를 호출하지 않으므로 형식만 맞춘 더미를 넣어 통과시킨다.
+      # 가드 자체는 그대로 둔다 — 진짜 기동을 막아 주는 장치다.
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: dummy-for-lint-only-no-backend-call
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
