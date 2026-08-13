@@ -88,7 +88,9 @@ jobs:
 
       # ── 1) 백엔드 API 통합테스트 ───────────────────────────────────────────
       - name: API 통합테스트(125케이스)
-        working-directory: docs/main_plan/user_plan/bizproject/통합테스트
+        # 2026-08-13: 문서 정리로 04_점검기록/ 아래로 옮겨졌는데 여기가 갱신되지 않았다.
+        # 야간 워크플로가 이 단계까지 도달한 적이 없어(설치에서 죽어서) 드러나지 않았다.
+        working-directory: docs/main_plan/user_plan/bizproject/04_점검기록/통합테스트
         env:
           BASE: http://localhost:9000
           # DB 교차검증: 러너에는 docker exec 대상 컨테이너가 없으므로 psql 직접 접속 모드
