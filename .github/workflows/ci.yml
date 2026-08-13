@@ -21,13 +21,18 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        # pnpm 11 은 node:sqlite 를 쓴다 → Node 22 미만에서는 pnpm 자체가 실행되지 않는다.
+        # 로컬 개발/검증 환경과 같은 24 로 맞춘다.
+        with: { node-version: 24 }
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: npx tsc --noEmit
       - name: Lint
         run: pnpm lint
-      - name: Unit tests (vitest — 순수 로직: 금액 표시·가격 필터·그리드)
+      # ⚠️ 이 값에는 콜론+공백(": ")이 들어 있다 → 반드시 따옴표로 감쌀 것.
+      #    따옴표가 없으면 YAML 이 "매핑"으로 읽어 워크플로 전체가 파싱에 실패하고,
+      #    GitHub 은 잡을 하나도 만들지 않은 채 0초 만에 실패시킨다(2026-08-03~08-13 실제 사고).
+      - name: "Unit tests (vitest — 순수 로직: 금액 표시·가격 필터·그리드)"
         run: pnpm test
       # next build 는 SSG 중 백엔드 호출 → CI 무백엔드에선 별도(야간 통합) 실행.
 
@@ -42,7 +47,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
@@ -66,7 +71,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
       - run: pnpm install --frozen-lockfile
       # 2026-07-28: integration-tests/playwright(독립 프로젝트) 를 tsconfig 에서 제외해
       # 소스 타입 에러가 0 이 되었으므로 정보성 → 게이트로 승격.
@@ -92,7 +97,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
       # 의존성 CVE — 정보성(전이 의존성 high 존재, 게이트는 통과). 추이 관찰용.
       - name: 의존성 audit (backend)
         working-directory: backend/services/api
