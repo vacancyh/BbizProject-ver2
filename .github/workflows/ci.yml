@@ -18,7 +18,7 @@ jobs:
         working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         # pnpm 11 은 node:sqlite 를 쓴다 → Node 22 미만에서는 pnpm 자체가 실행되지 않는다.
@@ -44,7 +44,7 @@ jobs:
         working-directory: apps/admin
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
@@ -68,7 +68,7 @@ jobs:
         working-directory: backend/services/api
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
@@ -94,7 +94,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 11.3.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 24 } # 24 인 이유는 위 스토어프론트 잡 주석 참고
