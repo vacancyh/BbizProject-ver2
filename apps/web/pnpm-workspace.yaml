@@ -2,7 +2,9 @@ allowBuilds:
   # 2026-08-03: 이미지 최적화(next/image)에 sharp 네이티브 바이너리가 필요하다.
   # 승인하지 않으면 /_next/image 가 500 을 내고 **상품 이미지가 전부 깨진다**(실측).
   sharp: true
-  unrs-resolver: set this to true or false
+  # ⚠️ 'set this to true or false' 를 남겨 두면 pnpm 이 ERR_PNPM_IGNORED_BUILDS 로
+  #    **설치 자체를 실패**시킨다. 로컬은 node_modules 가 이미 있어 안 드러나고 CI 에서만 터진다.
+  unrs-resolver: true # ESLint import 해석용 네이티브 리졸버
 
 # 판매 전 점검 2026-07-28: 전이 의존성 high CVE 상향(패치 수준). 회귀는 빌드·테스트로 검증.
 # 2026-08-03 재점검: sharp(런타임 libvips CVE) + eslint/webpack 체인 3종 추가.

@@ -1,9 +1,14 @@
+# pnpm 은 의존성의 설치 스크립트를 기본으로 막는다(공급망 방어). 여기서 하나씩 판단한다.
+# ⚠️ 'set this to true or false' 라는 미결정 문구를 남겨 두면 pnpm 이 ERR_PNPM_IGNORED_BUILDS
+#    로 **설치 자체를 실패**시킨다. 로컬은 node_modules 가 이미 있어 안 드러나고 CI 에서만 터진다.
 allowBuilds:
-  '@medusajs/telemetry': set this to true or false
-  '@swc/core': set this to true or false
-  esbuild: set this to true or false
-  msgpackr-extract: set this to true or false
-  protobufjs: set this to true or false
+  # 네이티브 바이너리가 있어야 도구가 동작한다 — 허용
+  '@swc/core': true # Medusa 빌드용 트랜스파일러
+  esbuild: true # 플랫폼별 바이너리 검증/연결
+  msgpackr-extract: true # 캐시 직렬화 가속(없으면 JS 폴백으로 느려짐)
+  # 설치 스크립트가 없어도 기능에 지장이 없다 — 차단
+  '@medusajs/telemetry': false # 사용 통계 수집 준비만 한다
+  protobufjs: false # 7.x 에서는 사실상 정리 작업뿐
 
 # 판매 전 점검 2026-07-28: 전이 의존성 high CVE 상향(패치 수준). 회귀는 테스트로 검증.
 overrides:
